@@ -1,0 +1,58 @@
+# Disable the spring security default configuration from spring-boot-actuator
+management.security.enabled: true
+security.basic.enabled: false
+
+# Disable Jolokia - An http/json bridge for remote JMX access
+endpoints.jolokia.enabled: false
+
+async:
+    corePoolSize: 5
+    maxPoolSize: 50
+    queueCapacity: 10000
+
+spring:
+    mvc.favicon.enabled: false
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        user: support@tami.io
+        password: <a7NhUuD
+        protocol: smtp
+        tls: true
+        auth: true
+        from: support@tami.io
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: none
+            naming-strategy: org.hibernate.cfg.EJB3NamingStrategy # please don't change this as it relates to DB column names
+    messageSource:
+        cacheSeconds: 1
+
+authentication:
+    password:
+        reset:
+            token: 1259smfULaz
+            tokenValidityInSeconds: 1800
+    xauth:
+        secret: myXAuthSecret
+        # Token is valid 1 month
+        tokenValidityInSeconds: 2592000 #TODO: change to OAuth
+
+callisto_config:
+    admin:
+        email: ahmed.aly@greenowlmobile.com
+    cors:
+        allowed-origins: "*"
+        allowed-methods: GET, PUT, POST, DELETE, OPTIONS
+        allowed-headers: "*"
+        exposed-headers:
+        allow-credentials: true
+        max-age: 1800
+    swagger:
+        title: Callisto API
+        description: Callisto.
+        termsOfServiceUrl:
+        contact: ahmed.aly@greenowlmobile.com
+        license:
+        licenseUrl:

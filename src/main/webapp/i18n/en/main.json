@@ -1,0 +1,11 @@
+{
+    "main": {
+        "subtitle": "This is your homepage",
+        "logged": {
+            "message": "You are logged in as user \"{{username}}\"."
+        },
+        "link": {
+        },
+        "github": "Github"
+    }
+}

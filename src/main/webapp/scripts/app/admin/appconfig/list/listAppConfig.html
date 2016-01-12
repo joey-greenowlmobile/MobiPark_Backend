@@ -1,0 +1,46 @@
+<div>
+    <div class="center-block" id="circularG" ng-show="loading" class="center">
+        <div id="circularG_1" class="circularG">
+        </div>
+        <div id="circularG_2" class="circularG">
+        </div>
+        <div id="circularG_3" class="circularG">
+        </div>
+        <div id="circularG_4" class="circularG">
+        </div>
+        <div id="circularG_5" class="circularG">
+        </div>
+        <div id="circularG_6" class="circularG">
+        </div>
+        <div id="circularG_7" class="circularG">
+        </div>
+        <div id="circularG_8" class="circularG">
+        </div>
+    </div>
+    <div ng-show="!loading">
+        <h2>Application Configuration Settings </h2>
+        <a class="btn btn-sm btn-primary" ui-sref="createAppConfig">Add New Config</a>
+    </div>
+</div>
+<table ng-show="!loading" class="table table-condensed table-striped table-bordered table-responsive"
+       style="table-layout:fixed">
+    <thead>
+    <tr>
+        <th ng-click="predicate = 'prefix'; reverse=!reverse">id</th>
+        <th ng-click="predicate = 'prefix'; reverse=!reverse">Key</th>
+        <th ng-click="predicate = 'prefix'; reverse=!reverse">Value</th>
+        <th ng-click="predicate = 'prefix'; reverse=!reverse">Type</th>
+        <th ng-click="predicate = 'prefix'; reverse=!reverse">Operation</th>
+    </tr>
+    </thead>
+
+    <tr ng-repeat="entry in configs | filter:filter | orderBy:predicate:reverse">
+        <td><span>{{entry.id}}</span></td>
+        <td><span>{{entry.key}}</span></td>
+        <td><span>{{entry.value}}</span></td>
+        <td><span>{{entry.type}}</span></td>
+        <td><button ng-click="edit(entry.id)" class="btn btn-sm btn-warning">edit</button></td>
+        </td>
+    </tr>
+</table>
+</div>

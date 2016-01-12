@@ -1,0 +1,56 @@
+server:
+    port: 8080
+
+aws:
+    credentials:
+        secret: vvuldbIZtbYfn62saztzS5fxtBqc/hsXb/mI+B+a
+        id: AKIAIG7E4NOYSOHGVUVA
+
+config:
+    base_url: http://localhost:8080
+    search_base_url: http://localhost:8888
+
+spring:
+    profiles:
+        active: dev
+    datasource:
+        driver-class-name: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+        url: jdbc:mysql://callistostagingdb.csjddf0o7ovd.us-east-1.rds.amazonaws.com:3306/callisto_staging_db?useUnicode=true&characterEncoding=utf8
+        name: callisto_staging_db
+        username: callisto_admin
+        password: stagGOWL123
+
+    jpa:
+        database-platform: org.hibernate.dialect.MySQLInnoDBDialect
+        database: MYSQL
+        show_sql: true
+        properties:
+            hibernate.cache.use_second_level_cache: false
+            hibernate.cache.use_query_cache: false
+            hibernate.generate_statistics: true
+
+    mail:
+        baseUrl: http://localhost:8080
+
+    thymeleaf:
+        mode: XHTML
+        cache: false
+
+metrics:
+    jmx.enabled: true
+    graphite:
+        enabled: false
+        host: localhost
+        port: 2300
+        prefix: dido
+
+cloud:
+  aws:
+    s3.bucket: www.callisto-staging.com
+
+callisto_config:
+    datasource:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true

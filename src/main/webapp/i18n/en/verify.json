@@ -1,0 +1,9 @@
+{
+    "activate": {
+        "title": "Verification",
+        "messages": {
+            "success": "<strong>Your phone number has been activated.</strong> Please <a href=\"#/login\">authenticate</a>.",
+            "error": "<strong>Your user could not be activated.</strong> Please use the registration form to sign up."
+        }
+    }
+}
