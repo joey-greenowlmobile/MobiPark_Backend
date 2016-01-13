@@ -181,7 +181,7 @@ public class CallistoBeanConfigurationProperties {
 
     public static class Mail {
 
-        private String from = "support@tami.io";
+        private String from = "<<email>>";
 
         public String getFrom() {
             return from;
