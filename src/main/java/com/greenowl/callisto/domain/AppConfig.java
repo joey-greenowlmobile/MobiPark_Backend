@@ -1,47 +1,26 @@
 package com.greenowl.callisto.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "T_APPLICATION_CONFIG")
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfig {
+public class AppConfig implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Access(AccessType.PROPERTY)
-    private Long id;
-
-    @NotNull
-    @Size(min = 5, max = 250)
-    @Column(unique = true, nullable = false)
+    @Column(name = "key_name", nullable = false, unique = true)
     private String key;
 
-    @Size(min = 5, max = 250)
-    @Column(unique = true, nullable = false)
+    @Column(name = "value", nullable = false)
     private String value;
 
+    @Column(name = "type", nullable = false)
     private String type;
 
     public AppConfig() {
-    }
-
-    public AppConfig(String key, String value, String type) {
-        this.key = key;
-        this.value = value;
-        this.type = type;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getKey() {
@@ -69,10 +48,25 @@ public class AppConfig {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AppConfig appConfig = (AppConfig) o;
+
+        return key.equals(appConfig.key);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
+    @Override
     public String toString() {
         return "AppConfig{" +
-                "id=" + id +
-                ", key='" + key + '\'' +
+                "key='" + key + '\'' +
                 ", value='" + value + '\'' +
                 ", type='" + type + '\'' +
                 '}';

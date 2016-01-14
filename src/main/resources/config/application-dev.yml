@@ -21,7 +21,7 @@ spring:
         password: stagGOWL123
 
     jpa:
-        database-platform: org.hibernate.dialect.MySQLInnoDBDialect
+        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
         database: MYSQL
         show_sql: true
         properties:
