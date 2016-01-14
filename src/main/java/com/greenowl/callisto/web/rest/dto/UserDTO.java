@@ -29,10 +29,6 @@ public class UserDTO implements Serializable {
 
     private List<String> roles;
 
-    private String imageUrl;
-
-    private String region;
-
     public UserDTO() {
     }
 
@@ -75,14 +71,6 @@ public class UserDTO implements Serializable {
     }
 
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
     public void setLogin(String login) {
         this.login = login;
     }
@@ -104,14 +92,6 @@ public class UserDTO implements Serializable {
     }
 
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
     @Override
     public String toString() {
         return "UserDTO{" +
@@ -120,8 +100,6 @@ public class UserDTO implements Serializable {
                 ", lastName='" + lastName + '\'' +
                 ", langKey='" + langKey + '\'' +
                 ", roles=" + roles +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", region='" + region + '\'' +
                 '}';
     }
 

@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +30,9 @@ public class RegistrationService {
 
     @Inject
     private AuthorityRepository authorityRepository;
+
+    @Inject
+    private UserRepository userRepository;
 
     @Inject
     private MailService mailService;
@@ -56,7 +58,8 @@ public class RegistrationService {
         String encryptedPassword = passwordEncoder.encode(desiredPassword);
         User newUser = UserFactory.create(login, firstName, lastName, region, encryptedPassword, authorities);
         LOG.debug("Created Information for User: {}", newUser);
-        UserDTO dto = UserUtil.getUserDTO(newUser);
+        User savedUser = userRepository.save(newUser);
+        UserDTO dto = UserUtil.getUserDTO(savedUser);
         LOG.info("Returning newly created user {}", dto);
         return dto;
     }
