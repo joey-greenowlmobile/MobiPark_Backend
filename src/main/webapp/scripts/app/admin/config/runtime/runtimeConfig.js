@@ -3,18 +3,19 @@
 angular.module('mainApp')
     .config(function ($stateProvider) {
         $stateProvider
-            .state('createAppConfig', {
+            .state('runtimeConfig', {
                 parent: 'admin',
-                url: '/app/config/new',
+                url: '/config/runtime',
                 data: {
                     roles: ['ROLE_ADMIN'],
-                    pageTitle: 'configuration.title'
+                    pageTitle: 'Manage Runtime Configuration'
                 },
                 views: {
                     'content@': {
-                        templateUrl: 'scripts/app/admin/appconfig/create/createAppConfig.html',
-                        controller: 'CreateAppConfigController'
+                        templateUrl: 'scripts/app/admin/config/runtime/runtimeConfig.html',
+                        controller: 'RuntimeConfigurationController'
                     }
                 }
             });
     });
+

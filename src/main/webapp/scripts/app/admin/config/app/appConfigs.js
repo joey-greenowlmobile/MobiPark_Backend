@@ -3,13 +3,16 @@
 angular.module('mainApp')
     .config(function ($stateProvider) {
         $stateProvider
-            .state('configs', {
+            .state('appConfigs', {
                 parent: 'admin',
                 url: '/admin/configs',
+                data: {
+                    roles: ['ROLE_ADMIN']
+                },
                 views: {
                     'content@': {
-                        templateUrl: 'scripts/app/admin/config/configs.html',
-                        controller: 'ConfigController'
+                        templateUrl: 'scripts/app/admin/config/app/app_configs.html',
+                        controller: 'AppConfigController'
                     }
                 }
             });

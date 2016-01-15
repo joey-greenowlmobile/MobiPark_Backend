@@ -51,7 +51,7 @@ public class AppCookieLocaleResolver extends CookieLocaleResolver {
 
     private void parseLocaleCookieIfNecessary(HttpServletRequest request) {
         if (request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME) == null) {
-            // Retrieve and parse cookie value.
+            // Retrieve and parse cookie value.c
             Cookie cookie = WebUtils.getCookie(request, getCookieName());
             Locale locale = null;
             TimeZone timeZone = null;

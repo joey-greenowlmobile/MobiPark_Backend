@@ -1,9 +1,9 @@
 package com.greenowl.callisto.web.rest.admin;
 
-import com.greenowl.callisto.service.config.ConfigService;
 import com.greenowl.callisto.domain.AppConfig;
 import com.greenowl.callisto.repository.AppConfigRepository;
 import com.greenowl.callisto.security.AuthoritiesConstants;
+import com.greenowl.callisto.service.config.ConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -37,8 +37,8 @@ public class GeneralAdminResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @RolesAllowed(AuthoritiesConstants.ADMIN)
     public ResponseEntity<?> configMap() {
-        Map<String, String> map = configService.getMap();
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        List<AppConfig> configs = appConfigRepository.findAll();
+        return new ResponseEntity<>(configs, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/config",
@@ -51,6 +51,7 @@ public class GeneralAdminResource {
         config.setType(type);
         config.setValue(value);
         AppConfig savedConfig = appConfigRepository.save(config);
+        configService.update();
         return new ResponseEntity<>(savedConfig, HttpStatus.OK);
     }
 

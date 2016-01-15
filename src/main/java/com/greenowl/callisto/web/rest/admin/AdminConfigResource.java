@@ -53,4 +53,5 @@ public class AdminConfigResource {
         return new ResponseEntity<>(response, OK);
     }
 
+
 }

@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Wraps an implementation of Spring Boot's AuditEventRepository.
+ * Wraps an implementation of Spring's AuditEventRepository.
  */
 @Repository
 public class CustomAuditEventRepository {
