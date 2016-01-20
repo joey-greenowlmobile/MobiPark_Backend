@@ -18,6 +18,8 @@ public final class Constants {
     public static final String SPRING_PROFILE_FAST = "fast"; // No Api Docs
     public static final String SYSTEM_ACCOUNT = "system";
 
+	public static final String STRIPE_TEST_KEY="sk_test_ZJmc3FVt5QFtpOp2eAWEGaFJ ";
+    
     public static final String RUNTIME_CONFIG_FILE_PATH = "config/config.json";
 
 }

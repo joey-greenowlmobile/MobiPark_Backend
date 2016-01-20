@@ -21,7 +21,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Access(AccessType.PROPERTY)
     private Long id;
-
     @NotNull
     @Email
     @Size(min = 5, max = 255)
@@ -55,7 +54,10 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private Integer activationKey;
 
     private String region;
-
+    private String state;
+    
+    @Column(name ="stripe_token")
+    private String stripeToken;
     @JsonIgnore
     @OneToMany(mappedBy = "owner", targetEntity = Device.class, fetch = FetchType.LAZY)
     private Set<Device> devices = new HashSet<>();
@@ -69,6 +71,11 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private Set<Authority> authorities = new HashSet<>();
 
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "profileHolder", targetEntity = PaymentProfile.class, fetch = FetchType.LAZY)
+    private Set<PaymentProfile> paymentProfiles = new HashSet<>();
+
+    
     public User() {
     }
 
@@ -167,8 +174,32 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
     }
+    
+    public Set<PaymentProfile> getPaymentProfiles() {
+		return paymentProfiles;
+	}
 
-    @Override
+	public void setPaymentProfiles(Set<PaymentProfile> paymentProfiles) {
+		this.paymentProfiles = paymentProfiles;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getStripeToken() {
+		return stripeToken;
+	}
+
+	public void setStripeToken(String stripeToken) {
+		this.stripeToken = stripeToken;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

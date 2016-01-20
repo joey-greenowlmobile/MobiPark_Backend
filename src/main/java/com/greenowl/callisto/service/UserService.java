@@ -71,6 +71,20 @@ public class UserService {
         return result;
     }
 
+    public void changeStripeToken(String stripeToken){
+    	User currentUser= getCurrentUser();
+    	currentUser.setStripeToken(stripeToken);
+    	userRepository.save(currentUser);
+    	LOG.debug("Changed stripe_token for User: {}",currentUser);
+    }
+    
+    public void changeStripeToken(String login,String stripeToken){
+    	User User= getUser(login);
+    	User.setStripeToken(stripeToken);
+    	userRepository.save(User);
+    	LOG.debug("Changed stripe_token for User: {}",User);
+    }
+    
     public void changePassword(String password) {
         User currentUser = getCurrentUser();
         String encryptedPassword = passwordEncoder.encode(password);
