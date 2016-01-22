@@ -24,7 +24,7 @@ import com.greenowl.callisto.web.rest.dto.payment.CreatePaymentProfileRequest;
 @Service
 public class StripeAccountService {
 
-    private final Logger LOG = LoggerFactory.getLogger(UserService.class);
+    private final Logger LOG = LoggerFactory.getLogger(StripeAccountService.class);
 	@Inject
 	private PaymentProfileRepository paymentProfileRepository;
 	@Inject

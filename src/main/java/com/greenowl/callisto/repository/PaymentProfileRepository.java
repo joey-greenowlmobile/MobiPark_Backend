@@ -18,8 +18,8 @@ public interface PaymentProfileRepository extends JpaRepository<PaymentProfile, 
 	   @Query("select u from PaymentProfile u where u.stripeToken=?1 and u.cardToken=?2")
 	   PaymentProfile getPaymentProfileByStripeTokenAndCardToken(String stripeToken, String cardToken);
 
-	    @Query("select u from PaymentProfile u where u.active = false and u.createdDate > ?1")
-	    List<PaymentProfile> findNotActivatedPaymentProfilesByCreationDateBefore(DateTime dateTime);
+	   @Query("select u from PaymentProfile u where u.active = false and u.createdDate > ?1")
+	   List<PaymentProfile> findNotActivatedPaymentProfilesByCreationDateBefore(DateTime dateTime);
 
 	   
 }
