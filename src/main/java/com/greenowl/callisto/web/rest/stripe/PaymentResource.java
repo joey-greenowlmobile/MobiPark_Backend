@@ -60,20 +60,6 @@ public class PaymentResource {
     	 return new ResponseEntity<>(paymentProfileDTO, OK);
     }
    
-    @RequestMapping(value = "/registerStripe", method = RequestMethod.POST
-            , produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
-    @Transactional(readOnly = false)
-    public ResponseEntity<?> AddStripeToken(@PathVariable("version") String version ,  @RequestParam final String stripeToken) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
-    	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
-    	User user = userService.getUserWithAuthorities();
-    	if(user.getStripeToken()==null){
-    	userService.changeStripeToken(stripeToken);}
-    	else{
-    		return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-    	}
-    	return new ResponseEntity<>(OK);
-    }
     
     @RequestMapping(value = "/test2", method = RequestMethod.GET
             , produces = MediaType.APPLICATION_JSON_VALUE)

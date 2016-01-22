@@ -25,7 +25,9 @@ import com.greenowl.callisto.domain.PlanEligibleUser;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.service.EligiblePlanUserService;
 import com.greenowl.callisto.service.ParkingPlanService;
+import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.web.rest.dto.ParkingPlanDTO;
+import com.greenowl.callisto.web.rest.dto.ResponseDTO;
 import com.greenowl.callisto.web.rest.dto.user.CreateUserRequest;
 import static org.springframework.http.HttpStatus.OK;
 /**
@@ -40,7 +42,8 @@ public class SubscribeResource {
     ParkingPlanService parkingPlanService;
     @Inject
     EligiblePlanUserService eligiblePlanUserService;
-
+    @Inject
+    UserService userService;
    
 	@RequestMapping(value = "/allPlan",
             method = RequestMethod.GET,
@@ -61,5 +64,16 @@ public class SubscribeResource {
         		
         	}
         return new ResponseEntity<>(parkingPlanDTOs,OK);
-        }
-}}
+        }	
+	}
+	
+	@RequestMapping(value = "/subscribePlan",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional(readOnly = false)
+	 public  ResponseEntity<?> subscribePlan(@PathVariable("apiVersion") final String apiVersion,@RequestParam final String userEmail,@RequestParam final String planName ) {
+		String response =eligiblePlanUserService.subscribePlan(userEmail, planName);
+		ResponseDTO responseDTO=new ResponseDTO(response);
+		return new ResponseEntity<>(responseDTO,OK);
+	}
+}

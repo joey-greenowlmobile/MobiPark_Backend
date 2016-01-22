@@ -51,9 +51,7 @@ public class StripeAccountService {
     		paymentProfileRepository.save(savedProfile);
     		PaymentProfileDTO paymentProfileDTO = PaymentProfileUtil.getPaymentProfileDTO(savedProfile);
     		return paymentProfileDTO;}
-    		else{
-    			System.out.println((paymentProfileRepository.getPaymentProfileByStripeTokenAndCardToken(stripeToken, cardToken)).getCardToken());
-    		}
+    	
     	}
 		return null;
 		

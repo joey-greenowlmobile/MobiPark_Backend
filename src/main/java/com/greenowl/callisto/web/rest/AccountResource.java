@@ -47,6 +47,8 @@ public class AccountResource {
     private static final String USER_NOT_REMOVED = "Unable to remove user.";
 
     private static final String USER_NOT_FOUND = "Unable to find user.";
+    
+    private static final String STRIPE_FAILED ="register with stripe failed!";
 
     @Inject
     private UserRepository userRepository;
@@ -70,7 +72,12 @@ public class AccountResource {
             return new ResponseEntity<>(genericBadReq(USERNAME_TAKEN, "/register"),
                     BAD_REQUEST);
         }
-        UserDTO dto = registrationService.register(req);
+        String stripeToken=registrationService.stripeRegister(req);
+        if (stripeToken==null){
+        	return new ResponseEntity<>(genericBadReq(STRIPE_FAILED, "/register"),
+                    BAD_REQUEST);
+        }
+        UserDTO dto = registrationService.register(req,stripeToken);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 

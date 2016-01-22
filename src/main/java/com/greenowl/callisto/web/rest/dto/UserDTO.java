@@ -27,19 +27,23 @@ public class UserDTO implements Serializable {
     @Size(min = 2, max = 5)
     private String langKey;
 
+    @Size(max = 50)
+    private String stripeToken;
+
     private List<String> roles;
 
     public UserDTO() {
     }
 
     public UserDTO(Long id, String login, String firstName, String lastName,
-                   String langKey, List<String> roles) {
+                   String langKey, List<String> roles, String stripeToken) {
         this.id = id;
         this.login = login;
         this.firstName = firstName;
         this.lastName = lastName;
         this.langKey = langKey;
         this.roles = roles;
+        this.stripeToken=stripeToken;
     }
 
     public Long getId() {
@@ -92,13 +96,22 @@ public class UserDTO implements Serializable {
     }
 
 
-    @Override
+    public String getStripeToken() {
+		return stripeToken;
+	}
+
+	public void setStripeToken(String stripeToken) {
+		this.stripeToken = stripeToken;
+	}
+
+	@Override
     public String toString() {
         return "UserDTO{" +
                 "login='" + login + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", langKey='" + langKey + '\'' +
+                ", stripeToken='" + stripeToken + '\'' +
                 ", roles=" + roles +
                 '}';
     }
