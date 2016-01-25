@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "T_APPLICATION_CONFIG")
-public class AppConfig extends AbstractAuditingEntity implements Serializable {
+public class AppConfig implements Serializable {
 
     @Id
     @Column(name = "key_name", nullable = false, unique = true)

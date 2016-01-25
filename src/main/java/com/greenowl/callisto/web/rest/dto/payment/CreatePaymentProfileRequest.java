@@ -4,88 +4,77 @@ import com.greenowl.callisto.domain.User;
 
 public class CreatePaymentProfileRequest {
 	
-	private String login;
-	private String stripeToken;
+	private CardProfile card;
+	private String created;
 	
-	private String cardToken;
+	private String id;
 	
-	private String ccType;
+	private Boolean livemode;
 	
-	private String cardholderName;
-
-	private String ccExpiryDate;
+	private Boolean used;
 
 	public CreatePaymentProfileRequest(){
 		
 	}
 	
-	public CreatePaymentProfileRequest(String login, String stripeToken, String cardToken, String ccType, String cardholderName, String ccExpiryDate){
-		this.login=login;
-		this.stripeToken=stripeToken;
-		this.cardToken=cardToken;
-		this.ccType=ccType;
-		this.cardholderName=cardholderName;
-		this.ccExpiryDate=ccExpiryDate;
+	public CreatePaymentProfileRequest(CardProfile card, String created, String id, Boolean livemode, Boolean used){
+		this.card=card;
+		this.created=created;
+		this.id=id;
+		this.livemode=livemode;
+		this.used=used;
 	}
 
 
 
-
-	public String getStripeToken() {
-		return stripeToken;
+	public CardProfile getCard() {
+		return card;
 	}
 
-	public void setStripeToken(String stripeToken) {
-		this.stripeToken = stripeToken;
+	public void setCard(CardProfile card) {
+		this.card = card;
 	}
 
-	public String getCcType() {
-		return ccType;
+	public String getCreated() {
+		return created;
 	}
 
-	public void setCcType(String ccType) {
-		this.ccType = ccType;
+	public void setCreated(String created) {
+		this.created = created;
 	}
 
-	public String getCardholderName() {
-		return cardholderName;
+	public String getId() {
+		return id;
 	}
 
-	public void setCardholderName(String cardholderName) {
-		this.cardholderName = cardholderName;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public String getCcExpiryDate() {
-		return ccExpiryDate;
+	public Boolean getLivemode() {
+		return livemode;
 	}
 
-	public void setCcExpiryDate(String ccExpiryDate) {
-		this.ccExpiryDate = ccExpiryDate;
+	public void setLivemode(Boolean livemode) {
+		this.livemode = livemode;
 	}
 
-    public String getCardToken() {
-		return cardToken;
-	}
-	public void setCardToken(String cardToken) {
-		this.cardToken = cardToken;
-	}
-	public String getLogin() {
-		return login;
+	public Boolean getUsed() {
+		return used;
 	}
 
-	public void setLogin(String login) {
-		this.login = login;
+	public void setUsed(Boolean used) {
+		this.used = used;
 	}
 
 	@Override
     public String toString() {
         return "CreatePaymentProfileRequest{" +
-                ", login='" + login + '\'' +
-                ", stripeToken='" + stripeToken + '\'' +
-                ", cardToken='" + cardToken + '\'' +
-                ", ccType='" + ccType + '\'' +
-                ", cardholderName='" + cardholderName + '\'' +
-                ", ccExpiryDate='" + ccExpiryDate  +
+                ", card='" + card.toString() + '\'' +
+                ", created='" + created + '\'' +
+                ", id='" + id + '\'' +
+                ", livemode='" + livemode + '\'' +
+                ", used='" + used  +
                 '}';
     }
 }

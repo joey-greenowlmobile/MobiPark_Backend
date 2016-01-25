@@ -2,13 +2,18 @@ package com.greenowl.callisto.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.greenowl.callisto.domain.Authority;
+import com.greenowl.callisto.domain.ParkingPlan;
+import com.greenowl.callisto.domain.PlanEligibleUser;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.repository.UserRepository;
 import com.greenowl.callisto.security.AuthoritiesConstants;
 import com.greenowl.callisto.security.SecurityUtils;
+import com.greenowl.callisto.service.EligiblePlanUserService;
+import com.greenowl.callisto.service.ParkingPlanService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.service.register.RegistrationService;
 import com.greenowl.callisto.service.util.UserUtil;
+import com.greenowl.callisto.web.rest.dto.ParkingPlanDTO;
 import com.greenowl.callisto.web.rest.dto.PasswordUpdateDTO;
 import com.greenowl.callisto.web.rest.dto.UserDTO;
 import com.greenowl.callisto.web.rest.dto.user.CreateUserRequest;
@@ -19,12 +24,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,6 +57,8 @@ public class AccountResource {
     private static final String USER_NOT_FOUND = "Unable to find user.";
     
     private static final String STRIPE_FAILED ="register with stripe failed!";
+    
+    private static final String PLAN_NOT_FOUND="Unable to find suitable plan.";
 
     @Inject
     private UserRepository userRepository;
@@ -58,7 +68,12 @@ public class AccountResource {
 
     @Inject
     private UserService userService;
-
+    
+    @Inject
+    private EligiblePlanUserService eligiblePlanUserService;
+    
+    @Inject
+    private ParkingPlanService parkingPlanService;
     /**
      * POST  /register -> register the user.
      */
@@ -66,11 +81,17 @@ public class AccountResource {
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @Transactional(readOnly = false)
     public ResponseEntity<?> registerAccount(@PathVariable("apiVersion") final String apiVersion, @Valid @RequestBody CreateUserRequest req) {
         Optional<User> optional = userRepository.findOneByLogin(req.getLogin()); //login available
         if (optional.isPresent()) {
             return new ResponseEntity<>(genericBadReq(USERNAME_TAKEN, "/register"),
                     BAD_REQUEST);
+        }
+        List<PlanEligibleUser> users =eligiblePlanUserService.getPlansByUserEmail(req.getLogin());
+        if (users.size()==0){
+        	  return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"),
+                      BAD_REQUEST);
         }
         String stripeToken=registrationService.stripeRegister(req);
         if (stripeToken==null){
@@ -78,8 +99,21 @@ public class AccountResource {
                     BAD_REQUEST);
         }
         UserDTO dto = registrationService.register(req,stripeToken);
-        return new ResponseEntity<>(dto, HttpStatus.CREATED);
-    }
+    	List<ParkingPlanDTO> parkingPlanDTOs = new ArrayList<ParkingPlanDTO>();
+    	if (users.size()==1){
+    		ParkingPlanDTO parkingPlanDTO=parkingPlanService.createParkingPlanInformation(users.get(0).getPlanGroup());
+    		return new ResponseEntity<>(parkingPlanDTO,OK);
+    	}
+    	for(PlanEligibleUser user: users ) {
+    		ParkingPlan plan=user.getPlanGroup();
+    		if (plan!=null){
+    			parkingPlanDTOs.add(parkingPlanService.createParkingPlanInformation(plan));
+    		}
+    		
+    	}
+    	return new ResponseEntity<>(parkingPlanDTOs,OK);
+    }	
+    
 
     /**
      * GET  /account -> get the current user.

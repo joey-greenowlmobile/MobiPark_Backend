@@ -60,9 +60,9 @@ public class EligiblePlanUserService {
 		 return planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
 		 
 	 }
-	 public String subscribePlan(String userEmail, String planName){
+	 public String subscribePlan(String userEmail, Long planId){
 		 String userToken= userService.getUser(userEmail).getStripeToken();
-		 ParkingPlan parkingPlan=parkingPlanRepository.getOneParkingPlanByPlanName(planName);
+		 ParkingPlan parkingPlan=parkingPlanRepository.getOneParkingPlanById(planId);
 		 if(checkSubscribeByPlanIdAndUserEmail(userEmail, parkingPlan.getId())==true){
 			return "Already Subscribed"; 
 		 }
@@ -77,12 +77,12 @@ public class EligiblePlanUserService {
 				 return "Failed at retriving";
 			 }
 			 Map<String, Object> params = new HashMap<String, Object>();
-			 params.put("plan", planName);
+			 params.put("plan", planId);
 			 try {
 				 cu.createSubscription(params);
 				 List<PlanEligibleUser> users= planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
 				 for (PlanEligibleUser user:users){
-					 if (user.getPlanGroup().getPlanName().equals(planName)){
+					 if (user.getPlanGroup().getId().equals(planId)){
 						 user.setSubscribed(true);
 						 planEligibleUserRepository.save(user);
 						 return "Subscribed";

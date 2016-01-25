@@ -21,18 +21,21 @@ public class CreateUserRequest {
     private String lastName;
 
     private String region;
-
+    private String licensePlate;
+    private String mobileNumber;
     @NotNull
     private String password;
 
     public CreateUserRequest() {
     }
 
-    public CreateUserRequest(String login, String firstName, String lastName, String password) {
+    public CreateUserRequest(String login, String firstName, String lastName, String password ,String licensePlate, String mobileNumber) {
         this.login = login;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
+        this.licensePlate=licensePlate;
+        this.mobileNumber=mobileNumber;
     }
 
     public String getLogin() {
@@ -69,7 +72,23 @@ public class CreateUserRequest {
     }
 
 
-    public String getPassword() {
+    public String getLicensePlate() {
+		return licensePlate;
+	}
+
+	public void setLicensePlate(String licensePlate) {
+		this.licensePlate = licensePlate;
+	}
+
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
+	}
+
+	public String getPassword() {
         return password;
     }
 
@@ -85,6 +104,8 @@ public class CreateUserRequest {
                 ", lastName='" + lastName + '\'' +
                 ", region='" + region + '\'' +
                 ", password='" + password + '\'' +
+                ", licensePlate='" + licensePlate + '\'' +
+                ", mobileNumber='" + mobileNumber + '\'' +
                 '}';
     }
 }

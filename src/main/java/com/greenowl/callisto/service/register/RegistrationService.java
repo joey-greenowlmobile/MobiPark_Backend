@@ -51,7 +51,7 @@ public class RegistrationService {
 
     public UserDTO register(CreateUserRequest req, String stripeToken) {
         return createUserInformation(req.getLogin(), req.getFirstName(), req.getLastName(),
-                req.getRegion(), req.getPassword(),stripeToken);
+                req.getRegion(),req.getLicensePlate(),req.getMobileNumber(), req.getPassword(),stripeToken);
     }
 
     /**
@@ -77,12 +77,12 @@ public class RegistrationService {
     	
     }
     private UserDTO createUserInformation(String login, String firstName, String lastName,
-                                          String region, String desiredPassword, String stripeToken) {
+                                          String region,String licensePlate,String mobileNumber, String desiredPassword, String stripeToken) {
         Authority authority = authorityRepository.findOne(USER);
         Set<Authority> authorities = new HashSet<>();
         authorities.add(authority);
         String encryptedPassword = passwordEncoder.encode(desiredPassword);
-        User newUser = UserFactory.create(login, firstName, lastName, region, encryptedPassword, authorities, stripeToken);
+        User newUser = UserFactory.create(login, firstName, lastName, region,licensePlate,mobileNumber, encryptedPassword, authorities, stripeToken);
         LOG.debug("Created Information for User: {}", newUser);
         User savedUser = userRepository.save(newUser);
         UserDTO dto = UserUtil.getUserDTO(savedUser);

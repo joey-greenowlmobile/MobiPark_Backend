@@ -40,9 +40,12 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "last_name", length = 50)
     private String lastName;
 
+    @Size(min = 0 , max = 50)
+    @Column(name = "license_plate", length = 30, unique = true)
+    private String licensePlate;
     @Size(min = 0, max = 20)
-    @Column(name = "phone_number", length = 30, unique = true)
-    private String phoneNumber;
+    @Column(name = "mobile_number", length = 30, unique = true)
+    private String mobileNumber;
 
     private boolean activated = true;
 
@@ -119,12 +122,20 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.lastName = lastName;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getLicensePlate() {
+		return licensePlate;
+	}
+
+	public void setLicensePlate(String licensePlate) {
+		this.licensePlate = licensePlate;
+	}
+
+	public String getMobileNumber() {
+        return mobileNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
     }
 
     public boolean isActivated() {

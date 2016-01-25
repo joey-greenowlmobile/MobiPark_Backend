@@ -7,7 +7,6 @@ import java.util.List;
 import com.greenowl.callisto.domain.PaymentProfile;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.web.rest.dto.PaymentProfileDTO;
-import com.greenowl.callisto.web.rest.dto.UserDTO;
 
 public class PaymentProfileUtil {
 	private PaymentProfileUtil(){}
@@ -23,11 +22,10 @@ public class PaymentProfileUtil {
 	public static PaymentProfileDTO getPaymentProfileDTO(PaymentProfile paymentProfile){
 		return new PaymentProfileDTO(paymentProfile.getId(),
 				paymentProfile.getProfileHolder().getId(),
-				paymentProfile.getStripeToken(),
 				paymentProfile.getCardToken(),
-				paymentProfile.getCcType(),
-				paymentProfile.getCardholderName(),
-				paymentProfile.getCcExpiryDate());
+				paymentProfile.getExpMonth(),
+				paymentProfile.getExpYear(),
+				paymentProfile.getLast4());
 	}
 	
 	

@@ -27,21 +27,19 @@ public class PaymentProfile extends AbstractAuditingEntity implements Serializab
     @Access(AccessType.PROPERTY)
     private Long id;
 	
-    @Column(name = "stripe_token", nullable = false)
-    private String stripeToken;
 
     @Column(name = "card_token", nullable = false)
     private String cardToken;
 
-    @Column(name = "cc_type", nullable = false)
-    private String ccType;
 
-    @Column(name = "cardholder_name", nullable = false)
-    private String cardholderName;
+    @Column(name = "exp_month", nullable = false)
+    private Long expMonth;
 
-    @Column(name = "cc_expiry_date", nullable = false)
-    private String ccExpiryDate;
+    @Column(name = "exp_year", nullable = false)
+    private Long expYear;
     
+    @Column(name= "last4", nullable=false)
+    private String last4;
     @Column(name = "active", nullable = false)
     private Boolean active;
     
@@ -59,14 +57,6 @@ public class PaymentProfile extends AbstractAuditingEntity implements Serializab
 		this.id = id;
 	}
 
-	public String getStripeToken() {
-		return stripeToken;
-	}
-
-	public void setStripeToken(String stripeToken) {
-		this.stripeToken = stripeToken;
-	}
-
 	public String getCardToken() {
 		return cardToken;
 	}
@@ -75,28 +65,29 @@ public class PaymentProfile extends AbstractAuditingEntity implements Serializab
 		this.cardToken = cardToken;
 	}
 
-	public String getCcType() {
-		return ccType;
+
+	public Long getExpMonth() {
+		return expMonth;
 	}
 
-	public void setCcType(String ccType) {
-		this.ccType = ccType;
+	public void setExpMonth(Long expMonth) {
+		this.expMonth = expMonth;
 	}
 
-	public String getCardholderName() {
-		return cardholderName;
+	public Long getExpYear() {
+		return expYear;
 	}
 
-	public void setCardholderName(String cardholderName) {
-		this.cardholderName = cardholderName;
+	public void setExpYear(Long expYear) {
+		this.expYear = expYear;
 	}
 
-	public String getCcExpiryDate() {
-		return ccExpiryDate;
+	public String getLast4() {
+		return last4;
 	}
 
-	public void setCcExpiryDate(String ccExpiryDate) {
-		this.ccExpiryDate = ccExpiryDate;
+	public void setLast4(String last4) {
+		this.last4 = last4;
 	}
 
 	public Boolean getActive() {

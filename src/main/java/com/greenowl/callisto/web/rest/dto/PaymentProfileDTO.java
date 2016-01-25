@@ -8,36 +8,26 @@ public class PaymentProfileDTO  implements Serializable{
 	
 	private Long userId;
 	
-	private String stripeToken;
-	
 	private String cardToken;
 	
-	private String ccType;
+	private Long expMonth;
 	
-	private String cardholderName;
+	private Long expYear;
+	
+	private String last4;
 
-	private String ccExpiryDate;
 	
 	public PaymentProfileDTO(){}
 	
-	public PaymentProfileDTO(Long id, Long userId, String stripeToken, String cardToken, String ccType, String cardholderName, String ccExpiryDate){
+	public PaymentProfileDTO(Long id, Long userId,  String cardToken, Long expMonth, Long expYear , String last4){
 		this.id=id;
 		this.userId=userId;
-		this.stripeToken=stripeToken;
 		this.cardToken=cardToken;
-		this.ccType=ccType;
-		this.cardholderName=cardholderName;
-		this.ccExpiryDate=ccExpiryDate;
+		this.expMonth=expMonth;
+		this.expYear=expYear;
+		this.last4=last4;
 	}
 	
-
-	public String getStripeToken() {
-		return stripeToken;
-	}
-
-	public void setStripeToken(String stripeToken) {
-		this.stripeToken = stripeToken;
-	}
 
     public String getCardToken() {
 		return cardToken;
@@ -45,31 +35,6 @@ public class PaymentProfileDTO  implements Serializable{
 
 	public void setCardToken(String cardToken) {
 		this.cardToken = cardToken;
-	}
-
-
-	public String getCcType() {
-		return ccType;
-	}
-
-	public void setCcType(String ccType) {
-		this.ccType = ccType;
-	}
-
-	public String getCardholderName() {
-		return cardholderName;
-	}
-
-	public void setCardholderName(String cardholderName) {
-		this.cardholderName = cardholderName;
-	}
-
-	public String getCcExpiryDate() {
-		return ccExpiryDate;
-	}
-
-	public void setCcExpiryDate(String ccExpiryDate) {
-		this.ccExpiryDate = ccExpiryDate;
 	}
 
     public Long getId() {
@@ -88,16 +53,39 @@ public class PaymentProfileDTO  implements Serializable{
 		this.userId = userId;
 	}
 
+	public Long getExpMonth() {
+		return expMonth;
+	}
+
+	public void setExpMonth(Long expMonth) {
+		this.expMonth = expMonth;
+	}
+
+	public Long getExpYear() {
+		return expYear;
+	}
+
+	public void setExpYear(Long expYear) {
+		this.expYear = expYear;
+	}
+
+	public String getLast4() {
+		return last4;
+	}
+
+	public void setLast4(String last4) {
+		this.last4 = last4;
+	}
+
 	@Override
     public String toString() {
         return "PaymentProfileDTO{" +
                 "id='" + id + '\'' +
                 ", userId='" + userId + '\'' +
-                ", stripeToken='" + stripeToken + '\'' +
                 ", cardToken='" + cardToken + '\'' +
-                ", ccType='" + ccType + '\'' +
-                ", cardholderName='" + cardholderName + '\'' +
-                ", ccExpiryDate=" + ccExpiryDate +
+                ", expMonth='" + expMonth + '\'' +
+                ", expYear=" + expYear +  '\'' +
+                ", last4=" + last4 +
                 '}';
     }
 	@Override

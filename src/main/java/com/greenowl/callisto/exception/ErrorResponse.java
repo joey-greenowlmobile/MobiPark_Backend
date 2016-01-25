@@ -102,7 +102,8 @@ public class ErrorResponse {
         }
 
         public Builder path(String path) {
-            response.setPath(path);
+        	String p = "/api/" + ApiUtil.getVersion().getValue() + path;
+            response.setPath(p);
             return this;
         }
 

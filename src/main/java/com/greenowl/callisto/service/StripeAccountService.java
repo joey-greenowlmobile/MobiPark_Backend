@@ -1,5 +1,6 @@
 package com.greenowl.callisto.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +19,7 @@ import com.greenowl.callisto.repository.PaymentProfileRepository;
 import com.greenowl.callisto.repository.UserRepository;
 import com.greenowl.callisto.service.util.PaymentProfileUtil;
 import com.greenowl.callisto.web.rest.dto.PaymentProfileDTO;
+import com.greenowl.callisto.web.rest.dto.payment.CardProfile;
 import com.greenowl.callisto.web.rest.dto.payment.CreatePaymentProfileRequest;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
@@ -30,31 +32,38 @@ public class StripeAccountService {
 	@Inject
 	private UserRepository userRepository;
 
-	public List<PaymentProfile> getPaymentProfileById(Integer id){
+	public PaymentProfile getPaymentProfileById(Long id){
 		
 		return paymentProfileRepository.getPaymentProfileById(id);
 	}
-	public List<PaymentProfile> getPaymentProfileByStripeToken(String stripeToken){
-		return paymentProfileRepository.getPaymentProfileByStripeToken(stripeToken);
+	public List<PaymentProfile> getPaymentProfileByUser(User user){
+		return paymentProfileRepository.getPaymentProfilesByUser(user);
 	}
 	
-	public PaymentProfileDTO registerPaymentProfile(CreatePaymentProfileRequest req){
-		return createPaymentInformation(req.getLogin(),req.getStripeToken(),req.getCardToken(),req.getCardholderName(),req.getCcType(),req.getCcExpiryDate());
+	public PaymentProfileDTO registerPaymentProfile(CreatePaymentProfileRequest req, String login, String cardToken){
+		return createPaymentInformation(req.getCard(),req.getCreated(),req.getId(),req.getLivemode(),req.getUsed(), login, cardToken);
 	}
 	
-	private  PaymentProfileDTO createPaymentInformation(String login, String stripeToken, String cardToken, String ccType,String cardholderName, String ccExpiryDate){
+	private  PaymentProfileDTO createPaymentInformation(CardProfile card, String created, String id, Boolean livemode,Boolean used,String login, String cardToken){
 	  	Optional<User> optUser = userRepository.findOneByLogin(login);
     	if(optUser.isPresent()){
     		User user = optUser.get();
-    		PaymentProfile savedProfile= PaymentProfileFactory.create(user, stripeToken, cardToken, ccType, cardholderName, ccExpiryDate);
-    		if(paymentProfileRepository.getPaymentProfileByStripeTokenAndCardToken(stripeToken, cardToken)==null){
+    		PaymentProfile savedProfile= PaymentProfileFactory.create(card, created, livemode, used, user, cardToken);
     		paymentProfileRepository.save(savedProfile);
     		PaymentProfileDTO paymentProfileDTO = PaymentProfileUtil.getPaymentProfileDTO(savedProfile);
     		return paymentProfileDTO;}
+    	return null;
     	
-    	}
-		return null;
 		
 	}
+	public List<PaymentProfileDTO> getAllPaymentProfileDTOs(User user){
+		List<PaymentProfileDTO> paymentProfileDTOs= new ArrayList<PaymentProfileDTO>();
+		List<PaymentProfile> paymentProfiles =paymentProfileRepository.getPaymentProfilesByUser(user);
+		for (PaymentProfile paymentProfile: paymentProfiles){
+			paymentProfileDTOs.add(PaymentProfileUtil.getPaymentProfileDTO(paymentProfile));
+			
+		}
+		return paymentProfileDTOs;
 	}
 
+}
