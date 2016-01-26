@@ -40,8 +40,8 @@ public class StripeAccountService {
 		return paymentProfileRepository.getPaymentProfilesByUser(user);
 	}
 	
-	public PaymentProfileDTO registerPaymentProfile(CreatePaymentProfileRequest req, String login, String cardToken){
-		return createPaymentInformation(req.getCard(),req.getCreated(),req.getId(),req.getLivemode(),req.getUsed(), login, cardToken);
+	public PaymentProfileDTO registerPaymentProfile(CreatePaymentProfileRequest req, String email, String cardToken){
+		return createPaymentInformation(req.getCard(),req.getCreated(),req.getId(),req.getLivemode(),req.getUsed(), email, cardToken);
 	}
 	
 	private  PaymentProfileDTO createPaymentInformation(CardProfile card, String created, String id, Boolean livemode,Boolean used,String login, String cardToken){

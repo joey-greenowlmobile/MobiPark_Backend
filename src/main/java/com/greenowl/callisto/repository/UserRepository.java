@@ -26,6 +26,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u where u.login = ?1")
     User findSingleUserByLogin(String login);
 
-    User findOneByMobileNumber(String phoneNumber);
+    User findOneByMobileNumber(String mobileNumber);
 
 }

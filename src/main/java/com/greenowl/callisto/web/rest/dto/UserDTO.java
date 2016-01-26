@@ -16,7 +16,7 @@ public class UserDTO implements Serializable {
     @Email
     @NotNull
     @Size(min = 1, max = 50)
-    private String login; // Email
+    private String email; // Email
 
     @Size(max = 50)
     private String firstName;
@@ -35,10 +35,10 @@ public class UserDTO implements Serializable {
     public UserDTO() {
     }
 
-    public UserDTO(Long id, String login, String firstName, String lastName,
+    public UserDTO(Long id, String email, String firstName, String lastName,
                    String langKey, List<String> roles, String stripeToken) {
         this.id = id;
-        this.login = login;
+        this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.langKey = langKey;
@@ -54,8 +54,8 @@ public class UserDTO implements Serializable {
         this.id = id;
     }
 
-    public String getLogin() {
-        return login;
+    public String getEmail() {
+        return email;
     }
 
     public String getFirstName() {
@@ -75,8 +75,8 @@ public class UserDTO implements Serializable {
     }
 
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setFirstName(String firstName) {
@@ -107,7 +107,7 @@ public class UserDTO implements Serializable {
 	@Override
     public String toString() {
         return "UserDTO{" +
-                "login='" + login + '\'' +
+                "email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", langKey='" + langKey + '\'' +
@@ -123,12 +123,12 @@ public class UserDTO implements Serializable {
 
         UserDTO userDTO = (UserDTO) o;
 
-        return login.equals(userDTO.login);
+        return email.equals(userDTO.email);
 
     }
 
     @Override
     public int hashCode() {
-        return login.hashCode();
+        return email.hashCode();
     }
 }

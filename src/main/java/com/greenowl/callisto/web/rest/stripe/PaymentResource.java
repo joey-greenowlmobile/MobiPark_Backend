@@ -1,6 +1,7 @@
 package com.greenowl.callisto.web.rest.stripe;
 
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.HashMap;
@@ -64,9 +65,8 @@ public class PaymentResource {
     private EligiblePlanUserService eligiblePlanUserService;
     @RequestMapping(value = "/payment", method = RequestMethod.POST
             , produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
     @Transactional(readOnly = false)
-    public ResponseEntity<?> AddPayment(@PathVariable("version") String version ,  @Valid @RequestBody PaymentPlanRequest req) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
+    public ResponseEntity<?> AddPayment(@PathVariable("version") String version,  @Valid @RequestBody PaymentPlanRequest req) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
     	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
     	
     	User user = userService.getCurrentUser();
@@ -76,14 +76,16 @@ public class PaymentResource {
     	String cardToken = customer.createCard(params).getId();
     	stripeAccountService.registerPaymentProfile(req.getToken(),user.getLogin(),cardToken);
     	String response =eligiblePlanUserService.subscribePlan(user.getLogin(), req.getPlanId());
-		ResponseDTO responseDTO=new ResponseDTO(response);
-    	return new ResponseEntity<>(responseDTO,OK);
+		if (response.equals("Subscribed")){
+			return new ResponseEntity<>(OK);
+		}
+		return new ResponseEntity<>(genericBadReq(response, "/register"),
+                BAD_REQUEST);
     }
    
     
     @RequestMapping(value = "/payment", method = RequestMethod.GET
             , produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
     @Transactional(readOnly = false)
     public ResponseEntity<?> GetPreviousPayment(@PathVariable("version") String version ) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
     	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
@@ -95,7 +97,6 @@ public class PaymentResource {
     
     @RequestMapping(value = "/payment", method = RequestMethod.DELETE
             , produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
     @Transactional(readOnly = false)
     public ResponseEntity<?> DeletePayment(@PathVariable("version") String version, @Valid @RequestParam Long id) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
     	Stripe.apiKey=Constants.STRIPE_TEST_KEY;

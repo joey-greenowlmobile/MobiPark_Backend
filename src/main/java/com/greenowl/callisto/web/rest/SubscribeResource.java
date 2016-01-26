@@ -87,6 +87,10 @@ public class SubscribeResource {
 		User user= userService.getCurrentUser();
 		String response =eligiblePlanUserService.subscribePlan(user.getLogin(), planId);
 		ResponseDTO responseDTO=new ResponseDTO(response);
-		return new ResponseEntity<>(responseDTO,OK);
+		if (response.equals("Subscribed")){
+			return new ResponseEntity<>(OK);
+		}
+		return new ResponseEntity<>(genericBadReq(response, "/register"),
+                BAD_REQUEST);
 	}
 }

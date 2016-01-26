@@ -57,7 +57,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private Integer activationKey;
 
     private String region;
-    private String state;
     
     @Column(name ="stripe_token")
     private String stripeToken;
@@ -192,14 +191,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
 	public void setPaymentProfiles(Set<PaymentProfile> paymentProfiles) {
 		this.paymentProfiles = paymentProfiles;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
 	}
 
 	public String getStripeToken() {

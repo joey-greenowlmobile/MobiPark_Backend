@@ -56,6 +56,8 @@ public class AccountResource {
 
     private static final String USER_NOT_FOUND = "Unable to find user.";
     
+    private static final String PHONE_NUM_TAKEN ="mobile phone number is already in use!";
+    
     private static final String STRIPE_FAILED ="register with stripe failed!";
     
     private static final String PLAN_NOT_FOUND="Unable to find suitable plan.";
@@ -83,12 +85,17 @@ public class AccountResource {
     @Timed
     @Transactional(readOnly = false)
     public ResponseEntity<?> registerAccount(@PathVariable("apiVersion") final String apiVersion, @Valid @RequestBody CreateUserRequest req) {
-        Optional<User> optional = userRepository.findOneByLogin(req.getLogin()); //login available
+        Optional<User> optional = userRepository.findOneByLogin(req.getEmail()); //login available
         if (optional.isPresent()) {
             return new ResponseEntity<>(genericBadReq(USERNAME_TAKEN, "/register"),
                     BAD_REQUEST);
         }
-        List<PlanEligibleUser> users =eligiblePlanUserService.getPlansByUserEmail(req.getLogin());
+        User phoneuser =userRepository.findOneByMobileNumber(req.getMobileNumber());
+        if(phoneuser!=null){
+            return new ResponseEntity<>(genericBadReq(PHONE_NUM_TAKEN, "/register"),
+                    BAD_REQUEST);
+        }
+        List<PlanEligibleUser> users =eligiblePlanUserService.getPlansByUserEmail(req.getEmail());
         if (users.size()==0){
         	  return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"),
                       BAD_REQUEST);

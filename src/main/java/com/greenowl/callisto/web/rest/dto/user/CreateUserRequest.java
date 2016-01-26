@@ -12,7 +12,7 @@ public class CreateUserRequest {
     @Email
     @NotNull
     @Size(min = 5, max = 250)
-    private String login;
+    private String email;
 
     @Size(max = 50)
     private String firstName;
@@ -29,8 +29,8 @@ public class CreateUserRequest {
     public CreateUserRequest() {
     }
 
-    public CreateUserRequest(String login, String firstName, String lastName, String password ,String licensePlate, String mobileNumber) {
-        this.login = login;
+    public CreateUserRequest(String email, String firstName, String lastName, String password ,String licensePlate, String mobileNumber) {
+        this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
@@ -38,12 +38,12 @@ public class CreateUserRequest {
         this.mobileNumber=mobileNumber;
     }
 
-    public String getLogin() {
-        return login;
+    public String getEmail() {
+        return email;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getFirstName() {
@@ -99,7 +99,7 @@ public class CreateUserRequest {
     @Override
     public String toString() {
         return "CreateUserRequest{" +
-                "login='" + login + '\'' +
+                "email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", region='" + region + '\'' +
