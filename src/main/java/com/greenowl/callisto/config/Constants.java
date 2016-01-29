@@ -21,5 +21,5 @@ public final class Constants {
 	public static final String STRIPE_TEST_KEY="sk_test_ZJmc3FVt5QFtpOp2eAWEGaFJ ";
     
     public static final String RUNTIME_CONFIG_FILE_PATH = "config/config.json";
-
+    public static final Double SERVICE_FEES_PERCENTAGE = 0.2;
 }

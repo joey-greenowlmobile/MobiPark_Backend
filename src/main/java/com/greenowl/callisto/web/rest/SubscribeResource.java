@@ -21,10 +21,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.greenowl.callisto.domain.ParkingPlan;
+import com.greenowl.callisto.domain.PaymentProfile;
 import com.greenowl.callisto.domain.PlanEligibleUser;
+import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.repository.PaymentProfileRepository;
+import com.greenowl.callisto.repository.PlanSubscriptionRepository;
 import com.greenowl.callisto.service.EligiblePlanUserService;
 import com.greenowl.callisto.service.ParkingPlanService;
+import com.greenowl.callisto.service.SalesActivityService;
+import com.greenowl.callisto.service.SubscriptionService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.web.rest.dto.ParkingPlanDTO;
 import com.greenowl.callisto.web.rest.dto.ResponseDTO;
@@ -50,7 +56,15 @@ public class SubscribeResource {
     EligiblePlanUserService eligiblePlanUserService;
     @Inject
     UserService userService;
-   
+    @Inject
+    SubscriptionService subscriptionService;
+    @Inject
+    PaymentProfileRepository paymentProfileRepository;
+    @Inject 
+    SalesActivityService salesActivityService;
+    @Inject
+    PlanSubscriptionRepository planSubscriptionRepository;
+    
 	@RequestMapping(value = "/plan",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -59,7 +73,7 @@ public class SubscribeResource {
 		User currentUser =userService.getCurrentUser();
         List<PlanEligibleUser> users = eligiblePlanUserService.getPlansByUserEmail(currentUser.getLogin());
         if (users.size()==0){
-        	return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"),
+        	return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/plan"),
                     BAD_REQUEST);
         }
         else{
@@ -83,14 +97,27 @@ public class SubscribeResource {
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-	 public  ResponseEntity<?> subscribePlan(@PathVariable("apiVersion") final String apiVersion,@RequestParam final Long planId ) {
-		User user= userService.getCurrentUser();
-		String response =eligiblePlanUserService.subscribePlan(user.getLogin(), planId);
-		ResponseDTO responseDTO=new ResponseDTO(response);
-		if (response.equals("Subscribed")){
-			return new ResponseEntity<>(OK);
+	 public  ResponseEntity<?> subscribePlan(@PathVariable("apiVersion") final String apiVersion,@RequestParam final Long planId,@RequestParam final String login) {
+		User user= userService.getUser(login);
+		String response=null;
+		PaymentProfile paymentProfile= paymentProfileRepository.getPaymentProfilesByUser(user).get(0);
+		if(paymentProfile!=null){
+			response =eligiblePlanUserService.subscribePlan(user.getLogin(), planId);}
+		else{
+			response="Failed to find payment profile.";
 		}
-		return new ResponseEntity<>(genericBadReq(response, "/register"),
-                BAD_REQUEST);
+			if (response.equals("Subscribed")){
+				PlanSubscription planSubscription= subscriptionService.createPlanSubscription(user, planId, paymentProfile.getId());
+				if (planSubscription!=null){
+					salesActivityService.saveSaleActivityWithPlan(user, planSubscription);
+				return new ResponseEntity<>(OK);
+				}
+				else{
+					return new ResponseEntity<>(genericBadReq("Failed at adding to the table", "/register"),
+							BAD_REQUEST);
+				}
+			}
+			return new ResponseEntity<>(genericBadReq(response, "/register"),
+			BAD_REQUEST);
 	}
 }

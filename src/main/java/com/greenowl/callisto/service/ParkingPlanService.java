@@ -54,7 +54,7 @@ public class ParkingPlanService {
 	 }
 	 
 	 public ParkingPlanDTO createParkingPlanInformation(ParkingPlan parkingPlan){
-		 	ParkingPlanDTO parkingPlanDTO = new ParkingPlanDTO(parkingPlan.getLotId(), 
+		 	ParkingPlanDTO parkingPlanDTO = new ParkingPlanDTO(parkingPlan.getId(), 
 		 														parkingPlan.getPlanName(),
 		 														parkingPlan.getPlanDesc(), 
 		 														parkingPlan.getUnitChargeAmount(), 

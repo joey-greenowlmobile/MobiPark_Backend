@@ -58,7 +58,8 @@ public class RegistrationService {
     public String stripeRegister(CreateUserRequest req){
     	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
     	Map<String, Object> customerParams = new HashMap<String, Object>();
-    	customerParams.put("description",req.getFirstName()+req.getLastName());
+    	if(req.getFirstName()!=null|req.getLastName()!=null){
+    	customerParams.put("description",req.getFirstName()+req.getLastName());}
     	customerParams.put("email", req.getEmail());
     	try {
 			Customer cu = Customer.create(customerParams);

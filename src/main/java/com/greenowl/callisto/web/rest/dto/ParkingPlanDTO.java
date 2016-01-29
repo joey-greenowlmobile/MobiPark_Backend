@@ -3,28 +3,28 @@ package com.greenowl.callisto.web.rest.dto;
 
 public class ParkingPlanDTO {
 	
-	private Long lotId;
+	private Long planId;
 	
 	private String planName;
 	private String planDesc;
-	private String unitChargeAmount;
+	private Double unitChargeAmount;
 	
 	private Boolean monthlyPlan;
 	private Long planTerminatedDays;
 	public ParkingPlanDTO(){}
-	public ParkingPlanDTO(Long lotId,String planName, String planDesc, String unitChargeAmount,Boolean monthlyPlan, Long planTerminatedDays){
-		this.lotId=lotId;
+	public ParkingPlanDTO(Long planId,String planName, String planDesc, Double unitChargeAmount,Boolean monthlyPlan, Long planTerminatedDays){
+		this.planId=planId;
 		this.planName=planName;
 		this.planDesc=planDesc;
 		this.unitChargeAmount=unitChargeAmount;
 		this.monthlyPlan=monthlyPlan;
 		this.planTerminatedDays=planTerminatedDays;
 	}
-	public Long getLotId() {
-		return lotId;
+	public Long getPlanId() {
+		return planId;
 	}
-	public void setLotId(Long lotId) {
-		this.lotId = lotId;
+	public void setPlanId(Long planId) {
+		this.planId = planId;
 	}
 	public String getPlanName() {
 		return planName;
@@ -38,10 +38,10 @@ public class ParkingPlanDTO {
 	public void setPlanDesc(String planDesc) {
 		this.planDesc = planDesc;
 	}
-	public String getUnitChargeAmount() {
+	public Double getUnitChargeAmount() {
 		return unitChargeAmount;
 	}
-	public void setUnitChargeAmount(String unitChargeAmount) {
+	public void setUnitChargeAmount(Double unitChargeAmount) {
 		this.unitChargeAmount = unitChargeAmount;
 	}
 	public Boolean getMonthlyPlan() {

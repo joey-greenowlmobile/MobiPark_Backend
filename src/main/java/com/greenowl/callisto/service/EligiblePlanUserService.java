@@ -80,6 +80,7 @@ public class EligiblePlanUserService {
 			 params.put("plan", planId);
 			 try {
 				 cu.createSubscription(params);
+				 LOG.debug("Subscribed to the stripe");
 				 List<PlanEligibleUser> users= planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
 				 for (PlanEligibleUser user:users){
 					 if (user.getPlanGroup().getId().equals(planId)){
@@ -88,6 +89,7 @@ public class EligiblePlanUserService {
 						 return "Subscribed";
 					 }
 				 }
+				 LOG.error("Failed at editing eligible user table");
 			 }	
 			 catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
 				| APIException e) {

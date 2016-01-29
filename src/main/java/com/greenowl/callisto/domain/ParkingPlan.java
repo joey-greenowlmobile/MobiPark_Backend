@@ -35,7 +35,7 @@ public class ParkingPlan  extends AbstractAuditingEntity implements Serializable
 	private String planDesc;
 	
 	@Column(name = "unit_charge_amount", nullable = false)
-	private String unitChargeAmount;
+	private Double unitChargeAmount;
 	
 	@Column(name = "monthly_plan", nullable = false)
 	private Boolean monthlyPlan;
@@ -49,8 +49,13 @@ public class ParkingPlan  extends AbstractAuditingEntity implements Serializable
 
     @JsonIgnore
     @OneToMany(mappedBy = "planGroup", targetEntity = PlanEligibleUser.class, fetch = FetchType.LAZY)
-    private Set<PlanEligibleUser> PlanEligibleUsers = new HashSet<>();
+    private Set<PlanEligibleUser> planEligibleUsers = new HashSet<>();
 
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "planGroup", targetEntity = PlanSubscription.class, fetch = FetchType.LAZY)
+    private Set<PlanSubscription> planSubscriptions = new HashSet<>();
+    
 	public ParkingPlan(){}
 	
 	public Long getId() {
@@ -85,11 +90,11 @@ public class ParkingPlan  extends AbstractAuditingEntity implements Serializable
 		this.planDesc = planDesc;
 	}
 
-	public String getUnitChargeAmount() {
+	public Double getUnitChargeAmount() {
 		return unitChargeAmount;
 	}
 
-	public void setUnitChargeAmount(String unitChargeAmount) {
+	public void setUnitChargeAmount(Double unitChargeAmount) {
 		this.unitChargeAmount = unitChargeAmount;
 	}
 
@@ -118,11 +123,19 @@ public class ParkingPlan  extends AbstractAuditingEntity implements Serializable
 	}
 
 	public Set<PlanEligibleUser> getPlanEligibleUsers() {
-		return PlanEligibleUsers;
+		return planEligibleUsers;
 	}
 
 	public void setPlanEligibleUsers(Set<PlanEligibleUser> planEligibleUsers) {
-		PlanEligibleUsers = planEligibleUsers;
+		this.planEligibleUsers = planEligibleUsers;
+	}
+
+	public Set<PlanSubscription> getPlanSubscriptions() {
+		return planSubscriptions;
+	}
+
+	public void setPlanSubscriptions(Set<PlanSubscription> planSubscriptions) {
+		this.planSubscriptions = planSubscriptions;
 	}
 	
 	

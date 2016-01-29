@@ -1,6 +1,8 @@
 package com.greenowl.callisto.domain;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -12,8 +14,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * A payment profile.
@@ -47,6 +52,9 @@ public class PaymentProfile extends AbstractAuditingEntity implements Serializab
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User profileHolder; 
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "paymentProfile", targetEntity = PlanSubscription.class, fetch = FetchType.LAZY)
+    private Set<PlanSubscription> planSubscriptions = new HashSet<>();
     public PaymentProfile(){}
 
 	public Long getId() {
@@ -104,6 +112,14 @@ public class PaymentProfile extends AbstractAuditingEntity implements Serializab
 
 	public void setProfileHolder(User profileHolder) {
 		this.profileHolder = profileHolder;
+	}
+
+	public Set<PlanSubscription> getPlanSubscriptions() {
+		return planSubscriptions;
+	}
+
+	public void setPlanSubscriptions(Set<PlanSubscription> planSubscriptions) {
+		this.planSubscriptions = planSubscriptions;
 	}
     
     

@@ -77,7 +77,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @OneToMany(mappedBy = "profileHolder", targetEntity = PaymentProfile.class, fetch = FetchType.LAZY)
     private Set<PaymentProfile> paymentProfiles = new HashSet<>();
 
-    
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", targetEntity = PlanSubscription.class, fetch = FetchType.LAZY)
+    private Set<PlanSubscription> planSubscriptions = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "activityHolder", targetEntity = ParkingSaleActivity.class, fetch = FetchType.LAZY)
+    private Set<ParkingSaleActivity> ParkingSaleAcitivities = new HashSet<>();
+
     public User() {
     }
 
@@ -188,7 +195,15 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public Set<PaymentProfile> getPaymentProfiles() {
 		return paymentProfiles;
 	}
+    
+	public Set<PlanSubscription> getPlanSubscriptions() {
+		return planSubscriptions;
+	}
 
+	public void setPlanSubscriptions(Set<PlanSubscription> planSubscriptions) {
+		this.planSubscriptions = planSubscriptions;
+	}
+    
 	public void setPaymentProfiles(Set<PaymentProfile> paymentProfiles) {
 		this.paymentProfiles = paymentProfiles;
 	}
@@ -216,4 +231,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public int hashCode() {
         return login.hashCode();
     }
+
+
+    
 }

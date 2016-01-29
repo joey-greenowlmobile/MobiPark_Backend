@@ -27,14 +27,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.domain.PaymentProfile;
+import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.repository.PaymentProfileRepository;
+import com.greenowl.callisto.repository.SalesActivityRepository;
 import com.greenowl.callisto.security.AuthoritiesConstants;
 import com.greenowl.callisto.service.EligiblePlanUserService;
+import com.greenowl.callisto.service.SalesActivityService;
 import com.greenowl.callisto.service.StripeAccountService;
+import com.greenowl.callisto.service.SubscriptionService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.web.rest.dto.PaymentProfileDTO;
 import com.greenowl.callisto.web.rest.dto.ResponseDTO;
+import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.dto.payment.CreatePaymentProfileRequest;
 import com.greenowl.callisto.web.rest.dto.payment.PaymentPlanRequest;
 import com.greenowl.callisto.web.rest.dto.user.CreateUserRequest;
@@ -63,10 +68,14 @@ public class PaymentResource {
     private UserService userService;
     @Inject
     private EligiblePlanUserService eligiblePlanUserService;
+    @Inject
+    private SubscriptionService subscriptionService;
+    @Inject
+    private SalesActivityService salesActivityService;
     @RequestMapping(value = "/payment", method = RequestMethod.POST
             , produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-    public ResponseEntity<?> AddPayment(@PathVariable("version") String version,  @Valid @RequestBody PaymentPlanRequest req) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
+    public ResponseEntity<?> addPayment(@PathVariable("version") String version,  @Valid @RequestBody PaymentPlanRequest req) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
     	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
     	
     	User user = userService.getCurrentUser();
@@ -74,10 +83,22 @@ public class PaymentResource {
     	Map<String, Object> params = new HashMap<String, Object>();
     	params.put("source", req.getToken().getId());
     	String cardToken = customer.createCard(params).getId();
-    	stripeAccountService.registerPaymentProfile(req.getToken(),user.getLogin(),cardToken);
+    	PaymentProfileDTO paymentProfileDTO = stripeAccountService.registerPaymentProfile(req.getToken(),user.getLogin(),cardToken);
     	String response =eligiblePlanUserService.subscribePlan(user.getLogin(), req.getPlanId());
 		if (response.equals("Subscribed")){
-			return new ResponseEntity<>(OK);
+			PlanSubscription planSubscription= subscriptionService.createPlanSubscription(user, req.getPlanId(),paymentProfileDTO.getId());
+			if (planSubscription!=null){
+				SalesActivityDTO salesActivityDTO= salesActivityService.saveSaleActivityWithPlan(user, planSubscription);
+				if (salesActivityDTO !=null){
+				return new ResponseEntity<>(OK);
+				}
+				else{
+
+					LOG.error("Failed at adding to the sales activity table");
+				}
+			}
+			LOG.error("Failed at adding to the subscription table");
+			
 		}
 		return new ResponseEntity<>(genericBadReq(response, "/register"),
                 BAD_REQUEST);
@@ -87,7 +108,7 @@ public class PaymentResource {
     @RequestMapping(value = "/payment", method = RequestMethod.GET
             , produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-    public ResponseEntity<?> GetPreviousPayment(@PathVariable("version") String version ) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
+    public ResponseEntity<?> getPreviousPayment(@PathVariable("version") String version ) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
     	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
     	User user = userService.getCurrentUser();
     	List<PaymentProfileDTO> paymentProfileDTOs =stripeAccountService.getAllPaymentProfileDTOs(user);
@@ -98,7 +119,7 @@ public class PaymentResource {
     @RequestMapping(value = "/payment", method = RequestMethod.DELETE
             , produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-    public ResponseEntity<?> DeletePayment(@PathVariable("version") String version, @Valid @RequestParam Long id) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
+    public ResponseEntity<?> deletePayment(@PathVariable("version") String version, @Valid @RequestParam Long id) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException{
     	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
     	User user = userService.getUserWithAuthorities();
     	Customer customer = Customer.retrieve(user.getStripeToken());
@@ -119,59 +140,5 @@ public class PaymentResource {
 		return new ResponseEntity<>(genericBadReq("Failed to find payment profile on stripe.","/user/payment"),HttpStatus.NOT_FOUND);
     }
     
-    @RequestMapping(value = "/test2", method = RequestMethod.GET
-            , produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
-    @Transactional(readOnly = true)
-    public ResponseEntity<?> TestPayment2(@PathVariable("version") String version, @RequestParam final String token){
-    	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
-    	try {
-    		Map<String, Object> chargeParams = new HashMap<String, Object>();
-    		  chargeParams.put("amount", 1000); // amount in cents, again
-    		  chargeParams.put("currency", "cad");
-    		  chargeParams.put("customer", "cus_7ik4R3LrwqS9WJ");
-    		  chargeParams.put("description", "Example charge");
-
-    		  Charge charge = Charge.create(chargeParams);
-    		} catch (Exception e) {
-    	    	 return new ResponseEntity<>( OK);
-    		}
-    	 return new ResponseEntity<>( OK);
-    }
-    
-    @RequestMapping(value = "/test3", method = RequestMethod.GET
-            , produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
-    @Transactional(readOnly = true)
-    public ResponseEntity<?> TestPayment3(@PathVariable("version")@RequestBody String token ,final String version){
-    	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
-    	try {
-    		Customer cu = Customer.retrieve("cus_7ik4R3LrwqS9WJ");
-    		Map<String, Object> params = new HashMap<String, Object>();
-    		params.put("plan", "DOC");
-    		cu.createSubscription(params);
-    		} catch (Exception e) {
-    	    	 return new ResponseEntity<>( OK);
-    		}
-    	 return new ResponseEntity<>( OK);
-    }
-    
-    @RequestMapping(value = "/test4", method = RequestMethod.GET
-            , produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
-    @Transactional(readOnly = true)
-    public ResponseEntity<?> TestPayment4(@PathVariable("version")@RequestBody String token ,final String version){
-    	Stripe.apiKey=Constants.STRIPE_TEST_KEY;;
-    	try {
-    		Customer cu = Customer.retrieve("cus_7ik4R3LrwqS9WJ");
-    		Map<String, Object> params = new HashMap<String, Object>();
-    		params.put("plan", "DOC");
-    		cu.createSubscription(params);
-    		} catch (Exception e) {
-    	    	 return new ResponseEntity<>( OK);
-    		}
-    	 return new ResponseEntity<>( OK);
-    }
-
-    }
+}
 
