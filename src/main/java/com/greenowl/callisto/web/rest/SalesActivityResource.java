@@ -36,11 +36,14 @@ import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 public class SalesActivityResource {
     @Inject
     SalesActivityService salesActivityService;
-	@RequestMapping(value = "/record",
+    @Inject
+    SalesActivityRepository salesActivityRepository;
+	@RequestMapping(value = "/dailyRecord",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-	public  ResponseEntity<?> getDailySalesRecord(@PathVariable("apiVersion") final String apiVersion, @RequestParam final String day) {
+	public  ResponseEntity<?> getDailySalesRecord(@PathVariable("apiVersion") final String apiVersion, @RequestParam final String day, 
+			@RequestParam final Boolean sale, @RequestParam final Boolean record, @RequestParam final Boolean inFlight) {
 		Date date=null;
 		DateFormat df = new SimpleDateFormat("yyyy-mm-dd");
 		try {
@@ -54,12 +57,25 @@ public class SalesActivityResource {
 		DateTime startOfTheDay = dateTime.withTimeAtStartOfDay();
 		DateTime endOfTheDay = dateTime.plusDays(1).withTimeAtStartOfDay();
 		List<ParkingSaleActivity> parkingSaleActivities=  salesActivityService.findAllActivityBetween(startOfTheDay, endOfTheDay);
+		List<ParkingSaleActivity> filteredParkingSaleActivities =salesActivityService.filter(parkingSaleActivities,sale,record, inFlight);
 		List<SalesActivityDTO> salesActivityDTOs= new ArrayList<SalesActivityDTO>();
-		for (ParkingSaleActivity parkingSaleActivity: parkingSaleActivities){
+		for (ParkingSaleActivity parkingSaleActivity: filteredParkingSaleActivities){
 			salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity,parkingSaleActivity.getActivityHolder()));
 		}
 		return new ResponseEntity<>(salesActivityDTOs,OK);
 		  
 		
+	}
+	@RequestMapping(value = "/allRecord",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional(readOnly = false)
+	public ResponseEntity<?> getAllSalesRecord(@PathVariable("apiVersion") final String apiVersion){
+		List<ParkingSaleActivity> parkingSaleActivities= salesActivityRepository.findAll();
+		List<SalesActivityDTO> salesActivityDTOs= new ArrayList<SalesActivityDTO>();
+		for (ParkingSaleActivity parkingSaleActivity: parkingSaleActivities){
+			salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity,parkingSaleActivity.getActivityHolder()));
+		}
+		return new ResponseEntity<>(salesActivityDTOs,OK);
 	}
 }

@@ -1,5 +1,6 @@
 package com.greenowl.callisto.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.greenowl.callisto.config.Constants;
+import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.User;
@@ -53,6 +55,26 @@ public class SalesActivityService {
     	
     }
     
+    public SalesActivityDTO createSaleActivityForPlanUser(User user, ParkingPlan plan){
+    	ParkingSaleActivity newActivity = new ParkingSaleActivity();
+    	newActivity.setActivityHolder(user);
+    	newActivity.setPlanId(plan.getId());
+    	newActivity.setPlanName(parkingPlanRepository.getOneParkingPlanById(plan.getId()).getPlanName());
+    	newActivity.setLotId(plan.getLotId());
+    	newActivity.setUserEmail(user.getLogin());
+    	newActivity.setUserPhoneNumber(user.getMobileNumber());
+    	newActivity.setUserLicensePlate(user.getLicensePlate());
+    	Double totalCharge=0.0;
+    	newActivity.setChargeAmount(totalCharge);
+    	newActivity.setServiceAmount(totalCharge*Constants.SERVICE_FEES_PERCENTAGE);
+    	newActivity.setNetAmount(totalCharge*(1-Constants.SERVICE_FEES_PERCENTAGE));
+    	newActivity.setEntryDatetime( DateTime.now());
+    	newActivity.setParkingStatus("Parked");
+    	salesActivityRepository.save(newActivity);
+    	SalesActivityDTO salesActivityDTO = contructDTO(newActivity, user);
+    	return salesActivityDTO;
+    }
+    
     public List<ParkingSaleActivity> findAllActivityBetween (DateTime startTime, DateTime endTime){
     	return salesActivityRepository.getParkingSaleActivityBetween(startTime, endTime);
     }
@@ -64,4 +86,60 @@ public class SalesActivityService {
     			activity.getParkingStatus(), activity.getExceptionFlag(), activity.getInvoiceId());
     	return salesActivityDTO;
     }
+    
+    public List<ParkingSaleActivity> findInFlightActivityByUser(User user){
+    		List<ParkingSaleActivity> parkingSaleActivities= salesActivityRepository.getParkingSaleActivitiesByUser(user);
+    		List<ParkingSaleActivity> inFlightActivities =new ArrayList<ParkingSaleActivity>();
+    		for (ParkingSaleActivity activity: parkingSaleActivities){
+    			if (activity.getEntryDatetime()!=null && activity.getExitDatetime()==null){
+    				inFlightActivities.add(activity);
+    			}
+    		}
+    		return inFlightActivities;
+    }
+	public List<ParkingSaleActivity> filter(List<ParkingSaleActivity> parkingSaleActivities, Boolean sale,
+			Boolean record, Boolean inFlight) {
+		List<ParkingSaleActivity> filteredList= new ArrayList<ParkingSaleActivity>();
+		for (ParkingSaleActivity activity: parkingSaleActivities){
+			if(inFlight==true){
+				if (activity.getEntryDatetime()!=null&activity.getExitDatetime()==null){
+					filteredList.add(activity);
+				}
+			break;
+			}
+			if(sale==true){
+				
+				if(record==true){
+					if (activity.getEntryDatetime()!=null&&activity.getChargeAmount()!=null){
+						filteredList.add(activity);
+					}
+					else{
+						break;
+					}
+				}
+				else{
+					if(activity.getChargeAmount()!=null){
+						filteredList.add(activity);
+					}
+					else{
+						break;
+					}
+				}
+			}
+			else{
+				if(record==true){
+					if (activity.getEntryDatetime()!=null){
+						filteredList.add(activity);
+					}
+					else{
+						break;
+					}
+				}
+				else{
+					filteredList.add(activity);
+				}
+			}
+		}
+		return filteredList;
+	}
 }
