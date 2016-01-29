@@ -49,7 +49,7 @@ public class GateResource {
   		  return new ResponseEntity<>(genericBadReq("User already inside parking lot, can't open gate.", "/gate"),
                   BAD_REQUEST);
   		}
-  		if (user.getPlanSubscriptions()!=null){
+  		if (user.getPlanSubscriptions().size()==0){
   			ParkingPlan subscribedPlan =user.getPlanSubscriptions().iterator().next().getPlanGroup();
   			if (subscribedPlan!=null){
   				if (subscribedPlan.getLotId()==req.getLotId()){

@@ -38,44 +38,42 @@ public class SalesActivityResource {
     SalesActivityService salesActivityService;
     @Inject
     SalesActivityRepository salesActivityRepository;
-	@RequestMapping(value = "/dailyRecord",
+	@RequestMapping(value = "/records",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-	public  ResponseEntity<?> getDailySalesRecord(@PathVariable("apiVersion") final String apiVersion, @RequestParam final String day, 
+	public  ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion, @RequestParam(defaultValue = "all") final String type, @RequestParam final String day, 
 			@RequestParam final Boolean sale, @RequestParam final Boolean record, @RequestParam final Boolean inFlight) {
-		Date date=null;
-		DateFormat df = new SimpleDateFormat("yyyy-mm-dd");
-		try {
-			date = df.parse(day);
-		} 
-		catch (ParseException e) {
-			return new ResponseEntity<>(genericBadReq("Wrong date format", "/parking"),
-					BAD_REQUEST);	
+		if(type.equals("all")){	
+			List<ParkingSaleActivity> parkingSaleActivities= salesActivityRepository.findAll();
+			List<SalesActivityDTO> salesActivityDTOs= new ArrayList<SalesActivityDTO>();
+			List<ParkingSaleActivity> filteredParkingSaleActivities =salesActivityService.filter(parkingSaleActivities,sale,record, inFlight);
+			for (ParkingSaleActivity parkingSaleActivity: filteredParkingSaleActivities){
+				salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity,parkingSaleActivity.getActivityHolder()));
+			}
+			return new ResponseEntity<>(salesActivityDTOs,OK);
 		}
-		DateTime dateTime = new DateTime(date);
-		DateTime startOfTheDay = dateTime.withTimeAtStartOfDay();
-		DateTime endOfTheDay = dateTime.plusDays(1).withTimeAtStartOfDay();
-		List<ParkingSaleActivity> parkingSaleActivities=  salesActivityService.findAllActivityBetween(startOfTheDay, endOfTheDay);
-		List<ParkingSaleActivity> filteredParkingSaleActivities =salesActivityService.filter(parkingSaleActivities,sale,record, inFlight);
-		List<SalesActivityDTO> salesActivityDTOs= new ArrayList<SalesActivityDTO>();
-		for (ParkingSaleActivity parkingSaleActivity: filteredParkingSaleActivities){
-			salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity,parkingSaleActivity.getActivityHolder()));
+		else{
+			Date date=null;
+			DateFormat df = new SimpleDateFormat("yyyy-mm-dd");
+			try {
+				date = df.parse(day);
+			} 
+			catch (ParseException e) {
+				return new ResponseEntity<>(genericBadReq("Wrong date format", "/parking"),
+						BAD_REQUEST);	
+			}
+			DateTime dateTime = new DateTime(date);
+			DateTime startOfTheDay = dateTime.withTimeAtStartOfDay();
+			DateTime endOfTheDay = dateTime.plusDays(1).withTimeAtStartOfDay();
+			List<ParkingSaleActivity> parkingSaleActivities=  salesActivityService.findAllActivityBetween(startOfTheDay, endOfTheDay);
+			List<ParkingSaleActivity> filteredParkingSaleActivities =salesActivityService.filter(parkingSaleActivities,sale,record, inFlight);
+			List<SalesActivityDTO> salesActivityDTOs= new ArrayList<SalesActivityDTO>();
+			for (ParkingSaleActivity parkingSaleActivity: filteredParkingSaleActivities){
+				salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity,parkingSaleActivity.getActivityHolder()));
+			}
+			return new ResponseEntity<>(salesActivityDTOs,OK);
 		}
-		return new ResponseEntity<>(salesActivityDTOs,OK);
-		  
-		
-	}
-	@RequestMapping(value = "/allRecord",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional(readOnly = false)
-	public ResponseEntity<?> getAllSalesRecord(@PathVariable("apiVersion") final String apiVersion){
-		List<ParkingSaleActivity> parkingSaleActivities= salesActivityRepository.findAll();
-		List<SalesActivityDTO> salesActivityDTOs= new ArrayList<SalesActivityDTO>();
-		for (ParkingSaleActivity parkingSaleActivity: parkingSaleActivities){
-			salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity,parkingSaleActivity.getActivityHolder()));
-		}
-		return new ResponseEntity<>(salesActivityDTOs,OK);
+			
 	}
 }
