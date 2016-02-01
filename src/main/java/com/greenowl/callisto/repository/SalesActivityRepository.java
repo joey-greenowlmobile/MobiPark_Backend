@@ -21,6 +21,8 @@ public interface SalesActivityRepository extends JpaRepository<ParkingSaleActivi
 	
 	@Query("select u from ParkingSaleActivity u where u.activityHolder = ?1")
 	List<ParkingSaleActivity> getParkingSaleActivitiesByUser(User activityHolder);
-	
+
+	@Query("select u from ParkingSaleActivity u where u.invoiceId = ?1")
+	List<ParkingSaleActivity> getParkingSaleActivitiesByInvoiceId(String invoiceId);
 	
 }

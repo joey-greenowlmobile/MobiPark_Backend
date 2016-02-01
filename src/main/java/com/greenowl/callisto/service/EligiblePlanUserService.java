@@ -22,6 +22,7 @@ import com.stripe.exception.AuthenticationException;
 import com.stripe.exception.CardException;
 import com.stripe.exception.InvalidRequestException;
 import com.stripe.model.Customer;
+import com.stripe.model.Subscription;
 
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
@@ -79,14 +80,14 @@ public class EligiblePlanUserService {
 			 Map<String, Object> params = new HashMap<String, Object>();
 			 params.put("plan", planId);
 			 try {
-				 cu.createSubscription(params);
+				 Subscription subscription =cu.createSubscription(params);
 				 LOG.debug("Subscribed to the stripe");
 				 List<PlanEligibleUser> users= planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
 				 for (PlanEligibleUser user:users){
 					 if (user.getPlanGroup().getId().equals(planId)){
 						 user.setSubscribed(true);
 						 planEligibleUserRepository.save(user);
-						 return "Subscribed";
+						 return subscription.getId();
 					 }
 				 }
 				 LOG.error("Failed at editing eligible user table");

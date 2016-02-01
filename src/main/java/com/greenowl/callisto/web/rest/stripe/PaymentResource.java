@@ -85,8 +85,8 @@ public class PaymentResource {
     	String cardToken = customer.createCard(params).getId();
     	PaymentProfileDTO paymentProfileDTO = stripeAccountService.registerPaymentProfile(req.getToken(),user.getLogin(),cardToken);
     	String response =eligiblePlanUserService.subscribePlan(user.getLogin(), req.getPlanId());
-		if (response.equals("Subscribed")){
-			PlanSubscription planSubscription= subscriptionService.createPlanSubscription(user, req.getPlanId(),paymentProfileDTO.getId());
+		if (response.startsWith("sub_")){
+			PlanSubscription planSubscription= subscriptionService.createPlanSubscription(user, req.getPlanId(),paymentProfileDTO.getId(),response);
 			if (planSubscription!=null){
 				SalesActivityDTO salesActivityDTO= salesActivityService.saveSaleActivityWithPlan(user, planSubscription);
 				if (salesActivityDTO !=null){

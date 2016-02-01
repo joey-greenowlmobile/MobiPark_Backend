@@ -106,8 +106,8 @@ public class SubscribeResource {
 		else{
 			response="Failed to find payment profile.";
 		}
-			if (response.equals("Subscribed")){
-				PlanSubscription planSubscription= subscriptionService.createPlanSubscription(user, planId, paymentProfile.getId());
+			if (response.startsWith("sub_")){
+				PlanSubscription planSubscription= subscriptionService.createPlanSubscription(user, planId, paymentProfile.getId(),response);
 				if (planSubscription!=null){
 					salesActivityService.saveSaleActivityWithPlan(user, planSubscription);
 				return new ResponseEntity<>(OK);

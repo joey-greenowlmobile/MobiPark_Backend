@@ -36,7 +36,7 @@ public class SubscriptionService {
     	return planSubriptionRepository.getPlanSubscriptionById(id);
     }
     
-    public PlanSubscription createPlanSubscription(User user, Long planId, Long paymentProfileId){
+    public PlanSubscription createPlanSubscription(User user, Long planId, Long paymentProfileId,String stripeId){
 
     	PlanSubscription planSubscription = new PlanSubscription();
     	DateTime createdDate = DateTime.now();
@@ -49,6 +49,7 @@ public class SubscriptionService {
     		planSubscription.setPaymentProfile(paymentProfile);
     		planSubscription.setPlanStartDate(createdDate);
     		planSubscription.setPlanChargeAmount( parkingPlan.getUnitChargeAmount());
+    		planSubscription.setStripeId(stripeId);
     		planSubriptionRepository.save(planSubscription);
     		return planSubscription;}
     		else{

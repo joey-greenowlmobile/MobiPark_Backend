@@ -65,7 +65,9 @@ public class PlanSubscription extends AbstractAuditingEntity implements Serializ
 
 	@Column(name= "cancel_refund_amount")
 	private Double cancelRefundAmount;
-
+	
+	@Column(name ="stripe_id" , nullable=false)
+	private String stripeId;
 	public Long getId() {
 		return id;
 	}
@@ -161,6 +163,15 @@ public class PlanSubscription extends AbstractAuditingEntity implements Serializ
 	public void setCancelRefundAmount(Double cancelRefundAmount) {
 		this.cancelRefundAmount = cancelRefundAmount;
 	}
+
+	public String getStripeId() {
+		return stripeId;
+	}
+
+	public void setStripeId(String stripeId) {
+		this.stripeId = stripeId;
+	}
+
 	
 	
 	

@@ -1,7 +1,9 @@
 package com.greenowl.callisto.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -18,7 +20,13 @@ import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.repository.ParkingPlanRepository;
 import com.greenowl.callisto.repository.SalesActivityRepository;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
-import com.stripe.model.Plan;
+import com.stripe.Stripe;
+import com.stripe.exception.APIConnectionException;
+import com.stripe.exception.APIException;
+import com.stripe.exception.AuthenticationException;
+import com.stripe.exception.CardException;
+import com.stripe.exception.InvalidRequestException;
+import com.stripe.model.Invoice;
 
 @Service
 public class SalesActivityService {
@@ -34,7 +42,23 @@ public class SalesActivityService {
     }
     
     public SalesActivityDTO createSaleActivityWithPlan(User user, PlanSubscription plan){
+    	Stripe.apiKey=Constants.STRIPE_TEST_KEY;
     	ParkingSaleActivity newActivity = new ParkingSaleActivity();
+    	Map<String, Object> invoiceParams = new HashMap<String, Object>();
+    	invoiceParams.put("limit", 3);
+    	invoiceParams.put("customer", user.getStripeToken());
+    	try {
+			List<Invoice> invoices = Invoice.all(invoiceParams).getData();
+			for( Invoice invoice: invoices){
+				if (invoice.getSubscription().equals(plan.getStripeId())){
+					newActivity.setInvoiceId(invoice.getId());
+					break;
+				}
+			}
+		} catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
+				| APIException e) {
+			
+		}
     	newActivity.setActivityHolder(user);
     	newActivity.setPlanId(plan.getPlanGroup().getId());
     	newActivity.setPlanName(parkingPlanRepository.getOneParkingPlanById(plan.getPlanGroup().getId()).getPlanName());
