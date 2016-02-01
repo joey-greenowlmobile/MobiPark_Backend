@@ -87,6 +87,7 @@ public class GateResource {
   		ParkingSaleActivity parkingSaleActivity= salesActivityService.findInFlightActivityByUser(user).get(0);
   		parkingSaleActivity.setExitDatetime(DateTime.now());
   		parkingSaleActivity.setParkingStatus("Finished parking");
+  		//closeGate Function
   		salesActivityRepository.save(parkingSaleActivity);
   		SalesActivityDTO salesActivityDTO= salesActivityService.contructDTO(parkingSaleActivity, user);
   		return new ResponseEntity<>(salesActivityDTO,OK);
