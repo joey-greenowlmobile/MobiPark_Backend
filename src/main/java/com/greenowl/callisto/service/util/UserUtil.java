@@ -59,7 +59,10 @@ public class UserUtil {
                 user.getLastName(),
                 user.getLangKey(),
                 roles,
-                user.getStripeToken());
+                user.getStripeToken(),
+                user.getLicensePlate(),
+                user.getMobileNumber(),
+                user.getRegion());
     }
 
     public static boolean isValidEmail(String input) {

@@ -83,7 +83,7 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
 	private String parkingStatus;
 	
 	@Column(name = "exception_flag")
-	private Boolean exceptionFlag;
+	private String exceptionFlag;
 	
 	@Column(name = "invoice_id")
 	private String invoiceId;
@@ -224,11 +224,11 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
 		this.parkingStatus = parkingStatus;
 	}
 
-	public Boolean getExceptionFlag() {
+	public String getExceptionFlag() {
 		return exceptionFlag;
 	}
 
-	public void setExceptionFlag(Boolean exceptionFlag) {
+	public void setExceptionFlag(String exceptionFlag) {
 		this.exceptionFlag = exceptionFlag;
 	}
 

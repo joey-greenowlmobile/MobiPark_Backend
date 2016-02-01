@@ -23,14 +23,14 @@ public class SalesActivityDTO {
 	private DateTime entryDateTime;
 	private DateTime exitDateTime;
 	private String parkingStatus;
-	private Boolean exceptionFlag;
+	private String exceptionFlag;
 	private String invoiceId;
 	
 	public SalesActivityDTO(){};
 	public SalesActivityDTO(Long id, Long lotId, User user, Long planId, DateTime planSubscriptionDate,
 			DateTime planExpiryDate , Double chargeAmount, Double serviceAmount,
 			Double netAmount, Long ppId, DateTime entryDateTime, DateTime exitDateTime, String parkingStatus,
-			Boolean exceptionFlag, String invoiceId){
+			String exceptionFlag, String invoiceId){
 		this.id=id;
 		this.lotId=lotId;
 		this.userId=user.getId();
@@ -152,10 +152,10 @@ public class SalesActivityDTO {
 	public void setParkingStatus(String parkingStatus) {
 		this.parkingStatus = parkingStatus;
 	}
-	public Boolean getExceptionFlag() {
+	public String getExceptionFlag() {
 		return exceptionFlag;
 	}
-	public void setExceptionFlag(Boolean exceptionFlag) {
+	public void setExceptionFlag(String exceptionFlag) {
 		this.exceptionFlag = exceptionFlag;
 	}
 	public String getInvoiceId() {

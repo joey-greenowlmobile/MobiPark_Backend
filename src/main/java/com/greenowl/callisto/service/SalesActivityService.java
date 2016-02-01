@@ -142,7 +142,7 @@ public class SalesActivityService {
 					}
 				}
 				else{
-					if(activity.getChargeAmount()!=null){
+					if(activity.getChargeAmount()>0){
 						filteredList.add(activity);
 					}
 					else{

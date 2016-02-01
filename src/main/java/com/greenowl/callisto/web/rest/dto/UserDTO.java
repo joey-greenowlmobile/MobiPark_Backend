@@ -29,14 +29,18 @@ public class UserDTO implements Serializable {
 
     @Size(max = 50)
     private String stripeToken;
-
+    
+    private String licensePlate;
+    
+    private String mobileNumber;
+    private String region;
     private List<String> roles;
 
     public UserDTO() {
     }
 
     public UserDTO(Long id, String email, String firstName, String lastName,
-                   String langKey, List<String> roles, String stripeToken) {
+                   String langKey, List<String> roles, String stripeToken, String licensePlate ,String mobileNumber, String region) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -44,6 +48,9 @@ public class UserDTO implements Serializable {
         this.langKey = langKey;
         this.roles = roles;
         this.stripeToken=stripeToken;
+        this.licensePlate=licensePlate;
+        this.mobileNumber=mobileNumber;
+        this.region=region;
     }
 
     public Long getId() {
@@ -104,12 +111,39 @@ public class UserDTO implements Serializable {
 		this.stripeToken = stripeToken;
 	}
 
+	public String getLicensePlate() {
+		return licensePlate;
+	}
+
+	public void setLicensePlate(String licensePlate) {
+		this.licensePlate = licensePlate;
+	}
+
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
+	}
+
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
 	@Override
     public String toString() {
         return "UserDTO{" +
                 "email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", licensePlate='" + licensePlate + '\'' +
+                ", mobileNumber='" + mobileNumber + '\'' +
+                ", region='" + region + '\'' +
                 ", langKey='" + langKey + '\'' +
                 ", stripeToken='" + stripeToken + '\'' +
                 ", roles=" + roles +

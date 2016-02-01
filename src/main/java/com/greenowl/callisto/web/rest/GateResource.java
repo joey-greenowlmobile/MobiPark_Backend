@@ -3,6 +3,7 @@ package com.greenowl.callisto.web.rest;
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 
 import org.joda.time.DateTime;
@@ -23,6 +24,7 @@ import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.repository.SalesActivityRepository;
+import com.greenowl.callisto.security.AuthoritiesConstants;
 import com.greenowl.callisto.service.SalesActivityService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
@@ -92,4 +94,24 @@ public class GateResource {
   		SalesActivityDTO salesActivityDTO= salesActivityService.contructDTO(parkingSaleActivity, user);
   		return new ResponseEntity<>(salesActivityDTO,OK);
   	}
-}
+  	
+  	@RequestMapping(value = "/systemOpen",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+  	@Transactional(readOnly = false)
+    @RolesAllowed(AuthoritiesConstants.ADMIN)
+	public  ResponseEntity<?> systemOpenEnterGate(@PathVariable("apiVersion") final String apiVersion, @RequestBody GateOpenRequest req, @RequestParam final String reason){
+  		User user = userService.getCurrentUser();
+  		ParkingSaleActivity parkingSaleActivity=new ParkingSaleActivity();
+  		parkingSaleActivity.setLotId(req.getLotId());
+  		parkingSaleActivity.setActivityHolder(user);
+  		parkingSaleActivity.setUserEmail(user.getLogin());
+  		parkingSaleActivity.setParkingStatus("System");
+  		parkingSaleActivity.setExceptionFlag(reason);
+  		//Gate Open
+  		salesActivityRepository.save(parkingSaleActivity);
+  		SalesActivityDTO salesActivityDTO= salesActivityService.contructDTO(parkingSaleActivity, user);
+  		return new ResponseEntity<>(salesActivityDTO,OK);
+  	}
+  	}
+
