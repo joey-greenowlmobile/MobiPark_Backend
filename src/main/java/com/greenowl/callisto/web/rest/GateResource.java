@@ -54,7 +54,7 @@ public class GateResource {
                     //openGate function
 
                 } else {
-                    return new ResponseEntity<>(genericBadReq("Incorret parking lot.", "/gate"),
+                    return new ResponseEntity<>(genericBadReq("Incorrect parking lot.", "/gate"),
                             BAD_REQUEST);
                 }
             } else {

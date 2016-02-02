@@ -89,8 +89,8 @@ public class AccountResource {
             return new ResponseEntity<>(genericBadReq(USERNAME_TAKEN, "/register"),
                     BAD_REQUEST);
         }
-        User phoneuser = userRepository.findOneByMobileNumber(req.getMobileNumber());
-        if (phoneuser != null) {
+        User dbUser = userRepository.findOneByMobileNumber(req.getMobileNumber());
+        if (dbUser != null) {
             return new ResponseEntity<>(genericBadReq(PHONE_NUM_TAKEN, "/register"),
                     BAD_REQUEST);
         }

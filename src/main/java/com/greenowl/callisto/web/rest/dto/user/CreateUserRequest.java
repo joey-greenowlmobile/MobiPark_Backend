@@ -21,8 +21,11 @@ public class CreateUserRequest {
     private String lastName;
 
     private String region;
+
     private String licensePlate;
+
     private String mobileNumber;
+
     @NotNull
     private String password;
 

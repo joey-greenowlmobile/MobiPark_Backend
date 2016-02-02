@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
@@ -33,23 +34,11 @@ public class EligiblePlanUserService {
     @Inject
     private UserService userService;
 
-
-    public PlanEligibleUser getPlansByUserEmailAndPlanId(String userEmail, Long planId) {
-        List<PlanEligibleUser> users = planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
-        for (PlanEligibleUser user : users) {
-            if (user.getPlanGroup().getId() == planId) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    public boolean checkSubscribeByPlanIdAndUserEmail(String userEmail, Long planId) {
-        List<PlanEligibleUser> users = planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
-        for (PlanEligibleUser user : users) {
-            if (user.getPlanGroup().getId() == planId) {
-                return user.getSubscribed();
-            }
+    private boolean userIsEligible(String userEmail, Long planId) {
+        Optional<PlanEligibleUser> optionalPlan = planEligibleUserRepository.findOneByUserEmail(userEmail);
+        if (optionalPlan.isPresent()) {
+            PlanEligibleUser existingPlan = optionalPlan.get();
+            return (existingPlan.getId().equals(planId));
         }
         return false;
     }
@@ -62,7 +51,7 @@ public class EligiblePlanUserService {
     public String subscribePlan(String userEmail, Long planId) {
         String userToken = userService.getUser(userEmail).getStripeToken();
         ParkingPlan parkingPlan = parkingPlanRepository.getOneParkingPlanById(planId);
-        if (checkSubscribeByPlanIdAndUserEmail(userEmail, parkingPlan.getId()) == true) {
+        if (userIsEligible(userEmail, parkingPlan.getId())) {
             return "Already Subscribed";
         } else {
             Stripe.apiKey = Constants.STRIPE_TEST_KEY;
@@ -71,9 +60,9 @@ public class EligiblePlanUserService {
                 cu = Customer.retrieve(userToken);
             } catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
                     | APIException e) {
-                return "Failed at retriving";
+                return "Failed at retrieving customer information";
             }
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
             params.put("plan", planId);
             try {
                 Subscription subscription = cu.createSubscription(params);

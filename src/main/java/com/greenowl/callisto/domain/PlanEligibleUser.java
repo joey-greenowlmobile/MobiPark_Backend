@@ -11,7 +11,6 @@ public class PlanEligibleUser extends AbstractAuditingEntity implements Serializ
     @Access(AccessType.PROPERTY)
     private Long id;
 
-
     @Column(name = "user_email", nullable = false)
     private String userEmail;
 

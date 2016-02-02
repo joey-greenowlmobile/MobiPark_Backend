@@ -49,8 +49,7 @@ public class StripeAccountService {
             User user = optUser.get();
             PaymentProfile savedProfile = PaymentProfileFactory.create(card, created, livemode, used, user, cardToken);
             paymentProfileRepository.save(savedProfile);
-            PaymentProfileDTO paymentProfileDTO = PaymentProfileUtil.getPaymentProfileDTO(savedProfile);
-            return paymentProfileDTO;
+            return PaymentProfileUtil.getPaymentProfileDTO(savedProfile);
         }
         return null;
 
