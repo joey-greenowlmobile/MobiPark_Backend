@@ -1,179 +1,166 @@
 package com.greenowl.callisto.domain;
 
-import java.io.Serializable;
-
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
+import javax.persistence.*;
+import java.io.Serializable;
+
 @Entity
 @Table(name = "T_CUSTOMER_PLAN_SUBSCRIPTION")
-public class PlanSubscription extends AbstractAuditingEntity implements Serializable{
-	@Id
+public class PlanSubscription extends AbstractAuditingEntity implements Serializable {
+    @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Access(AccessType.PROPERTY)
     private Long id;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	private User user;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "plan_id", referencedColumnName = "id")
-	private ParkingPlan planGroup;
-	
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "pp_id", referencedColumnName = "id")
-	private PaymentProfile paymentProfile;
-	   
-	@Column(name= "plan_start_date", nullable= false)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_id", referencedColumnName = "id")
+    private ParkingPlan planGroup;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pp_id", referencedColumnName = "id")
+    private PaymentProfile paymentProfile;
+
+    @Column(name = "plan_start_date", nullable = false)
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime planStartDate;
-	
-	@Column(name= "plan_charge_amount", nullable= false)
-	private Double planChargeAmount;
-	
-	@Column(name= "plan_expiry_date")
+    private DateTime planStartDate;
+
+    @Column(name = "plan_charge_amount", nullable = false)
+    private Double planChargeAmount;
+
+    @Column(name = "plan_expiry_date")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime planExpiryDate;
+    private DateTime planExpiryDate;
 
-	@Column(name= "cancel_request_date")
+    @Column(name = "cancel_request_date")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime cancel_request_date;
-	
-	@Column(name ="cancel_request_reason")
-	private String cancelRequestReason;
-	
-	@Column(name= "cancel_effective_date")
+    private DateTime cancel_request_date;
+
+    @Column(name = "cancel_request_reason")
+    private String cancelRequestReason;
+
+    @Column(name = "cancel_effective_date")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime cancelEffectiveDate;
+    private DateTime cancelEffectiveDate;
 
-	@Column(name ="cancel_handled_by")
-	private String cancelHandledBy;
+    @Column(name = "cancel_handled_by")
+    private String cancelHandledBy;
 
-	@Column(name= "cancel_refund_amount")
-	private Double cancelRefundAmount;
-	
-	@Column(name ="stripe_id" , nullable=false)
-	private String stripeId;
-	public Long getId() {
-		return id;
-	}
+    @Column(name = "cancel_refund_amount")
+    private Double cancelRefundAmount;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Column(name = "stripe_id", nullable = false)
+    private String stripeId;
 
-	public User getUser() {
-		return user;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public ParkingPlan getPlanGroup() {
-		return planGroup;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setPlanGroup(ParkingPlan planGroup) {
-		this.planGroup = planGroup;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public PaymentProfile getPaymentProfile() {
-		return paymentProfile;
-	}
+    public ParkingPlan getPlanGroup() {
+        return planGroup;
+    }
 
-	public void setPaymentProfile(PaymentProfile paymentProfile) {
-		this.paymentProfile = paymentProfile;
-	}
+    public void setPlanGroup(ParkingPlan planGroup) {
+        this.planGroup = planGroup;
+    }
 
-	public DateTime getPlanStartDate() {
-		return planStartDate;
-	}
+    public PaymentProfile getPaymentProfile() {
+        return paymentProfile;
+    }
 
-	public void setPlanStartDate(DateTime planStartDate) {
-		this.planStartDate = planStartDate;
-	}
+    public void setPaymentProfile(PaymentProfile paymentProfile) {
+        this.paymentProfile = paymentProfile;
+    }
 
-	public Double getPlanChargeAmount() {
-		return planChargeAmount;
-	}
+    public DateTime getPlanStartDate() {
+        return planStartDate;
+    }
 
-	public void setPlanChargeAmount(Double planChargeAmount) {
-		this.planChargeAmount = planChargeAmount;
-	}
+    public void setPlanStartDate(DateTime planStartDate) {
+        this.planStartDate = planStartDate;
+    }
 
-	public DateTime getPlanExpiryDate() {
-		return planExpiryDate;
-	}
+    public Double getPlanChargeAmount() {
+        return planChargeAmount;
+    }
 
-	public void setPlanExpiryDate(DateTime planExpiryDate) {
-		this.planExpiryDate = planExpiryDate;
-	}
+    public void setPlanChargeAmount(Double planChargeAmount) {
+        this.planChargeAmount = planChargeAmount;
+    }
 
-	public DateTime getCancel_request_date() {
-		return cancel_request_date;
-	}
+    public DateTime getPlanExpiryDate() {
+        return planExpiryDate;
+    }
 
-	public void setCancel_request_date(DateTime cancel_request_date) {
-		this.cancel_request_date = cancel_request_date;
-	}
+    public void setPlanExpiryDate(DateTime planExpiryDate) {
+        this.planExpiryDate = planExpiryDate;
+    }
 
-	public String getCancelRequestReason() {
-		return cancelRequestReason;
-	}
+    public DateTime getCancel_request_date() {
+        return cancel_request_date;
+    }
 
-	public void setCancelRequestReason(String cancelRequestReason) {
-		this.cancelRequestReason = cancelRequestReason;
-	}
+    public void setCancel_request_date(DateTime cancel_request_date) {
+        this.cancel_request_date = cancel_request_date;
+    }
 
-	public DateTime getCancelEffectiveDate() {
-		return cancelEffectiveDate;
-	}
+    public String getCancelRequestReason() {
+        return cancelRequestReason;
+    }
 
-	public void setCancelEffectiveDate(DateTime cancelEffectiveDate) {
-		this.cancelEffectiveDate = cancelEffectiveDate;
-	}
+    public void setCancelRequestReason(String cancelRequestReason) {
+        this.cancelRequestReason = cancelRequestReason;
+    }
 
-	public String getCancelHandledBy() {
-		return cancelHandledBy;
-	}
+    public DateTime getCancelEffectiveDate() {
+        return cancelEffectiveDate;
+    }
 
-	public void setCancelHandledBy(String cancelHandledBy) {
-		this.cancelHandledBy = cancelHandledBy;
-	}
+    public void setCancelEffectiveDate(DateTime cancelEffectiveDate) {
+        this.cancelEffectiveDate = cancelEffectiveDate;
+    }
 
-	public Double getCancelRefundAmount() {
-		return cancelRefundAmount;
-	}
+    public String getCancelHandledBy() {
+        return cancelHandledBy;
+    }
 
-	public void setCancelRefundAmount(Double cancelRefundAmount) {
-		this.cancelRefundAmount = cancelRefundAmount;
-	}
+    public void setCancelHandledBy(String cancelHandledBy) {
+        this.cancelHandledBy = cancelHandledBy;
+    }
 
-	public String getStripeId() {
-		return stripeId;
-	}
+    public Double getCancelRefundAmount() {
+        return cancelRefundAmount;
+    }
 
-	public void setStripeId(String stripeId) {
-		this.stripeId = stripeId;
-	}
+    public void setCancelRefundAmount(Double cancelRefundAmount) {
+        this.cancelRefundAmount = cancelRefundAmount;
+    }
 
-	
-	
-	
-	
+    public String getStripeId() {
+        return stripeId;
+    }
+
+    public void setStripeId(String stripeId) {
+        this.stripeId = stripeId;
+    }
+
+
 }

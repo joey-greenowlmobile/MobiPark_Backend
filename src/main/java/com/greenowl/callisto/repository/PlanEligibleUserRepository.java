@@ -1,21 +1,19 @@
 package com.greenowl.callisto.repository;
 
-import java.util.List;
-
+import com.greenowl.callisto.domain.PlanEligibleUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.greenowl.callisto.domain.PlanEligibleUser;
+import java.util.List;
 
-public interface PlanEligibleUserRepository extends JpaRepository<PlanEligibleUser, Long>{
+public interface PlanEligibleUserRepository extends JpaRepository<PlanEligibleUser, Long> {
 
-	
-	@Query("select u from PlanEligibleUser u where u.userEmail = ?1")
-	List<PlanEligibleUser> getEligibleUsersByUserEmail(String userEmail);
 
-	@Query("select u from PlanEligibleUser u where u.subscribed = true")
-	List<PlanEligibleUser> getSubscribedUsersByPlanId();
-	
+    @Query("select u from PlanEligibleUser u where u.userEmail = ?1")
+    List<PlanEligibleUser> getEligibleUsersByUserEmail(String userEmail);
 
-	
+    @Query("select u from PlanEligibleUser u where u.subscribed = true")
+    List<PlanEligibleUser> getSubscribedUsersByPlanId();
+
+
 }

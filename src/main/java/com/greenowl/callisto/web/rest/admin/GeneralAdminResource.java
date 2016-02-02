@@ -1,9 +1,9 @@
 package com.greenowl.callisto.web.rest.admin;
 
-import com.greenowl.callisto.service.config.ConfigService;
 import com.greenowl.callisto.domain.AppConfig;
 import com.greenowl.callisto.repository.AppConfigRepository;
 import com.greenowl.callisto.security.AuthoritiesConstants;
+import com.greenowl.callisto.service.config.ConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

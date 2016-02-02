@@ -13,8 +13,8 @@ public class UserFactory {
     /**
      * Create A new User Entity.
      */
-    public static User create(String login, String firstName, String lastName, String region,String licensePlate,
-    		String mobileNumber, String encryptedPassword, Set<Authority> authorities, String stripeToken) {
+    public static User create(String login, String firstName, String lastName, String region, String licensePlate,
+                              String mobileNumber, String encryptedPassword, Set<Authority> authorities, String stripeToken) {
         User newUser = new User();
         newUser.setLogin(login);
         // new user gets initially a generated password, to avoid having to pick a password

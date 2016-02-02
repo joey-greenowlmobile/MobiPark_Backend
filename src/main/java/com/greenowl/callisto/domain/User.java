@@ -21,6 +21,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Access(AccessType.PROPERTY)
     private Long id;
+
     @NotNull
     @Email
     @Size(min = 5, max = 255)
@@ -40,9 +41,10 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "last_name", length = 50)
     private String lastName;
 
-    @Size(min = 0 , max = 50)
+    @Size(min = 0, max = 50)
     @Column(name = "license_plate", length = 30, unique = true)
     private String licensePlate;
+
     @Size(min = 0, max = 20)
     @Column(name = "mobile_number", length = 30, unique = true)
     private String mobileNumber;
@@ -57,8 +59,8 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private Integer activationKey;
 
     private String region;
-    
-    @Column(name ="stripe_token")
+
+    @Column(name = "stripe_token")
     private String stripeToken;
     @JsonIgnore
     @OneToMany(mappedBy = "owner", targetEntity = Device.class, fetch = FetchType.LAZY)
@@ -129,14 +131,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
     }
 
     public String getLicensePlate() {
-		return licensePlate;
-	}
+        return licensePlate;
+    }
 
-	public void setLicensePlate(String licensePlate) {
-		this.licensePlate = licensePlate;
-	}
+    public void setLicensePlate(String licensePlate) {
+        this.licensePlate = licensePlate;
+    }
 
-	public String getMobileNumber() {
+    public String getMobileNumber() {
         return mobileNumber;
     }
 
@@ -191,32 +193,32 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
     }
-    
+
     public Set<PaymentProfile> getPaymentProfiles() {
-		return paymentProfiles;
-	}
-    
-	public Set<PlanSubscription> getPlanSubscriptions() {
-		return planSubscriptions;
-	}
+        return paymentProfiles;
+    }
 
-	public void setPlanSubscriptions(Set<PlanSubscription> planSubscriptions) {
-		this.planSubscriptions = planSubscriptions;
-	}
-    
-	public void setPaymentProfiles(Set<PaymentProfile> paymentProfiles) {
-		this.paymentProfiles = paymentProfiles;
-	}
+    public Set<PlanSubscription> getPlanSubscriptions() {
+        return planSubscriptions;
+    }
 
-	public String getStripeToken() {
-		return stripeToken;
-	}
+    public void setPlanSubscriptions(Set<PlanSubscription> planSubscriptions) {
+        this.planSubscriptions = planSubscriptions;
+    }
 
-	public void setStripeToken(String stripeToken) {
-		this.stripeToken = stripeToken;
-	}
+    public void setPaymentProfiles(Set<PaymentProfile> paymentProfiles) {
+        this.paymentProfiles = paymentProfiles;
+    }
 
-	@Override
+    public String getStripeToken() {
+        return stripeToken;
+    }
+
+    public void setStripeToken(String stripeToken) {
+        this.stripeToken = stripeToken;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -233,5 +235,4 @@ public class User extends AbstractAuditingEntity implements Serializable {
     }
 
 
-    
 }

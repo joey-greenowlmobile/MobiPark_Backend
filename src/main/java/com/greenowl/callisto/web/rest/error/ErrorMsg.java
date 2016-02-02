@@ -6,8 +6,6 @@ public class ErrorMsg {
 
     private String exception;
 
-
-
     public String getMsg() {
         return msg;
     }

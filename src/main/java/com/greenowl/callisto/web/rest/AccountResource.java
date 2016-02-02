@@ -29,15 +29,13 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.greenowl.callisto.exception.ErrorResponseFactory.*;
+import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -55,12 +53,12 @@ public class AccountResource {
     private static final String USER_NOT_REMOVED = "Unable to remove user.";
 
     private static final String USER_NOT_FOUND = "Unable to find user.";
-    
-    private static final String PHONE_NUM_TAKEN ="mobile phone number is already in use!";
-    
-    private static final String STRIPE_FAILED ="register with stripe failed!";
-    
-    private static final String PLAN_NOT_FOUND="Unable to find suitable plan.";
+
+    private static final String PHONE_NUM_TAKEN = "mobile phone number is already in use!";
+
+    private static final String STRIPE_FAILED = "register with stripe failed!";
+
+    private static final String PLAN_NOT_FOUND = "Unable to find suitable plan.";
 
     @Inject
     private UserRepository userRepository;
@@ -70,12 +68,13 @@ public class AccountResource {
 
     @Inject
     private UserService userService;
-    
+
     @Inject
     private EligiblePlanUserService eligiblePlanUserService;
-    
+
     @Inject
     private ParkingPlanService parkingPlanService;
+
     /**
      * POST  /register -> register the user.
      */
@@ -90,37 +89,37 @@ public class AccountResource {
             return new ResponseEntity<>(genericBadReq(USERNAME_TAKEN, "/register"),
                     BAD_REQUEST);
         }
-        User phoneuser =userRepository.findOneByMobileNumber(req.getMobileNumber());
-        if(phoneuser!=null){
+        User phoneuser = userRepository.findOneByMobileNumber(req.getMobileNumber());
+        if (phoneuser != null) {
             return new ResponseEntity<>(genericBadReq(PHONE_NUM_TAKEN, "/register"),
                     BAD_REQUEST);
         }
-        List<PlanEligibleUser> users =eligiblePlanUserService.getPlansByUserEmail(req.getEmail());
-        if (users.size()==0){
-        	  return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"),
-                      BAD_REQUEST);
-        }
-        String stripeToken=registrationService.stripeRegister(req);
-        if (stripeToken==null){
-        	return new ResponseEntity<>(genericBadReq(STRIPE_FAILED, "/register"),
+        List<PlanEligibleUser> users = eligiblePlanUserService.getPlansByUserEmail(req.getEmail());
+        if (users.size() == 0) {
+            return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"),
                     BAD_REQUEST);
         }
-        UserDTO dto = registrationService.register(req,stripeToken);
-    	List<ParkingPlanDTO> parkingPlanDTOs = new ArrayList<ParkingPlanDTO>();
-    	if (users.size()==1){
-    		ParkingPlanDTO parkingPlanDTO=parkingPlanService.createParkingPlanInformation(users.get(0).getPlanGroup());
-    		return new ResponseEntity<>(parkingPlanDTO,OK);
-    	}
-    	for(PlanEligibleUser user: users ) {
-    		ParkingPlan plan=user.getPlanGroup();
-    		if (plan!=null){
-    			parkingPlanDTOs.add(parkingPlanService.createParkingPlanInformation(plan));
-    		}
-    		
-    	}
-    	return new ResponseEntity<>(parkingPlanDTOs,OK);
-    }	
-    
+        String stripeToken = registrationService.stripeRegister(req);
+        if (stripeToken == null) {
+            return new ResponseEntity<>(genericBadReq(STRIPE_FAILED, "/register"),
+                    BAD_REQUEST);
+        }
+        UserDTO dto = registrationService.register(req, stripeToken);
+        List<ParkingPlanDTO> parkingPlanDTOs = new ArrayList<ParkingPlanDTO>();
+        if (users.size() == 1) {
+            ParkingPlanDTO parkingPlanDTO = parkingPlanService.createParkingPlanInformation(users.get(0).getPlanGroup());
+            return new ResponseEntity<>(parkingPlanDTO, OK);
+        }
+        for (PlanEligibleUser user : users) {
+            ParkingPlan plan = user.getPlanGroup();
+            if (plan != null) {
+                parkingPlanDTOs.add(parkingPlanService.createParkingPlanInformation(plan));
+            }
+
+        }
+        return new ResponseEntity<>(parkingPlanDTOs, OK);
+    }
+
 
     /**
      * GET  /account -> get the current user.

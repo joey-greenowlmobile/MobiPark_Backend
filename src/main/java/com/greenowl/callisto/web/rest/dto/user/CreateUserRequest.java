@@ -29,13 +29,13 @@ public class CreateUserRequest {
     public CreateUserRequest() {
     }
 
-    public CreateUserRequest(String email, String firstName, String lastName, String password ,String licensePlate, String mobileNumber) {
+    public CreateUserRequest(String email, String firstName, String lastName, String password, String licensePlate, String mobileNumber) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
-        this.licensePlate=licensePlate;
-        this.mobileNumber=mobileNumber;
+        this.licensePlate = licensePlate;
+        this.mobileNumber = mobileNumber;
     }
 
     public String getEmail() {
@@ -73,22 +73,22 @@ public class CreateUserRequest {
 
 
     public String getLicensePlate() {
-		return licensePlate;
-	}
+        return licensePlate;
+    }
 
-	public void setLicensePlate(String licensePlate) {
-		this.licensePlate = licensePlate;
-	}
+    public void setLicensePlate(String licensePlate) {
+        this.licensePlate = licensePlate;
+    }
 
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
 
-	public void setMobileNumber(String mobileNumber) {
-		this.mobileNumber = mobileNumber;
-	}
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
 
-	public String getPassword() {
+    public String getPassword() {
         return password;
     }
 

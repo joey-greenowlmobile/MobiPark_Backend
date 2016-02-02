@@ -1,245 +1,232 @@
 package com.greenowl.callisto.domain;
 
-import java.io.Serializable;
-
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
+import javax.persistence.*;
+import java.io.Serializable;
 
 
 @Entity
 @Table(name = "T_PARKING_SALES_ACTIVITY")
 public class ParkingSaleActivity extends AbstractAuditingEntity implements Serializable {
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Access(AccessType.PROPERTY)
     private Long id;
-	
-	@Column(name = "lot_id", nullable = false)
-	private Long lotId;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	private User activityHolder; 
 
-	
-	@Column(name = "user_email")
-	private String userEmail;
-	
-	@Column(name = "user_phone_number")
-	private String userPhoneNumber;
-	
-	@Column(name = "user_license_plate")
-	private String userLicensePlate;
-	
-	@Column(name = "plan_id")
-	private Long planId;
+    @Column(name = "lot_id", nullable = false)
+    private Long lotId;
 
-	@Column(name = "plan_name")
-	private String planName;
-	
-	@Column(name = "plan_subscription_date")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User activityHolder;
+
+
+    @Column(name = "user_email")
+    private String userEmail;
+
+    @Column(name = "user_phone_number")
+    private String userPhoneNumber;
+
+    @Column(name = "user_license_plate")
+    private String userLicensePlate;
+
+    @Column(name = "plan_id")
+    private Long planId;
+
+    @Column(name = "plan_name")
+    private String planName;
+
+    @Column(name = "plan_subscription_date")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime planSubscriptionDate;
-	
-	@Column(name = "plan_expiry_date")
+    private DateTime planSubscriptionDate;
+
+    @Column(name = "plan_expiry_date")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime planExpiryDate;
-	
+    private DateTime planExpiryDate;
 
-	@Column(name = "charge_amount")
-	private Double chargeAmount;
 
-	@Column(name = "service_amount")
-	private Double serviceAmount;
+    @Column(name = "charge_amount")
+    private Double chargeAmount;
 
-	@Column(name = "net_amount")
-	private Double netAmount;
-	
-	@Column(name = "pp_id")
-	private Long ppId;
-	
-	@Column(name = "entry_datetime")
+    @Column(name = "service_amount")
+    private Double serviceAmount;
+
+    @Column(name = "net_amount")
+    private Double netAmount;
+
+    @Column(name = "pp_id")
+    private Long ppId;
+
+    @Column(name = "entry_datetime")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime entryDatetime;
-	
-	@Column(name = "exit_datetime")
+    private DateTime entryDatetime;
+
+    @Column(name = "exit_datetime")
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	private DateTime exitDatetime;
-	
-	@Column(name = "parking_status")
-	private String parkingStatus;
-	
-	@Column(name = "exception_flag")
-	private String exceptionFlag;
-	
-	@Column(name = "invoice_id")
-	private String invoiceId;
+    private DateTime exitDatetime;
 
-	public Long getId() {
-		return id;
-	}
+    @Column(name = "parking_status")
+    private String parkingStatus;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Column(name = "exception_flag")
+    private String exceptionFlag;
 
-	public Long getLotId() {
-		return lotId;
-	}
+    @Column(name = "invoice_id")
+    private String invoiceId;
 
-	public void setLotId(Long lotId) {
-		this.lotId = lotId;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public User getActivityHolder() {
-		return activityHolder;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setActivityHolder(User activityHolder) {
-		this.activityHolder = activityHolder;
-	}
+    public Long getLotId() {
+        return lotId;
+    }
 
-	public String getUserEmail() {
-		return userEmail;
-	}
+    public void setLotId(Long lotId) {
+        this.lotId = lotId;
+    }
 
-	public void setUserEmail(String userEmail) {
-		this.userEmail = userEmail;
-	}
+    public User getActivityHolder() {
+        return activityHolder;
+    }
 
-	public String getUserPhoneNumber() {
-		return userPhoneNumber;
-	}
+    public void setActivityHolder(User activityHolder) {
+        this.activityHolder = activityHolder;
+    }
 
-	public void setUserPhoneNumber(String userPhoneNumber) {
-		this.userPhoneNumber = userPhoneNumber;
-	}
+    public String getUserEmail() {
+        return userEmail;
+    }
 
-	public String getUserLicensePlate() {
-		return userLicensePlate;
-	}
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
 
-	public void setUserLicensePlate(String userLicensePlate) {
-		this.userLicensePlate = userLicensePlate;
-	}
+    public String getUserPhoneNumber() {
+        return userPhoneNumber;
+    }
 
-	public Long getPlanId() {
-		return planId;
-	}
+    public void setUserPhoneNumber(String userPhoneNumber) {
+        this.userPhoneNumber = userPhoneNumber;
+    }
 
-	public void setPlanId(Long planId) {
-		this.planId = planId;
-	}
+    public String getUserLicensePlate() {
+        return userLicensePlate;
+    }
 
-	public String getPlanName() {
-		return planName;
-	}
+    public void setUserLicensePlate(String userLicensePlate) {
+        this.userLicensePlate = userLicensePlate;
+    }
 
-	public void setPlanName(String planName) {
-		this.planName = planName;
-	}
+    public Long getPlanId() {
+        return planId;
+    }
 
-	public DateTime getPlanSubscriptionDate() {
-		return planSubscriptionDate;
-	}
+    public void setPlanId(Long planId) {
+        this.planId = planId;
+    }
 
-	public void setPlanSubscriptionDate(DateTime planSubscriptionDate) {
-		this.planSubscriptionDate = planSubscriptionDate;
-	}
+    public String getPlanName() {
+        return planName;
+    }
 
-	public DateTime getPlanExpiryDate() {
-		return planExpiryDate;
-	}
+    public void setPlanName(String planName) {
+        this.planName = planName;
+    }
 
-	public void setPlan_ExpiryDate(DateTime planExpiryDate) {
-		this.planExpiryDate = planExpiryDate;
-	}
+    public DateTime getPlanSubscriptionDate() {
+        return planSubscriptionDate;
+    }
 
-	public Double getChargeAmount() {
-		return chargeAmount;
-	}
+    public void setPlanSubscriptionDate(DateTime planSubscriptionDate) {
+        this.planSubscriptionDate = planSubscriptionDate;
+    }
 
-	public void setChargeAmount(Double chargeAmount) {
-		this.chargeAmount = chargeAmount;
-	}
+    public DateTime getPlanExpiryDate() {
+        return planExpiryDate;
+    }
 
-	public Double getServiceAmount() {
-		return serviceAmount;
-	}
+    public void setPlan_ExpiryDate(DateTime planExpiryDate) {
+        this.planExpiryDate = planExpiryDate;
+    }
 
-	public void setServiceAmount(Double serviceAmount) {
-		this.serviceAmount = serviceAmount;
-	}
+    public Double getChargeAmount() {
+        return chargeAmount;
+    }
 
-	public Double getNetAmount() {
-		return netAmount;
-	}
+    public void setChargeAmount(Double chargeAmount) {
+        this.chargeAmount = chargeAmount;
+    }
 
-	public void setNetAmount(Double netAmount) {
-		this.netAmount = netAmount;
-	}
+    public Double getServiceAmount() {
+        return serviceAmount;
+    }
 
-	public Long getPpId() {
-		return ppId;
-	}
+    public void setServiceAmount(Double serviceAmount) {
+        this.serviceAmount = serviceAmount;
+    }
 
-	public void setPpId(Long ppId) {
-		this.ppId = ppId;
-	}
+    public Double getNetAmount() {
+        return netAmount;
+    }
 
-	public DateTime getEntryDatetime() {
-		return entryDatetime;
-	}
+    public void setNetAmount(Double netAmount) {
+        this.netAmount = netAmount;
+    }
 
-	public void setEntryDatetime(DateTime entryDatetime) {
-		this.entryDatetime = entryDatetime;
-	}
+    public Long getPpId() {
+        return ppId;
+    }
 
-	public DateTime getExitDatetime() {
-		return exitDatetime;
-	}
+    public void setPpId(Long ppId) {
+        this.ppId = ppId;
+    }
 
-	public void setExitDatetime(DateTime exitDatetime) {
-		this.exitDatetime = exitDatetime;
-	}
+    public DateTime getEntryDatetime() {
+        return entryDatetime;
+    }
 
-	public String getParkingStatus() {
-		return parkingStatus;
-	}
+    public void setEntryDatetime(DateTime entryDatetime) {
+        this.entryDatetime = entryDatetime;
+    }
 
-	public void setParkingStatus(String parkingStatus) {
-		this.parkingStatus = parkingStatus;
-	}
+    public DateTime getExitDatetime() {
+        return exitDatetime;
+    }
 
-	public String getExceptionFlag() {
-		return exceptionFlag;
-	}
+    public void setExitDatetime(DateTime exitDatetime) {
+        this.exitDatetime = exitDatetime;
+    }
 
-	public void setExceptionFlag(String exceptionFlag) {
-		this.exceptionFlag = exceptionFlag;
-	}
+    public String getParkingStatus() {
+        return parkingStatus;
+    }
 
-	public String getInvoiceId() {
-		return invoiceId;
-	}
+    public void setParkingStatus(String parkingStatus) {
+        this.parkingStatus = parkingStatus;
+    }
 
-	public void setInvoiceId(String invoiceId) {
-		this.invoiceId = invoiceId;
-	}
-	
-	
-	
+    public String getExceptionFlag() {
+        return exceptionFlag;
+    }
+
+    public void setExceptionFlag(String exceptionFlag) {
+        this.exceptionFlag = exceptionFlag;
+    }
+
+    public String getInvoiceId() {
+        return invoiceId;
+    }
+
+    public void setInvoiceId(String invoiceId) {
+        this.invoiceId = invoiceId;
+    }
+
+
 }
