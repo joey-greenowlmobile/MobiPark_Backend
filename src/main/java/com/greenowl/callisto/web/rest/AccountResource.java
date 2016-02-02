@@ -89,23 +89,27 @@ public class AccountResource {
             return new ResponseEntity<>(genericBadReq(USERNAME_TAKEN, "/register"),
                     BAD_REQUEST);
         }
-        User dbUser = userRepository.findOneByMobileNumber(req.getMobileNumber());
-        if (dbUser != null) {
+        Optional<User> optUSer = userRepository.findOneByMobileNumber(req.getMobileNumber());
+        if (!optUSer.isPresent()) {
             return new ResponseEntity<>(genericBadReq(PHONE_NUM_TAKEN, "/register"),
                     BAD_REQUEST);
         }
+        // Check for plan eligibility
         List<PlanEligibleUser> users = eligiblePlanUserService.getPlansByUserEmail(req.getEmail());
         if (users.size() == 0) {
             return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"),
                     BAD_REQUEST);
         }
+
         String stripeToken = registrationService.stripeRegister(req);
         if (stripeToken == null) {
             return new ResponseEntity<>(genericBadReq(STRIPE_FAILED, "/register"),
                     BAD_REQUEST);
         }
+
         UserDTO dto = registrationService.register(req, stripeToken);
-        List<ParkingPlanDTO> parkingPlanDTOs = new ArrayList<ParkingPlanDTO>();
+
+        List<ParkingPlanDTO> parkingPlanDTOs = new ArrayList<>();
         if (users.size() == 1) {
             ParkingPlanDTO parkingPlanDTO = parkingPlanService.createParkingPlanInformation(users.get(0).getPlanGroup());
             return new ResponseEntity<>(parkingPlanDTO, OK);

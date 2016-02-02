@@ -6,6 +6,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "T_PARKING_PLAN_ELIGIBLE_USER")
 public class PlanEligibleUser extends AbstractAuditingEntity implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Access(AccessType.PROPERTY)

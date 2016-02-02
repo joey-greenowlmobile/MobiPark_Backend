@@ -45,7 +45,6 @@ public class EligiblePlanUserService {
 
     public List<PlanEligibleUser> getPlansByUserEmail(String userEmail) {
         return planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
-
     }
 
     public String subscribePlan(String userEmail, Long planId) {
