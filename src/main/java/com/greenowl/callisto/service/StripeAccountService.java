@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Service
@@ -31,16 +32,11 @@ public class StripeAccountService {
     private UserRepository userRepository;
 
     public PaymentProfile getPaymentProfileById(Long id) {
-
         return paymentProfileRepository.getPaymentProfileById(id);
     }
 
-    public List<PaymentProfile> getPaymentProfileByUser(User user) {
-        return paymentProfileRepository.getPaymentProfilesByUser(user);
-    }
-
     public PaymentProfileDTO registerPaymentProfile(CreatePaymentProfileRequest req, String email, String cardToken) {
-        return createPaymentInformation(req.getCard(), req.getCreated(), req.getId(), req.getLivemode(), req.getUsed(), email, cardToken);
+        return createPaymentInformation(req.getCard(), req.getCreated(), req.getId(), req.getLiveMode(), req.getUsed(), email, cardToken);
     }
 
     private PaymentProfileDTO createPaymentInformation(CardProfile card, String created, String id, Boolean livemode, Boolean used, String login, String cardToken) {
@@ -52,17 +48,12 @@ public class StripeAccountService {
             return PaymentProfileUtil.getPaymentProfileDTO(savedProfile);
         }
         return null;
-
-
     }
 
     public List<PaymentProfileDTO> getAllPaymentProfileDTOs(User user) {
-        List<PaymentProfileDTO> paymentProfileDTOs = new ArrayList<PaymentProfileDTO>();
+        List<PaymentProfileDTO> paymentProfileDTOs = new ArrayList<>();
         List<PaymentProfile> paymentProfiles = paymentProfileRepository.getPaymentProfilesByUser(user);
-        for (PaymentProfile paymentProfile : paymentProfiles) {
-            paymentProfileDTOs.add(PaymentProfileUtil.getPaymentProfileDTO(paymentProfile));
-
-        }
+        paymentProfileDTOs.addAll(paymentProfiles.stream().map(PaymentProfileUtil::getPaymentProfileDTO).collect(Collectors.toList()));
         return paymentProfileDTOs;
     }
 

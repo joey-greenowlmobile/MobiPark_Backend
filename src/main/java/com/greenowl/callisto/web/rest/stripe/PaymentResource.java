@@ -63,7 +63,7 @@ public class PaymentResource {
 
         User user = userService.getCurrentUser();
         Customer customer = Customer.retrieve(user.getStripeToken());
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("source", req.getToken().getId());
         String cardToken = customer.createCard(params).getId();
         PaymentProfileDTO paymentProfileDTO = stripeAccountService.registerPaymentProfile(req.getToken(), user.getLogin(), cardToken);
@@ -75,7 +75,6 @@ public class PaymentResource {
                 if (salesActivityDTO != null) {
                     return new ResponseEntity<>(OK);
                 } else {
-
                     LOG.error("Failed at adding to the sales activity table");
                 }
             }
@@ -108,6 +107,7 @@ public class PaymentResource {
         System.out.println(user.getStripeToken());
 
         PaymentProfile paymentProfile = stripeAccountService.getPaymentProfileById(id);
+
         if (paymentProfile == null) {
             return new ResponseEntity<>(genericBadReq("Can't find payment profile.", "/user/payment"), HttpStatus.NOT_FOUND);
         }

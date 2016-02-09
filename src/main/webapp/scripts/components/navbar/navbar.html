@@ -11,11 +11,32 @@
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse" ng-switch="isAuthenticated()">
             <ul class="nav navbar-nav nav-pills navbar-right">
+
                 <li ui-sref-active="active">
                     <a ui-sref="home">
                         <span class="glyphicon glyphicon-home"></span>
                         <span>Home</span>
                     </a>
+                </li>
+
+                <li ng-class="{active: $state.includes('operation')}" ng-switch-when="true"
+                    ng-show="isInRole('ROLE_OPERATOR')"
+                    class="dropdown pointer">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                <span>
+                                    <span class="glyphicon glyphicon-signal"></span>
+                                    <span class="hidden-tablet">Operations</span>
+                                    <b class="caret"></b>
+                                </span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li ui-sref-active="active"><a ui-sref="transactions"><span
+                                class="glyphicon glyphicon-list-alt"></span>
+                            &#xA0;<span>Transactions</span></a></li>
+                        <li ui-sref-active="active"><a ui-sref="sales"><span
+                                class="glyphicon  glyphicon-briefcase"></span>
+                            &#xA0;<span>Sales</span></a></li>
+                    </ul>
                 </li>
                 <li ng-class="{active: $state.includes('account')}" class="dropdown pointer">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="">

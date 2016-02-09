@@ -1,5 +1,8 @@
 package com.greenowl.callisto.web.rest.dto.payment;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CreatePaymentProfileRequest {
 
     private CardProfile card;
@@ -8,7 +11,8 @@ public class CreatePaymentProfileRequest {
 
     private String id;
 
-    private Boolean livemode;
+    @JsonProperty("livemode")
+    private Boolean liveMode;
 
     private Boolean used;
 
@@ -16,11 +20,11 @@ public class CreatePaymentProfileRequest {
 
     }
 
-    public CreatePaymentProfileRequest(CardProfile card, String created, String id, Boolean livemode, Boolean used) {
+    public CreatePaymentProfileRequest(CardProfile card, String created, String id, Boolean liveMode, Boolean used) {
         this.card = card;
         this.created = created;
         this.id = id;
-        this.livemode = livemode;
+        this.liveMode = liveMode;
         this.used = used;
     }
 
@@ -49,12 +53,12 @@ public class CreatePaymentProfileRequest {
         this.id = id;
     }
 
-    public Boolean getLivemode() {
-        return livemode;
+    public Boolean getLiveMode() {
+        return liveMode;
     }
 
-    public void setLivemode(Boolean livemode) {
-        this.livemode = livemode;
+    public void setLiveMode(Boolean liveMode) {
+        this.liveMode = liveMode;
     }
 
     public Boolean getUsed() {
@@ -71,7 +75,7 @@ public class CreatePaymentProfileRequest {
                 ", card='" + card.toString() + '\'' +
                 ", created='" + created + '\'' +
                 ", id='" + id + '\'' +
-                ", livemode='" + livemode + '\'' +
+                ", liveMode='" + liveMode + '\'' +
                 ", used='" + used +
                 '}';
     }
