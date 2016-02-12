@@ -18,9 +18,11 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.sql.Timestamp;
 
 @Service
 public class SalesActivityService {
@@ -62,7 +64,7 @@ public class SalesActivityService {
         newActivity.setUserEmail(user.getLogin());
         newActivity.setUserPhoneNumber(user.getMobileNumber());
         newActivity.setUserLicensePlate(user.getLicensePlate());
-        newActivity.setPlanSubscriptionDate(plan.getPlanStartDate());
+        newActivity.setPlanSubscriptionDate(new java.sql.Timestamp(plan.getPlanStartDate().getMillis()));
         Double totalCharge = plan.getPlanChargeAmount();
         newActivity.setChargeAmount(totalCharge);
         newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
@@ -88,14 +90,14 @@ public class SalesActivityService {
         newActivity.setChargeAmount(totalCharge);
         newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
         newActivity.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
-        newActivity.setEntryDatetime(DateTime.now());
+        newActivity.setEntryDatetime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()));
         newActivity.setParkingStatus("Parked");
         salesActivityRepository.save(newActivity);
         SalesActivityDTO salesActivityDTO = contructDTO(newActivity, user);
         return salesActivityDTO;
     }
 
-    public List<ParkingSaleActivity> findAllActivityBetween(DateTime startTime, DateTime endTime) {
+    public List<ParkingSaleActivity> findAllActivityBetween(Timestamp startTime, Timestamp endTime) {
         return salesActivityRepository.getParkingSaleActivityBetween(startTime, endTime);
     }
 
@@ -104,6 +106,7 @@ public class SalesActivityService {
                 activity.getPlanSubscriptionDate(), activity.getPlanExpiryDate(), activity.getChargeAmount(), activity.getServiceAmount(),
                 activity.getNetAmount(), activity.getPpId(), activity.getEntryDatetime(), activity.getEntryDatetime(),
                 activity.getParkingStatus(), activity.getExceptionFlag(), activity.getInvoiceId());
+        salesActivityDTO.setGateResponse(activity.getGateResponse());
         return salesActivityDTO;
     }
 
@@ -156,5 +159,22 @@ public class SalesActivityService {
             }
         }
         return filteredList;
+    }
+    
+    
+    public ParkingSaleActivity getParkingSaleActivityById(long id){
+    	return salesActivityRepository.getParkingSaleActivityById(id);        	
+    }
+    
+    public void updateParkingStatus(String parkingStatus, long id){
+    	salesActivityRepository.setParkingStatusById(parkingStatus, id);
+    }
+    
+    public void updateGateResponse(String gateResponse, long id){
+    	salesActivityRepository.setGateResponse(gateResponse, id);
+    }
+    
+    public void updateExitTime(java.sql.Timestamp timestamp, long id){
+    	salesActivityRepository.setExitTime(timestamp, id);
     }
 }

@@ -22,4 +22,12 @@ public final class Constants {
     
     public static final String RUNTIME_CONFIG_FILE_PATH = "config/config.json";
     public static final Double SERVICE_FEES_PERCENTAGE = 0.2;
+    
+    public static final int  ENTER_GATE = 1;
+    
+    public static final String PARKING_STATUS_PENDING = "PENDING";
+    public static final String PARKING_STATUS_IN_FLIGHT = "IN_FLIGHT";
+    public static final String PARKING_STATUS_EXCEPTION = "EXCEPTION";
+    public static final String PARKING_STATUS_COMPLETED = "COMPLETED";
+    
 }

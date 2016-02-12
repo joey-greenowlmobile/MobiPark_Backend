@@ -18,6 +18,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -55,10 +56,15 @@ public class SalesActivityResource {
                 return new ResponseEntity<>(genericBadReq("Wrong date format", "/parking"),
                         BAD_REQUEST);
             }
-            DateTime dateTime = new DateTime(date);
-            DateTime startOfTheDay = dateTime.withTimeAtStartOfDay();
-            DateTime endOfTheDay = dateTime.plusDays(1).withTimeAtStartOfDay();
-            parkingSaleActivities = salesActivityService.findAllActivityBetween(startOfTheDay, endOfTheDay);
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.setTime(date);
+            calendar1.set(Calendar.HOUR_OF_DAY, 0);
+            calendar1.set(Calendar.MINUTE, 0);
+            calendar1.set(Calendar.SECOND, 0);
+            Calendar calendar2 = Calendar.getInstance();
+            calendar2.setTime(calendar1.getTime());
+            calendar2.add(Calendar.DAY_OF_YEAR, 1);
+            parkingSaleActivities = salesActivityService.findAllActivityBetween(new java.sql.Timestamp(calendar1.getTimeInMillis()), new java.sql.Timestamp(calendar2.getTimeInMillis()));
         }
 
         List<SalesActivityDTO> salesActivityDTOs = new ArrayList<SalesActivityDTO>();

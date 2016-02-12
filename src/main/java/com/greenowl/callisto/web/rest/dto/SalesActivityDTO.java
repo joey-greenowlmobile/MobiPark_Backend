@@ -2,7 +2,8 @@ package com.greenowl.callisto.web.rest.dto;
 
 
 import com.greenowl.callisto.domain.User;
-import org.joda.time.DateTime;
+import java.util.Date;
+import java.sql.Timestamp;
 
 public class SalesActivityDTO {
 
@@ -22,9 +23,9 @@ public class SalesActivityDTO {
 
     private String planName;
 
-    private DateTime planSubscriptionDate;
+    private Date planSubscriptionDate;
 
-    private DateTime planExpiryDate;
+    private Date planExpiryDate;
 
     private Double chargeAmount;
 
@@ -34,22 +35,32 @@ public class SalesActivityDTO {
 
     private Long ppId;
 
-    private DateTime entryDateTime;
+    private Date entryDateTime;
 
-    private DateTime exitDateTime;
+    private Date exitDateTime;
 
     private String parkingStatus;
 
     private String exceptionFlag;
 
     private String invoiceId;
+    
+    private String gateResponse;
 
-    public SalesActivityDTO() {
+    public String getGateResponse() {
+		return gateResponse;
+	}
+
+	public void setGateResponse(String gateResponse) {
+		this.gateResponse = gateResponse;
+	}
+
+	public SalesActivityDTO() {
     }
 
-    public SalesActivityDTO(Long id, Long lotId, User user, Long planId, DateTime planSubscriptionDate,
-                            DateTime planExpiryDate, Double chargeAmount, Double serviceAmount,
-                            Double netAmount, Long ppId, DateTime entryDateTime, DateTime exitDateTime, String parkingStatus,
+    public SalesActivityDTO(Long id, Long lotId, User user, Long planId, Timestamp planSubscriptionDate,
+                            Timestamp planExpiryDate, Double chargeAmount, Double serviceAmount,
+                            Double netAmount, Long ppId, Timestamp entryDateTime, Timestamp exitDateTime, String parkingStatus,
                             String exceptionFlag, String invoiceId) {
         this.id = id;
         this.lotId = lotId;
@@ -58,14 +69,22 @@ public class SalesActivityDTO {
         this.userPhoneNumber = user.getMobileNumber();
         this.userLicensePlate = user.getLicensePlate();
         this.planId = planId;
-        this.planSubscriptionDate = planSubscriptionDate;
-        this.planExpiryDate = planExpiryDate;
+        if(planSubscriptionDate!=null){
+        	this.planSubscriptionDate = new Date(planSubscriptionDate.getTime());
+        }
+        if(planExpiryDate!=null){
+        	this.planExpiryDate = new Date(planExpiryDate.getTime());
+        }
         this.chargeAmount = chargeAmount;
         this.serviceAmount = serviceAmount;
         this.netAmount = netAmount;
         this.ppId = ppId;
-        this.entryDateTime = entryDateTime;
-        this.exitDateTime = exitDateTime;
+        if(entryDateTime!=null){
+        	this.entryDateTime = new Date(entryDateTime.getTime());
+        }
+        if(exitDateTime!=null){
+        	this.exitDateTime = new Date(exitDateTime.getTime());
+        }
         this.parkingStatus = parkingStatus;
         this.exceptionFlag = exceptionFlag;
         this.invoiceId = invoiceId;
@@ -135,19 +154,19 @@ public class SalesActivityDTO {
         this.planName = planName;
     }
 
-    public DateTime getPlanSubscriptionDate() {
+    public Date getPlanSubscriptionDate() {
         return planSubscriptionDate;
     }
 
-    public void setPlanSubscriptionDate(DateTime planSubscriptionDate) {
+    public void setPlanSubscriptionDate(Date planSubscriptionDate) {
         this.planSubscriptionDate = planSubscriptionDate;
     }
 
-    public DateTime getPlanExpiryDate() {
+    public Date getPlanExpiryDate() {
         return planExpiryDate;
     }
 
-    public void setPlanExpiryDate(DateTime planExpiryDate) {
+    public void setPlanExpiryDate(Date planExpiryDate) {
         this.planExpiryDate = planExpiryDate;
     }
 
@@ -183,19 +202,19 @@ public class SalesActivityDTO {
         this.ppId = ppId;
     }
 
-    public DateTime getEntryDateTime() {
+    public Date getEntryDateTime() {
         return entryDateTime;
     }
 
-    public void setEntryDateTime(DateTime entryDateTime) {
+    public void setEntryDateTime(Date entryDateTime) {
         this.entryDateTime = entryDateTime;
     }
 
-    public DateTime getExitDateTime() {
+    public Date getExitDateTime() {
         return exitDateTime;
     }
 
-    public void setExitDateTime(DateTime exitDateTime) {
+    public void setExitDateTime(Date exitDateTime) {
         this.exitDateTime = exitDateTime;
     }
 
