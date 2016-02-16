@@ -25,6 +25,9 @@ import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
 import com.greenowlmobile.parkgateclient.parkgateCmdClient;
+import javax.inject.Inject;
+import org.springframework.transaction.annotation.Transactional;
+import javax.annotation.security.RolesAllowed;
 
 
 @RestController
