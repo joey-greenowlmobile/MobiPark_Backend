@@ -91,13 +91,13 @@ public class SalesActivityService {
         newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
         newActivity.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
         newActivity.setEntryDatetime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()));
-        newActivity.setParkingStatus("Parked");
+        newActivity.setParkingStatus(Constants.PARKING_STATUS_PARKING_START);
         salesActivityRepository.save(newActivity);
         SalesActivityDTO salesActivityDTO = contructDTO(newActivity, user);
         return salesActivityDTO;
     }
 
-    public List<ParkingSaleActivity> findAllActivityBetween(Timestamp startTime, Timestamp endTime) {
+    public List<ParkingSaleActivity> findAllActivityBetween(DateTime startTime, DateTime endTime) {
         return salesActivityRepository.getParkingSaleActivityBetween(startTime, endTime);
     }
 
@@ -121,45 +121,40 @@ public class SalesActivityService {
         return inFlightActivities;
     }
 
-    public List<ParkingSaleActivity> filter(List<ParkingSaleActivity> parkingSaleActivities, Boolean sale,
-                                            Boolean record, Boolean inFlight) {
-        List<ParkingSaleActivity> filteredList = new ArrayList<ParkingSaleActivity>();
-        for (ParkingSaleActivity activity : parkingSaleActivities) {
-            if (inFlight == true) {
-                if (activity.getEntryDatetime() != null & activity.getExitDatetime() == null) {
-                    filteredList.add(activity);
-                }
-                break;
-            }
-            if (sale == true) {
-
-                if (record == true) {
-                    if (activity.getEntryDatetime() != null && activity.getChargeAmount() != null) {
-                        filteredList.add(activity);
-                    } else {
-                        break;
-                    }
-                } else {
-                    if (activity.getChargeAmount() > 0) {
-                        filteredList.add(activity);
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                if (record == true) {
-                    if (activity.getEntryDatetime() != null) {
-                        filteredList.add(activity);
-                    } else {
-                        break;
-                    }
-                } else {
-                    filteredList.add(activity);
-                }
-            }
-        }
-        return filteredList;
-    }
+    public List<ParkingSaleActivity> filter(List<ParkingSaleActivity> parkingSaleActivities, String type) {
+    	List<ParkingSaleActivity> filteredList =new ArrayList<ParkingSaleActivity>();
+    	
+    	for (ParkingSaleActivity activity: parkingSaleActivities){
+    	switch(type.toLowerCase()){
+    		case "all": 		filteredList.add(activity) ;
+    							break;
+    		case "sales": 		if(activity.getChargeAmount()!=null && activity.getChargeAmount()!=0){
+    								filteredList.add(activity);
+    							}
+    							break;
+    		case "inflight": 	if (activity.getParkingStatus()!=null){
+    								if (activity.getParkingStatus().equals("IN_FLIGHT")){
+    									filteredList.add(activity);
+    								}
+    							}	
+    							break;
+    		case "park":		if (activity.getEntryDatetime()!=null){
+    								filteredList.add(activity);
+    							}
+    							break;
+    		case "exception": 	if (activity.getParkingStatus()!=null){
+    								if (activity.getParkingStatus().equals("EXCEPTION")){
+    									filteredList.add(activity);
+    								}
+    							}
+    							break;
+    		default:			break;
+    	}
+    	}
+    	return filteredList;
+    	}
+    	
+        
     
     
     public ParkingSaleActivity getParkingSaleActivityById(long id){

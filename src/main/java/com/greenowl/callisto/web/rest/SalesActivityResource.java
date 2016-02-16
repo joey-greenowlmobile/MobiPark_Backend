@@ -42,47 +42,48 @@ public class SalesActivityResource {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-    public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion, @RequestParam(defaultValue = "all") final String type, @RequestParam final String day,
-                                        @RequestParam final Boolean sale, @RequestParam final Boolean record, @RequestParam final Boolean inFlight) {
+    public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion, @RequestParam(defaultValue = "all") final String type, @RequestParam final String startDay,@RequestParam final String endDay) {
         List<ParkingSaleActivity> parkingSaleActivities = new ArrayList<ParkingSaleActivity>();
         if (type.equals("all")) {
             parkingSaleActivities = salesActivityRepository.findAll();
         } else {
-            Date date = null;
-            DateFormat df = new SimpleDateFormat("yyyy-mm-dd");
+            Date startDate = null;
+            Date endDate = null;
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             try {
-                date = df.parse(day);
+            	startDate = df.parse(startDay);
+            	System.out.println(startDate.toString());
+            	endDate = df.parse(endDay);
+
+            	System.out.println(endDate.toString());
             } catch (ParseException e) {
                 return new ResponseEntity<>(genericBadReq("Wrong date format", "/parking"),
                         BAD_REQUEST);
             }
             Calendar calendar1 = Calendar.getInstance();
-            calendar1.setTime(date);
+            calendar1.setTime(startDate);
             calendar1.set(Calendar.HOUR_OF_DAY, 0);
             calendar1.set(Calendar.MINUTE, 0);
             calendar1.set(Calendar.SECOND, 0);
             Calendar calendar2 = Calendar.getInstance();
-            calendar2.setTime(calendar1.getTime());
+            calendar2.setTime(endDate);
+
+            calendar2.set(Calendar.HOUR_OF_DAY, 0);
+            calendar2.set(Calendar.MINUTE, 0);
+            calendar2.set(Calendar.SECOND, 0);
             calendar2.add(Calendar.DAY_OF_YEAR, 1);
-            parkingSaleActivities = salesActivityService.findAllActivityBetween(new java.sql.Timestamp(calendar1.getTimeInMillis()), new java.sql.Timestamp(calendar2.getTimeInMillis()));
+            System.out.println(calendar2.getTime());
+            parkingSaleActivities = salesActivityService.findAllActivityBetween(new DateTime(calendar1.getTime()),new DateTime(calendar2.getTime()));
         }
 
         List<SalesActivityDTO> salesActivityDTOs = new ArrayList<SalesActivityDTO>();
-        List<ParkingSaleActivity> filteredParkingSaleActivities = salesActivityService.filter(parkingSaleActivities, sale, record, inFlight);
-        if (!inFlight) {
-            for (ParkingSaleActivity parkingSaleActivity : filteredParkingSaleActivities) {
-                salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity, parkingSaleActivity.getActivityHolder()));
-            }
-            return new ResponseEntity<>(salesActivityDTOs, OK);
-        } else {
-            List<UserDTO> userDTOs = new ArrayList<UserDTO>();
-            for (ParkingSaleActivity parkingSaleActivity : filteredParkingSaleActivities) {
-                UserDTO userDTO = UserUtil.getUserDTO(userRepository.findSingleUserByLogin(parkingSaleActivity.getUserEmail()));
-                userDTOs.add(userDTO);
-            }
-
-            return new ResponseEntity<>(userDTOs, OK);
+        List<ParkingSaleActivity> filteredParkingSaleActivities = salesActivityService.filter(parkingSaleActivities, type);
+     
+        for (ParkingSaleActivity parkingSaleActivity : filteredParkingSaleActivities) {
+        	salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity, parkingSaleActivity.getActivityHolder()));
         }
+        return new ResponseEntity<>(salesActivityDTOs, OK);
+     
     }
 
 }

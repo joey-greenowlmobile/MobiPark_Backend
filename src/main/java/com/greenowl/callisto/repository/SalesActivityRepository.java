@@ -3,6 +3,8 @@ package com.greenowl.callisto.repository;
 import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.domain.User;
 import java.sql.Timestamp;
+
+import org.joda.time.DateTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
@@ -16,7 +18,7 @@ public interface SalesActivityRepository extends JpaRepository<ParkingSaleActivi
     ParkingSaleActivity getParkingSaleActivityById(Long id);
 
     @Query("select u from ParkingSaleActivity u where u.createdDate > ?1 and u.createdDate <?2")
-    List<ParkingSaleActivity> getParkingSaleActivityBetween(Timestamp startTime, Timestamp endTime);
+    List<ParkingSaleActivity> getParkingSaleActivityBetween(DateTime startTime, DateTime endTime);
 
     @Query("select u from ParkingSaleActivity u where u.activityHolder = ?1")
     List<ParkingSaleActivity> getParkingSaleActivitiesByUser(User activityHolder);

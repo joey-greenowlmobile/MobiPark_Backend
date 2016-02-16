@@ -90,7 +90,7 @@ public class AccountResource {
                     BAD_REQUEST);
         }
         Optional<User> optUSer = userRepository.findOneByMobileNumber(req.getMobileNumber());
-        if (!optUSer.isPresent()) {
+        if (optUSer.isPresent()) {
             return new ResponseEntity<>(genericBadReq(PHONE_NUM_TAKEN, "/register"),
                     BAD_REQUEST);
         }

@@ -76,7 +76,8 @@ public class GateResource {
 	                		ticketStatusService.createParkingValTicketStatus(pvts);
 	                		return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
 	                	}
-	                	else if(result==null || result.startsWith("ERROR")){    		
+	                	else if(result==null || result.startsWith("ERROR")){    
+	                		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, salesActivityDTO.getId());
 	                		return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate.", "/gate"),
 	                				org.springframework.http.HttpStatus.BAD_REQUEST);
 	                	}          	    
@@ -116,7 +117,7 @@ public class GateResource {
         ParkingSaleActivity parkingSaleActivity = salesActivityService.findInFlightActivityByUser(user).get(0);
         salesActivityService.updateExitTime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()), parkingSaleActivity.getId());      
         //closeGate Function
-        salesActivityService.updateParkingStatus("Finished parking", parkingSaleActivity.getId());
+        salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_COMPLETED, parkingSaleActivity.getId());
         SalesActivityDTO salesActivityDTO = salesActivityService.contructDTO(parkingSaleActivity, user);
         return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
     }
