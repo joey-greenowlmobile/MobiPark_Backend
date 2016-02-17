@@ -52,7 +52,7 @@ public class SalesActivityDTO {
     public SalesActivityDTO() {
     }
 
-    public SalesActivityDTO(Long id, Long lotId, User user, Long planId, Timestamp planSubscriptionDate,
+    public SalesActivityDTO(Long id, Long lotId, User user, Long planId,String planName, Timestamp planSubscriptionDate,
                             Timestamp planExpiryDate, Double chargeAmount, Double serviceAmount,
                             Double netAmount, Long ppId, Timestamp entryDateTime, Timestamp exitDateTime, String parkingStatus,
                             String exceptionFlag, String invoiceId) {
@@ -63,6 +63,7 @@ public class SalesActivityDTO {
         this.userPhoneNumber = user.getMobileNumber();
         this.userLicensePlate = user.getLicensePlate();
         this.planId = planId;
+        this.planName=planName;
         if (planSubscriptionDate != null) {
             this.planSubscriptionDate = new Date(planSubscriptionDate.getTime());
         }
