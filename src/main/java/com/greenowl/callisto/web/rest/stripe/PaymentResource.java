@@ -35,92 +35,107 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/api/{version}/user/")
 public class PaymentResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PaymentResource.class);
+	private final static Logger LOG = LoggerFactory.getLogger(PaymentResource.class);
 
-    @Inject
-    private StripeAccountService stripeAccountService;
+	@Inject
+	private StripeAccountService stripeAccountService;
 
-    @Inject
-    private PaymentProfileRepository paymentProfileRepository;
+	@Inject
+	private PaymentProfileRepository paymentProfileRepository;
 
-    @Inject
-    private UserService userService;
+	@Inject
+	private UserService userService;
 
-    @Inject
-    private EligiblePlanUserService eligiblePlanUserService;
+	@Inject
+	private EligiblePlanUserService eligiblePlanUserService;
 
-    @Inject
-    private SubscriptionService subscriptionService;
+	@Inject
+	private SubscriptionService subscriptionService;
 
-    @Inject
-    private SalesActivityService salesActivityService;
+	@Inject
+	private SalesActivityService salesActivityService;
 
-    @RequestMapping(value = "/payment", method = RequestMethod.POST
-            , produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional(readOnly = false)
-    public ResponseEntity<?> addPayment(@PathVariable("version") String version, @Valid @RequestBody PaymentPlanRequest req) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException {
-        Stripe.apiKey = Constants.STRIPE_TEST_KEY;
+	/**
+	 * POST /api/{version}/user/payment -> Register the payment profile for a
+	 * user in database and attach the payment on the stripe account.
+	 */
+	@RequestMapping(value = "/payment", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Transactional(readOnly = false)
+	public ResponseEntity<?> addPayment(@PathVariable("version") String version,
+			@Valid @RequestBody PaymentPlanRequest req) throws AuthenticationException, InvalidRequestException,
+					APIConnectionException, CardException, APIException {
+		
+		Stripe.apiKey = Constants.STRIPE_TEST_KEY;
+		User user = userService.getCurrentUser();
+		Customer customer = Customer.retrieve(user.getStripeToken());
+		Map<String, Object> params = new HashMap<>();
+		params.put("source", req.getToken().getId());
+		String cardToken = customer.createCard(params).getId();
+		PaymentProfileDTO paymentProfileDTO = stripeAccountService.registerPaymentProfile(req.getToken(),
+				user.getLogin(), cardToken);
+		String response = eligiblePlanUserService.subscribePlan(user.getLogin(), req.getPlanId());
+		if (response.startsWith("sub_")) {
+			PlanSubscription planSubscription = subscriptionService.createPlanSubscription(user, req.getPlanId(),
+					paymentProfileDTO.getId(), response);
+			if (planSubscription != null) {
+				SalesActivityDTO salesActivityDTO = salesActivityService.savePlanSaleRecord(user,
+						planSubscription);
+				if (salesActivityDTO != null) {
+					return new ResponseEntity<>(OK);
+				} else {
+					LOG.error("Failed at adding to the sales activity table");
+				}
+			}
+			LOG.error("Failed at adding to the subscription table");
 
-        User user = userService.getCurrentUser();
-        Customer customer = Customer.retrieve(user.getStripeToken());
-        Map<String, Object> params = new HashMap<>();
-        params.put("source", req.getToken().getId());
-        String cardToken = customer.createCard(params).getId();
-        PaymentProfileDTO paymentProfileDTO = stripeAccountService.registerPaymentProfile(req.getToken(), user.getLogin(), cardToken);
-        String response = eligiblePlanUserService.subscribePlan(user.getLogin(), req.getPlanId());
-        if (response.startsWith("sub_")) {
-            PlanSubscription planSubscription = subscriptionService.createPlanSubscription(user, req.getPlanId(), paymentProfileDTO.getId(), response);
-            if (planSubscription != null) {
-                SalesActivityDTO salesActivityDTO = salesActivityService.saveSaleActivityWithPlan(user, planSubscription);
-                if (salesActivityDTO != null) {
-                    return new ResponseEntity<>(OK);
-                } else {
-                    LOG.error("Failed at adding to the sales activity table");
-                }
-            }
-            LOG.error("Failed at adding to the subscription table");
+		}
+		return new ResponseEntity<>(genericBadReq(response, "/register"), BAD_REQUEST);
+	}
 
-        }
-        return new ResponseEntity<>(genericBadReq(response, "/register"),
-                BAD_REQUEST);
-    }
+	/**
+	 * GET /api/{version}/user/payment -> Return all the payment profiles for a
+	 * user.
+	 */
+	@RequestMapping(value = "/payment", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Transactional(readOnly = false)
+	public ResponseEntity<?> getPreviousPayment(@PathVariable("version") String version) throws AuthenticationException,
+			InvalidRequestException, APIConnectionException, CardException, APIException {
+		Stripe.apiKey = Constants.STRIPE_TEST_KEY;
+		User user = userService.getCurrentUser();
+		List<PaymentProfileDTO> paymentProfileDTOs = stripeAccountService.getAllPaymentProfileDTOs(user);
+		return new ResponseEntity<>(paymentProfileDTOs, OK);
+	}
 
+	/**
+	 * DELETE /api/{version}/user/payment -> Delete one payment method for a
+	 * user.
+	 */
+	@RequestMapping(value = "/payment", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Transactional(readOnly = false)
+	public ResponseEntity<?> deletePayment(@PathVariable("version") String version, @Valid @RequestParam Long id)
+			throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException,
+			APIException {
+		Stripe.apiKey = Constants.STRIPE_TEST_KEY;
+		User user = userService.getUserWithAuthorities();
+		Customer customer = Customer.retrieve(user.getStripeToken());
+		System.out.println(user.getStripeToken());
 
-    @RequestMapping(value = "/payment", method = RequestMethod.GET
-            , produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional(readOnly = false)
-    public ResponseEntity<?> getPreviousPayment(@PathVariable("version") String version) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException {
-        Stripe.apiKey = Constants.STRIPE_TEST_KEY;
-        User user = userService.getCurrentUser();
-        List<PaymentProfileDTO> paymentProfileDTOs = stripeAccountService.getAllPaymentProfileDTOs(user);
-        return new ResponseEntity<>(paymentProfileDTOs, OK);
-    }
+		PaymentProfile paymentProfile = stripeAccountService.getPaymentProfileById(id);
 
-
-    @RequestMapping(value = "/payment", method = RequestMethod.DELETE
-            , produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional(readOnly = false)
-    public ResponseEntity<?> deletePayment(@PathVariable("version") String version, @Valid @RequestParam Long id) throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException {
-        Stripe.apiKey = Constants.STRIPE_TEST_KEY;
-        User user = userService.getUserWithAuthorities();
-        Customer customer = Customer.retrieve(user.getStripeToken());
-        System.out.println(user.getStripeToken());
-
-        PaymentProfile paymentProfile = stripeAccountService.getPaymentProfileById(id);
-
-        if (paymentProfile == null) {
-            return new ResponseEntity<>(genericBadReq("Can't find payment profile.", "/user/payment"), HttpStatus.NOT_FOUND);
-        }
-        for (ExternalAccount source : customer.getSources().getData()) {
-            System.out.println(source.getId());
-            if (source.getId().equals(paymentProfile.getCardToken())) {
-                source.delete();
-                paymentProfileRepository.delete(id);
-                return new ResponseEntity<>(OK);
-            }
-        }
-        return new ResponseEntity<>(genericBadReq("Failed to find payment profile on stripe.", "/user/payment"), HttpStatus.NOT_FOUND);
-    }
+		if (paymentProfile == null) {
+			return new ResponseEntity<>(genericBadReq("Can't find payment profile.", "/user/payment"),
+					HttpStatus.NOT_FOUND);
+		}
+		for (ExternalAccount source : customer.getSources().getData()) {
+			System.out.println(source.getId());
+			if (source.getId().equals(paymentProfile.getCardToken())) {
+				source.delete();
+				paymentProfileRepository.delete(id);
+				return new ResponseEntity<>(OK);
+			}
+		}
+		return new ResponseEntity<>(genericBadReq("Failed to find payment profile on stripe.", "/user/payment"),
+				HttpStatus.NOT_FOUND);
+	}
 
 }
-

@@ -1,15 +1,16 @@
 'use strict';
 
 angular.module('mainApp')
-    .controller('TransactionsController', function ($rootScope, $scope, $state, $timeout, $http, $log, Auth) {
+    .controller('TransactionsController', function ($rootScope, $scope, $state, $timeout, $http, $log, TransactionService) {
 
-        $scope.dummy = [];
+        $scope.records = [];
 
-        $http.get('api/v1/transactions').then(function (response) {
-            $scope.dummy = response.data;
+        TransactionService.findAll().then(function (response) {
+            $log.info("Found " + response.length + " records");
+            $scope.records = response;
         });
 
         $(document).ready(function () {
-            $('#example').DataTable();
+            $('#transactions_data_table').DataTable();
         });
     });

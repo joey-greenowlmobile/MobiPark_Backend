@@ -36,27 +36,30 @@ public class SubscriptionService {
     	return planSubriptionRepository.getPlanSubscriptionById(id);
     }
     
+    /**
+     * Update plan subscription for a user based on one payment.
+     * @param user
+     * @param planId
+     * @param paymentProfileId
+     * @param stripeId
+     * @return
+     */
     public PlanSubscription createPlanSubscription(User user, Long planId, Long paymentProfileId,String stripeId){
-
     	PlanSubscription planSubscription = new PlanSubscription();
     	DateTime createdDate = DateTime.now();
-    		ParkingPlan parkingPlan = parkingPlanRepository.getOneParkingPlanById(planId);
-    
-    		PaymentProfile paymentProfile = paymentProfileRepository.getPaymentProfileById(paymentProfileId);
-    		if (parkingPlan!=null & paymentProfile!=null){
-    		planSubscription.setUser(user);
-    		planSubscription.setPlanGroup(parkingPlan);
-    		planSubscription.setPaymentProfile(paymentProfile);
-    		planSubscription.setPlanStartDate(createdDate);
-    		planSubscription.setPlanChargeAmount( parkingPlan.getUnitChargeAmount());
-    		planSubscription.setStripeId(stripeId);
-    		planSubriptionRepository.save(planSubscription);
-    		return planSubscription;}
-    		else{
-    			return null;
-    		}
-    	
-    	
-    	
+    	ParkingPlan parkingPlan = parkingPlanRepository.getOneParkingPlanById(planId);
+		PaymentProfile paymentProfile = paymentProfileRepository.getPaymentProfileById(paymentProfileId);
+		if (parkingPlan!=null & paymentProfile!=null){
+			planSubscription.setUser(user);
+			planSubscription.setPlanGroup(parkingPlan);
+			planSubscription.setPaymentProfile(paymentProfile);
+			planSubscription.setPlanStartDate(createdDate);
+			planSubscription.setPlanChargeAmount( parkingPlan.getUnitChargeAmount());
+			planSubscription.setStripeId(stripeId);
+			planSubriptionRepository.save(planSubscription);
+			return planSubscription;}
+		else{
+			return null;
+		}
     }
 }
