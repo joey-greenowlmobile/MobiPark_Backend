@@ -17,18 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.sql.Timestamp;
+import java.util.*;
 
 @Service
 public class SalesActivityService {
 
     @Inject
     private ParkingPlanRepository parkingPlanRepository;
+
     @Inject
     private SalesActivityRepository salesActivityRepository;
 
@@ -46,7 +42,7 @@ public class SalesActivityService {
         invoiceParams.put("limit", 3);
         invoiceParams.put("customer", user.getStripeToken());
         try {
-            List<Invoice> invoices = Invoice.all(invoiceParams).getData();
+            List<Invoice> invoices = Invoice.list(invoiceParams).getData();
             for (Invoice invoice : invoices) {
                 if (invoice.getSubscription().equals(plan.getStripeId())) {
                     newActivity.setInvoiceId(invoice.getId());
@@ -55,7 +51,7 @@ public class SalesActivityService {
             }
         } catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
                 | APIException e) {
-
+            e.printStackTrace();
         }
         newActivity.setActivityHolder(user);
         newActivity.setPlanId(plan.getPlanGroup().getId());
@@ -122,54 +118,58 @@ public class SalesActivityService {
     }
 
     public List<ParkingSaleActivity> filter(List<ParkingSaleActivity> parkingSaleActivities, String type) {
-    	List<ParkingSaleActivity> filteredList =new ArrayList<ParkingSaleActivity>();
-    	
-    	for (ParkingSaleActivity activity: parkingSaleActivities){
-    	switch(type.toLowerCase()){
-    		case "all": 		filteredList.add(activity) ;
-    							break;
-    		case "sales": 		if(activity.getChargeAmount()!=null && activity.getChargeAmount()!=0){
-    								filteredList.add(activity);
-    							}
-    							break;
-    		case "inflight": 	if (activity.getParkingStatus()!=null){
-    								if (activity.getParkingStatus().equals("IN_FLIGHT")){
-    									filteredList.add(activity);
-    								}
-    							}	
-    							break;
-    		case "park":		if (activity.getEntryDatetime()!=null){
-    								filteredList.add(activity);
-    							}
-    							break;
-    		case "exception": 	if (activity.getParkingStatus()!=null){
-    								if (activity.getParkingStatus().equals("EXCEPTION")){
-    									filteredList.add(activity);
-    								}
-    							}
-    							break;
-    		default:			break;
-    	}
-    	}
-    	return filteredList;
-    	}
-    	
-        
-    
-    
-    public ParkingSaleActivity getParkingSaleActivityById(long id){
-    	return salesActivityRepository.getParkingSaleActivityById(id);        	
+        List<ParkingSaleActivity> filteredList = new ArrayList<>();
+
+        for (ParkingSaleActivity activity : parkingSaleActivities) {
+            switch (type.toLowerCase()) {
+                case "all":
+                    filteredList.add(activity);
+                    break;
+                case "sales":
+                    if (activity.getChargeAmount() != null && activity.getChargeAmount() != 0) {
+                        filteredList.add(activity);
+                    }
+                    break;
+                case "inflight":
+                    if (activity.getParkingStatus() != null) {
+                        if (activity.getParkingStatus().equals("IN_FLIGHT")) {
+                            filteredList.add(activity);
+                        }
+                    }
+                    break;
+                case "park":
+                    if (activity.getEntryDatetime() != null) {
+                        filteredList.add(activity);
+                    }
+                    break;
+                case "exception":
+                    if (activity.getParkingStatus() != null) {
+                        if (activity.getParkingStatus().equals("EXCEPTION")) {
+                            filteredList.add(activity);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return filteredList;
     }
-    
-    public void updateParkingStatus(String parkingStatus, long id){
-    	salesActivityRepository.setParkingStatusById(parkingStatus, id);
+
+
+    public ParkingSaleActivity getParkingSaleActivityById(long id) {
+        return salesActivityRepository.getParkingSaleActivityById(id);
     }
-    
-    public void updateGateResponse(String gateResponse, long id){
-    	salesActivityRepository.setGateResponse(gateResponse, id);
+
+    public void updateParkingStatus(String parkingStatus, long id) {
+        salesActivityRepository.setParkingStatusById(parkingStatus, id);
     }
-    
-    public void updateExitTime(java.sql.Timestamp timestamp, long id){
-    	salesActivityRepository.setExitTime(timestamp, id);
+
+    public void updateGateResponse(String gateResponse, long id) {
+        salesActivityRepository.setGateResponse(gateResponse, id);
+    }
+
+    public void updateExitTime(java.sql.Timestamp timestamp, long id) {
+        salesActivityRepository.setExitTime(timestamp, id);
     }
 }

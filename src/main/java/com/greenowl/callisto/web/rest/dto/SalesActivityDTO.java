@@ -1,7 +1,9 @@
 package com.greenowl.callisto.web.rest.dto;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.greenowl.callisto.domain.User;
+
 import java.util.Date;
 import java.sql.Timestamp;
 
@@ -44,18 +46,10 @@ public class SalesActivityDTO {
     private String exceptionFlag;
 
     private String invoiceId;
-    
+
     private String gateResponse;
 
-    public String getGateResponse() {
-		return gateResponse;
-	}
-
-	public void setGateResponse(String gateResponse) {
-		this.gateResponse = gateResponse;
-	}
-
-	public SalesActivityDTO() {
+    public SalesActivityDTO() {
     }
 
     public SalesActivityDTO(Long id, Long lotId, User user, Long planId, Timestamp planSubscriptionDate,
@@ -69,21 +63,21 @@ public class SalesActivityDTO {
         this.userPhoneNumber = user.getMobileNumber();
         this.userLicensePlate = user.getLicensePlate();
         this.planId = planId;
-        if(planSubscriptionDate!=null){
-        	this.planSubscriptionDate = new Date(planSubscriptionDate.getTime());
+        if (planSubscriptionDate != null) {
+            this.planSubscriptionDate = new Date(planSubscriptionDate.getTime());
         }
-        if(planExpiryDate!=null){
-        	this.planExpiryDate = new Date(planExpiryDate.getTime());
+        if (planExpiryDate != null) {
+            this.planExpiryDate = new Date(planExpiryDate.getTime());
         }
         this.chargeAmount = chargeAmount;
         this.serviceAmount = serviceAmount;
         this.netAmount = netAmount;
         this.ppId = ppId;
-        if(entryDateTime!=null){
-        	this.entryDateTime = new Date(entryDateTime.getTime());
+        if (entryDateTime != null) {
+            this.entryDateTime = new Date(entryDateTime.getTime());
         }
-        if(exitDateTime!=null){
-        	this.exitDateTime = new Date(exitDateTime.getTime());
+        if (exitDateTime != null) {
+            this.exitDateTime = new Date(exitDateTime.getTime());
         }
         this.parkingStatus = parkingStatus;
         this.exceptionFlag = exceptionFlag;
@@ -240,6 +234,14 @@ public class SalesActivityDTO {
 
     public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
+    }
+
+    public String getGateResponse() {
+        return gateResponse;
+    }
+
+    public void setGateResponse(String gateResponse) {
+        this.gateResponse = gateResponse;
     }
 
     @Override
