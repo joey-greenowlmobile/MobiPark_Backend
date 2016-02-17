@@ -3,7 +3,7 @@ package com.greenowl.callisto.web.rest;
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 
 import java.util.Calendar;
-
+import java.util.Date;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +28,7 @@ import com.greenowlmobile.parkgateclient.parkgateCmdClient;
 import javax.inject.Inject;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.security.RolesAllowed;
+import org.joda.time.DateTime;
 
 
 @RestController
@@ -61,7 +62,7 @@ public class GateResource {
                 	SalesActivityDTO salesActivityDTO = salesActivityService.createSaleActivityForPlanUser(user, subscribedPlan);
                 	if(salesActivityDTO!=null){
                 		//open gate
-	                	parkgateCmdClient parkClient = new parkgateCmdClient("localhost",2222);
+	                	parkgateCmdClient parkClient = new parkgateCmdClient("52.71.192.103",2222);
 	                	String result1 = parkClient.openGate(Constants.ENTER_GATE, salesActivityDTO.getId().toString());
 	                	//if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
 	                	//	result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
@@ -76,7 +77,8 @@ public class GateResource {
 	                		ticketStatusService.createParkingValTicketStatus(pvts);
 	                		return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
 	                	}
-	                	else if(result==null || result.startsWith("ERROR")){    		
+	                	else if(result==null || result.startsWith("ERROR")){    
+	                		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, salesActivityDTO.getId());
 	                		return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate.", "/gate"),
 	                				org.springframework.http.HttpStatus.BAD_REQUEST);
 	                	}          	    
@@ -114,9 +116,9 @@ public class GateResource {
             		org.springframework.http.HttpStatus.BAD_REQUEST);
         }
         ParkingSaleActivity parkingSaleActivity = salesActivityService.findInFlightActivityByUser(user).get(0);
-        salesActivityService.updateExitTime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()), parkingSaleActivity.getId());      
+        salesActivityService.updateExitTime(new DateTime(new Date()), parkingSaleActivity.getId());      
         //closeGate Function
-        salesActivityService.updateParkingStatus("Finished parking", parkingSaleActivity.getId());
+        salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_COMPLETED, parkingSaleActivity.getId());
         SalesActivityDTO salesActivityDTO = salesActivityService.contructDTO(parkingSaleActivity, user);
         return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
     }

@@ -17,18 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.sql.Timestamp;
+import java.util.*;
 
 @Service
 public class SalesActivityService {
 
     @Inject
     private ParkingPlanRepository parkingPlanRepository;
+
     @Inject
     private SalesActivityRepository salesActivityRepository;
 
@@ -46,7 +42,7 @@ public class SalesActivityService {
         invoiceParams.put("limit", 3);
         invoiceParams.put("customer", user.getStripeToken());
         try {
-            List<Invoice> invoices = Invoice.all(invoiceParams).getData();
+            List<Invoice> invoices = Invoice.list(invoiceParams).getData();
             for (Invoice invoice : invoices) {
                 if (invoice.getSubscription().equals(plan.getStripeId())) {
                     newActivity.setInvoiceId(invoice.getId());
@@ -55,7 +51,7 @@ public class SalesActivityService {
             }
         } catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
                 | APIException e) {
-
+            e.printStackTrace();
         }
         newActivity.setActivityHolder(user);
         newActivity.setPlanId(plan.getPlanGroup().getId());
@@ -64,7 +60,7 @@ public class SalesActivityService {
         newActivity.setUserEmail(user.getLogin());
         newActivity.setUserPhoneNumber(user.getMobileNumber());
         newActivity.setUserLicensePlate(user.getLicensePlate());
-        newActivity.setPlanSubscriptionDate(new java.sql.Timestamp(plan.getPlanStartDate().getMillis()));
+        newActivity.setPlanSubscriptionDate(plan.getPlanStartDate());
         Double totalCharge = plan.getPlanChargeAmount();
         newActivity.setChargeAmount(totalCharge);
         newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
@@ -90,14 +86,14 @@ public class SalesActivityService {
         newActivity.setChargeAmount(totalCharge);
         newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
         newActivity.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
-        newActivity.setEntryDatetime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()));
-        newActivity.setParkingStatus("Parked");
+        //newActivity.setEntryDatetime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()));
+        newActivity.setParkingStatus(Constants.PARKING_STATUS_PARKING_START);
         salesActivityRepository.save(newActivity);
         SalesActivityDTO salesActivityDTO = contructDTO(newActivity, user);
         return salesActivityDTO;
     }
 
-    public List<ParkingSaleActivity> findAllActivityBetween(Timestamp startTime, Timestamp endTime) {
+    public List<ParkingSaleActivity> findAllActivityBetween(DateTime startTime, DateTime endTime) {
         return salesActivityRepository.getParkingSaleActivityBetween(startTime, endTime);
     }
 
@@ -121,60 +117,59 @@ public class SalesActivityService {
         return inFlightActivities;
     }
 
-    public List<ParkingSaleActivity> filter(List<ParkingSaleActivity> parkingSaleActivities, Boolean sale,
-                                            Boolean record, Boolean inFlight) {
-        List<ParkingSaleActivity> filteredList = new ArrayList<ParkingSaleActivity>();
-        for (ParkingSaleActivity activity : parkingSaleActivities) {
-            if (inFlight == true) {
-                if (activity.getEntryDatetime() != null & activity.getExitDatetime() == null) {
-                    filteredList.add(activity);
-                }
-                break;
-            }
-            if (sale == true) {
+    public List<ParkingSaleActivity> filter(List<ParkingSaleActivity> parkingSaleActivities, String type) {
+        List<ParkingSaleActivity> filteredList = new ArrayList<>();
 
-                if (record == true) {
-                    if (activity.getEntryDatetime() != null && activity.getChargeAmount() != null) {
+        for (ParkingSaleActivity activity : parkingSaleActivities) {
+            switch (type.toLowerCase()) {
+                case "all":
+                    filteredList.add(activity);
+                    break;
+                case "sales":
+                    if (activity.getChargeAmount() != null && activity.getChargeAmount() != 0) {
                         filteredList.add(activity);
-                    } else {
-                        break;
                     }
-                } else {
-                    if (activity.getChargeAmount() > 0) {
-                        filteredList.add(activity);
-                    } else {
-                        break;
+                    break;
+                case "inflight":
+                    if (activity.getParkingStatus() != null) {
+                        if (activity.getParkingStatus().equals("IN_FLIGHT")) {
+                            filteredList.add(activity);
+                        }
                     }
-                }
-            } else {
-                if (record == true) {
+                    break;
+                case "park":
                     if (activity.getEntryDatetime() != null) {
                         filteredList.add(activity);
-                    } else {
-                        break;
                     }
-                } else {
-                    filteredList.add(activity);
-                }
+                    break;
+                case "exception":
+                    if (activity.getParkingStatus() != null) {
+                        if (activity.getParkingStatus().equals("EXCEPTION")) {
+                            filteredList.add(activity);
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
         return filteredList;
     }
-    
-    
-    public ParkingSaleActivity getParkingSaleActivityById(long id){
-    	return salesActivityRepository.getParkingSaleActivityById(id);        	
+
+
+    public ParkingSaleActivity getParkingSaleActivityById(long id) {
+        return salesActivityRepository.getParkingSaleActivityById(id);
     }
-    
-    public void updateParkingStatus(String parkingStatus, long id){
-    	salesActivityRepository.setParkingStatusById(parkingStatus, id);
+
+    public void updateParkingStatus(String parkingStatus, long id) {
+        salesActivityRepository.setParkingStatusById(parkingStatus, id);
     }
-    
-    public void updateGateResponse(String gateResponse, long id){
-    	salesActivityRepository.setGateResponse(gateResponse, id);
+
+    public void updateGateResponse(String gateResponse, long id) {
+        salesActivityRepository.setGateResponse(gateResponse, id);
     }
-    
-    public void updateExitTime(java.sql.Timestamp timestamp, long id){
-    	salesActivityRepository.setExitTime(timestamp, id);
+
+    public void updateExitTime(DateTime time, long id) {
+        salesActivityRepository.setExitTime(time, id);
     }
 }

@@ -2,87 +2,62 @@ package com.greenowl.callisto.web.rest;
 
 import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.repository.SalesActivityRepository;
-import com.greenowl.callisto.repository.UserRepository;
 import com.greenowl.callisto.service.SalesActivityService;
-import com.greenowl.callisto.service.util.UserUtil;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
-import com.greenowl.callisto.web.rest.dto.UserDTO;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/{apiVersion}/parking")
 public class SalesActivityResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SalesActivityResource.class);
+
     @Inject
     private SalesActivityService salesActivityService;
 
     @Inject
     private SalesActivityRepository salesActivityRepository;
 
-    @Inject
-    private UserRepository userRepository;
-
+    /**
+     * GET /api/{version}/parking/records -> Returns a list of records between a start and end date of type :type.
+     */
     @RequestMapping(value = "/records",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
-    public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion, @RequestParam(defaultValue = "all") final String type, @RequestParam final String day,
-                                        @RequestParam final Boolean sale, @RequestParam final Boolean record, @RequestParam final Boolean inFlight) {
-        List<ParkingSaleActivity> parkingSaleActivities = new ArrayList<ParkingSaleActivity>();
+    public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion, @RequestParam(defaultValue = "all") final String type,
+                                        @RequestParam(required = false) final Long start, @RequestParam(required = false) final Long end) {
+        LOG.debug("Checking for records using type = {}, for start date = and end date = {}", type, start, end);
+        List<ParkingSaleActivity> parkingSaleActivities;
+
         if (type.equals("all")) {
             parkingSaleActivities = salesActivityRepository.findAll();
         } else {
-            Date date = null;
-            DateFormat df = new SimpleDateFormat("yyyy-mm-dd");
-            try {
-                date = df.parse(day);
-            } catch (ParseException e) {
-                return new ResponseEntity<>(genericBadReq("Wrong date format", "/parking"),
-                        BAD_REQUEST);
-            }
-            Calendar calendar1 = Calendar.getInstance();
-            calendar1.setTime(date);
-            calendar1.set(Calendar.HOUR_OF_DAY, 0);
-            calendar1.set(Calendar.MINUTE, 0);
-            calendar1.set(Calendar.SECOND, 0);
-            Calendar calendar2 = Calendar.getInstance();
-            calendar2.setTime(calendar1.getTime());
-            calendar2.add(Calendar.DAY_OF_YEAR, 1);
-            parkingSaleActivities = salesActivityService.findAllActivityBetween(new java.sql.Timestamp(calendar1.getTimeInMillis()), new java.sql.Timestamp(calendar2.getTimeInMillis()));
+            DateTime startDate = new DateTime(start);
+            DateTime endDate = new DateTime(end);
+            parkingSaleActivities = salesActivityService.findAllActivityBetween(startDate, endDate);
         }
 
-        List<SalesActivityDTO> salesActivityDTOs = new ArrayList<SalesActivityDTO>();
-        List<ParkingSaleActivity> filteredParkingSaleActivities = salesActivityService.filter(parkingSaleActivities, sale, record, inFlight);
-        if (!inFlight) {
-            for (ParkingSaleActivity parkingSaleActivity : filteredParkingSaleActivities) {
-                salesActivityDTOs.add(salesActivityService.contructDTO(parkingSaleActivity, parkingSaleActivity.getActivityHolder()));
-            }
-            return new ResponseEntity<>(salesActivityDTOs, OK);
-        } else {
-            List<UserDTO> userDTOs = new ArrayList<UserDTO>();
-            for (ParkingSaleActivity parkingSaleActivity : filteredParkingSaleActivities) {
-                UserDTO userDTO = UserUtil.getUserDTO(userRepository.findSingleUserByLogin(parkingSaleActivity.getUserEmail()));
-                userDTOs.add(userDTO);
-            }
+        List<SalesActivityDTO> salesActivityDTOs = new ArrayList<>();
+        List<ParkingSaleActivity> filteredParkingSaleActivities = salesActivityService.filter(parkingSaleActivities, type);
 
-            return new ResponseEntity<>(userDTOs, OK);
-        }
+        salesActivityDTOs.addAll(filteredParkingSaleActivities.stream().map(parkingSaleActivity -> salesActivityService.contructDTO(parkingSaleActivity, parkingSaleActivity.getActivityHolder())).collect(Collectors.toList()));
+        LOG.info("Returning {} records", salesActivityDTOs.size());
+        return new ResponseEntity<>(salesActivityDTOs, OK);
+
     }
 
 }

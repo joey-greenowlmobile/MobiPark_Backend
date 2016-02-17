@@ -2,8 +2,7 @@ package com.greenowl.callisto.web.rest.dto;
 
 
 import com.greenowl.callisto.domain.User;
-import java.util.Date;
-import java.sql.Timestamp;
+import org.joda.time.DateTime;
 
 public class SalesActivityDTO {
 
@@ -23,9 +22,9 @@ public class SalesActivityDTO {
 
     private String planName;
 
-    private Date planSubscriptionDate;
+    private DateTime planSubscriptionDate;
 
-    private Date planExpiryDate;
+    private DateTime planExpiryDate;
 
     private Double chargeAmount;
 
@@ -35,9 +34,9 @@ public class SalesActivityDTO {
 
     private Long ppId;
 
-    private Date entryDateTime;
+    private DateTime entryDateTime;
 
-    private Date exitDateTime;
+    private DateTime exitDateTime;
 
     private String parkingStatus;
 
@@ -58,9 +57,9 @@ public class SalesActivityDTO {
 	public SalesActivityDTO() {
     }
 
-    public SalesActivityDTO(Long id, Long lotId, User user, Long planId, Timestamp planSubscriptionDate,
-                            Timestamp planExpiryDate, Double chargeAmount, Double serviceAmount,
-                            Double netAmount, Long ppId, Timestamp entryDateTime, Timestamp exitDateTime, String parkingStatus,
+    public SalesActivityDTO(Long id, Long lotId, User user, Long planId, DateTime planSubscriptionDate,
+    		DateTime planExpiryDate, Double chargeAmount, Double serviceAmount,
+                            Double netAmount, Long ppId, DateTime entryDateTime, DateTime exitDateTime, String parkingStatus,
                             String exceptionFlag, String invoiceId) {
         this.id = id;
         this.lotId = lotId;
@@ -69,22 +68,14 @@ public class SalesActivityDTO {
         this.userPhoneNumber = user.getMobileNumber();
         this.userLicensePlate = user.getLicensePlate();
         this.planId = planId;
-        if(planSubscriptionDate!=null){
-        	this.planSubscriptionDate = new Date(planSubscriptionDate.getTime());
-        }
-        if(planExpiryDate!=null){
-        	this.planExpiryDate = new Date(planExpiryDate.getTime());
-        }
+        this.planSubscriptionDate = planSubscriptionDate;
+        this.planExpiryDate = planExpiryDate;
         this.chargeAmount = chargeAmount;
         this.serviceAmount = serviceAmount;
         this.netAmount = netAmount;
         this.ppId = ppId;
-        if(entryDateTime!=null){
-        	this.entryDateTime = new Date(entryDateTime.getTime());
-        }
-        if(exitDateTime!=null){
-        	this.exitDateTime = new Date(exitDateTime.getTime());
-        }
+        this.entryDateTime = entryDateTime;
+        this.exitDateTime = exitDateTime;        
         this.parkingStatus = parkingStatus;
         this.exceptionFlag = exceptionFlag;
         this.invoiceId = invoiceId;
@@ -154,19 +145,19 @@ public class SalesActivityDTO {
         this.planName = planName;
     }
 
-    public Date getPlanSubscriptionDate() {
+    public DateTime getPlanSubscriptionDate() {
         return planSubscriptionDate;
     }
 
-    public void setPlanSubscriptionDate(Date planSubscriptionDate) {
+    public void setPlanSubscriptionDate(DateTime planSubscriptionDate) {
         this.planSubscriptionDate = planSubscriptionDate;
     }
 
-    public Date getPlanExpiryDate() {
+    public DateTime getPlanExpiryDate() {
         return planExpiryDate;
     }
 
-    public void setPlanExpiryDate(Date planExpiryDate) {
+    public void setPlanExpiryDate(DateTime planExpiryDate) {
         this.planExpiryDate = planExpiryDate;
     }
 
@@ -202,19 +193,19 @@ public class SalesActivityDTO {
         this.ppId = ppId;
     }
 
-    public Date getEntryDateTime() {
+    public DateTime getEntryDateTime() {
         return entryDateTime;
     }
 
-    public void setEntryDateTime(Date entryDateTime) {
+    public void setEntryDateTime(DateTime entryDateTime) {
         this.entryDateTime = entryDateTime;
     }
 
-    public Date getExitDateTime() {
+    public DateTime getExitDateTime() {
         return exitDateTime;
     }
 
-    public void setExitDateTime(Date exitDateTime) {
+    public void setExitDateTime(DateTime exitDateTime) {
         this.exitDateTime = exitDateTime;
     }
 

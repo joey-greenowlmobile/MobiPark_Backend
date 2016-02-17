@@ -25,6 +25,8 @@ public final class Constants {
     
     public static final int  ENTER_GATE = 1;
     
+
+    public static final String PARKING_STATUS_PARKING_START = "PARKING_START";
     public static final String PARKING_STATUS_PENDING = "PENDING";
     public static final String PARKING_STATUS_IN_FLIGHT = "IN_FLIGHT";
     public static final String PARKING_STATUS_EXCEPTION = "EXCEPTION";

@@ -4,8 +4,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Timestamp;
-
+import org.joda.time.DateTime;
 
 @Entity
 @Table(name = "T_PARKING_SALES_ACTIVITY")
@@ -39,12 +38,12 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
     private String planName;
 
     @Column(name = "plan_subscription_date")
-    @Type(type = "java.sql.Timestamp")
-    private Timestamp planSubscriptionDate;
+    @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+    private DateTime planSubscriptionDate;
 
     @Column(name = "plan_expiry_date")
-    @Type(type = "java.sql.Timestamp")
-    private Timestamp planExpiryDate;
+    @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+    private DateTime planExpiryDate;
 
 
     @Column(name = "charge_amount")
@@ -60,12 +59,12 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
     private Long ppId;
 
     @Column(name = "entry_datetime")
-    @Type(type = "java.sql.Timestamp")
-    private Timestamp entryDatetime;
+    @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+    private DateTime entryDatetime;
 
     @Column(name = "exit_datetime")
-    @Type(type = "java.sql.Timestamp")
-    private Timestamp exitDatetime;
+    @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+    private DateTime exitDatetime;
 
     @Column(name = "parking_status")
     private String parkingStatus;
@@ -75,11 +74,12 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
 
     @Column(name = "invoice_id")
     private String invoiceId;
-    
+       
     @Column(name = "gate_response")
     private String gateResponse;
 
-    public Long getId() {
+    
+	public Long getId() {
         return id;
     }
 
@@ -143,19 +143,19 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
         this.planName = planName;
     }
 
-    public Timestamp getPlanSubscriptionDate() {
+    public DateTime getPlanSubscriptionDate() {
         return planSubscriptionDate;
     }
 
-    public void setPlanSubscriptionDate(Timestamp planSubscriptionDate) {
+    public void setPlanSubscriptionDate(DateTime planSubscriptionDate) {
         this.planSubscriptionDate = planSubscriptionDate;
     }
 
-    public Timestamp getPlanExpiryDate() {
+    public DateTime getPlanExpiryDate() {
         return planExpiryDate;
     }
 
-    public void setPlan_ExpiryDate(Timestamp planExpiryDate) {
+    public void setPlan_ExpiryDate(DateTime planExpiryDate) {
         this.planExpiryDate = planExpiryDate;
     }
 
@@ -191,19 +191,19 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
         this.ppId = ppId;
     }
 
-    public Timestamp getEntryDatetime() {
+    public DateTime getEntryDatetime() {
         return entryDatetime;
     }
 
-    public void setEntryDatetime(Timestamp entryDatetime) {
+    public void setEntryDatetime(DateTime entryDatetime) {
         this.entryDatetime = entryDatetime;
     }
 
-    public Timestamp getExitDatetime() {
+    public DateTime getExitDatetime() {
         return exitDatetime;
     }
 
-    public void setExitDatetime(Timestamp exitDatetime) {
+    public void setExitDatetime(DateTime exitDatetime) {
         this.exitDatetime = exitDatetime;
     }
 
