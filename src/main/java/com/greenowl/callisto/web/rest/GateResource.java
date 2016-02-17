@@ -1,18 +1,5 @@
 package com.greenowl.callisto.web.rest;
 
-import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
-
-import java.util.Calendar;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.ParkingSaleActivity;
@@ -25,9 +12,16 @@ import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
 import com.greenowlmobile.parkgateclient.parkgateCmdClient;
-import javax.inject.Inject;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
+import java.util.Calendar;
+
+import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 
 
 @RestController
