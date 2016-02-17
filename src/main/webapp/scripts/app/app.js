@@ -4,9 +4,10 @@ angular.module('mainApp', ['LocalStorageModule', 'tmh.dynamicLocale',
     'ngResource', 'ui.router', 'ngCookies', 'pascalprecht.translate',
     'ngCacheBuster', 'infinite-scroll', 'uiGmapgoogle-maps', 'ui.bootstrap', 'ngFileUpload', 'ui.ace', 'yaru22.angular-timeago'])
 
-    .run(function ($rootScope, $location, $window, $http, $state, $translate, Auth, Principal, Language, ENV, VERSION) {
+    .run(function ($rootScope, $location, $window, $http, $state, $translate, Auth, Principal, Language, ENV, API_VERSION, VERSION) {
         $rootScope.ENV = ENV;
         $rootScope.VERSION = VERSION;
+        $rootScope.API_VERSION = API_VERSION;
         $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams) {
             $rootScope.toState = toState;
             $rootScope.toStateParams = toStateParams;
@@ -21,7 +22,7 @@ angular.module('mainApp', ['LocalStorageModule', 'tmh.dynamicLocale',
             });
         });
 
-        $rootScope.$on('$stateChangeSuccess',  function(event, toState, toParams, fromState, fromParams) {
+        $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
             var titleKey = 'global.title';
 
             $rootScope.previousStateName = fromState.name;
@@ -37,7 +38,7 @@ angular.module('mainApp', ['LocalStorageModule', 'tmh.dynamicLocale',
             });
         });
 
-        $rootScope.back = function() {
+        $rootScope.back = function () {
             // If previous state is 'activate' or do not exist go to 'home'
             if ($rootScope.previousStateName === 'activate' || $state.get($rootScope.previousStateName) === null) {
                 $state.go('home');
@@ -55,7 +56,7 @@ angular.module('mainApp', ['LocalStorageModule', 'tmh.dynamicLocale',
                 var token = localStorageService.get('token');
 
                 if (token && token.expires && token.expires > new Date().getTime()) {
-                  config.headers['x-auth-token'] = token.token;
+                    config.headers['x-auth-token'] = token.token;
                 }
 
                 return config;
@@ -63,7 +64,7 @@ angular.module('mainApp', ['LocalStorageModule', 'tmh.dynamicLocale',
         };
     })
     //Google maps configuration
-    .config(function(uiGmapGoogleMapApiProvider) {
+    .config(function (uiGmapGoogleMapApiProvider) {
         uiGmapGoogleMapApiProvider.configure({
             //    key: 'your api key',
             v: '3.17',

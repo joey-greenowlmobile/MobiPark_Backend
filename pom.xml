@@ -65,7 +65,7 @@
         <guava.version>19.0</guava.version>
         <jts.version>1.13</jts.version>
         <stripe.version>1.40.1</stripe.version>
-		<parkgate.version>1.0.1</parkgate.version>
+        <parkgate.version>1.0.1</parkgate.version>
     </properties>
 
     <dependencies>
@@ -321,11 +321,12 @@
             <artifactId>stripe-java</artifactId>
             <version>${stripe.version}</version>
         </dependency>
+        <!-- Adaptor for service responsible for operating the gate -->
         <dependency>
-           <groupId>com.greenowlmobile</groupId>
-           <artifactId>parkgate</artifactId>
-           <version>${parkgate.version}</version>
-       </dependency>
+            <groupId>com.greenowlmobile</groupId>
+            <artifactId>parkgate</artifactId>
+            <version>${parkgate.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
