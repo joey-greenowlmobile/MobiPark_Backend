@@ -52,4 +52,5 @@ public class ParkingValTicketStatusService {
 		return pvtsRepository.getParkingValTicketStatusByTicketnoAndTickettype(ticketNo, ticketType);
 	}
 	
+	
 }

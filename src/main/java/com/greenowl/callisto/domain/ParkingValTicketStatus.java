@@ -77,7 +77,6 @@ public class ParkingValTicketStatus implements Serializable {
 	public void setTicketType(int ticketType) {
 		this.ticketType = ticketType;
 	}
-	
-	
+		
 	
 }

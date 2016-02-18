@@ -24,4 +24,5 @@ public interface ParkingValTicketStatusRepository extends JpaRepository<ParkingV
 	@Query("update ParkingValTicketStatus p set p.validatedFlag = ?1 where p.id = ?2")
 	public void updateValidatedFlag(int flag, long id);
 	
+	
 }

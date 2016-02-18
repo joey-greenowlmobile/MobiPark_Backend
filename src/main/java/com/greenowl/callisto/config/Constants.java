@@ -35,4 +35,5 @@ public final class Constants {
     public static final int PARKING_TICKET_TYPE_ENTER = 1;
     public static final int PARKING_TICKET_TYPE_EXIT = 2;
     
+    
 }
