@@ -1,25 +1,35 @@
 package com.greenowl.callisto.domain;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import org.joda.time.DateTime;
 import javax.persistence.*;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "T_PARKING_VAL_TICKET_STATUS")
 public class ParkingValTicketStatus implements Serializable {
     @Id
 	@Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
 	@Column(name = "created_date_time")
-	private Timestamp createdDateTime;
+	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	private DateTime createdDateTime;
 	
 	@Column(name = "validate_date_time")
-	private Timestamp validateDateTime;
+	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	private DateTime validateDateTime;
 	
 	@Column(name = "validated_flag")
-	private Boolean validatedFlag;
+	private int validatedFlag;
 
+	@Column(name = "ticket_no")
+	private Long ticketNo;
+	
+	@Column(name = "ticket_type")
+	private int ticketType;
+	
 	public Long getId() {
 		return id;
 	}
@@ -28,28 +38,44 @@ public class ParkingValTicketStatus implements Serializable {
 		this.id = id;
 	}
 
-	public Timestamp getCreatedDateTime() {
+	public DateTime getCreatedDateTime() {
 		return createdDateTime;
 	}
 
-	public void setCreatedDateTime(Timestamp createdDateTime) {
+	public void setCreatedDateTime(DateTime createdDateTime) {
 		this.createdDateTime = createdDateTime;
 	}
 
-	public Timestamp getValidateDateTime() {
+	public DateTime getValidateDateTime() {
 		return validateDateTime;
 	}
 
-	public void setValidateDateTime(Timestamp validateDateTime) {
+	public void setValidateDateTime(DateTime validateDateTime) {
 		this.validateDateTime = validateDateTime;
 	}
 
-	public Boolean getValidatedFlag() {
+	public int getValidatedFlag() {
 		return validatedFlag;
 	}
 
-	public void setValidatedFlag(Boolean validatedFlag) {
+	public void setValidatedFlag(int validatedFlag) {
 		this.validatedFlag = validatedFlag;
+	}
+
+	public Long getTicketNo() {
+		return ticketNo;
+	}
+
+	public void setTicketNo(Long ticketNo) {
+		this.ticketNo = ticketNo;
+	}
+
+	public int getTicketType() {
+		return ticketType;
+	}
+
+	public void setTicketType(int ticketType) {
+		this.ticketType = ticketType;
 	}
 	
 	

@@ -32,4 +32,7 @@ public final class Constants {
     public static final String PARKING_STATUS_EXCEPTION = "EXCEPTION";
     public static final String PARKING_STATUS_COMPLETED = "COMPLETED";
     
+    public static final int PARKING_TICKET_TYPE_ENTER = 1;
+    public static final int PARKING_TICKET_TYPE_EXIT = 2;
+    
 }

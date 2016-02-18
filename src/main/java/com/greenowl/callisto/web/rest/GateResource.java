@@ -2,8 +2,9 @@ package com.greenowl.callisto.web.rest;
 
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 
-import java.util.Calendar;
 import java.util.Date;
+
+import org.joda.time.DateTime;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.ParkingSaleActivity;
-import com.greenowl.callisto.domain.ParkingValTicketStatus;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.security.AuthoritiesConstants;
 import com.greenowl.callisto.service.ParkingValTicketStatusService;
@@ -27,9 +27,8 @@ import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
 import com.greenowlmobile.parkgateclient.parkgateCmdClient;
 import javax.inject.Inject;
 import org.springframework.transaction.annotation.Transactional;
-import javax.annotation.security.RolesAllowed;
-import org.joda.time.DateTime;
-
+import org.springframework.web.bind.annotation.*;
+import javax.annotation.security.*;
 
 @RestController
 @RequestMapping("/api/{apiVersion}/parking")
@@ -62,49 +61,48 @@ public class GateResource {
                 	SalesActivityDTO salesActivityDTO = salesActivityService.createSaleActivityForPlanUser(user, subscribedPlan);
                 	if(salesActivityDTO!=null){
                 		//open gate
-	                	parkgateCmdClient parkClient = new parkgateCmdClient("52.71.192.103",2222);
-	                	String result1 = parkClient.openGate(Constants.ENTER_GATE, salesActivityDTO.getId().toString());
-	                	//if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
-	                	//	result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
-	                	//}
-	                	final String result = result1;
-	                	
+	                	String result1 = openGate(Constants.ENTER_GATE, salesActivityDTO.getId().toString());
+	                	if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
+	                		result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
+	                	}
+	                	final String result = result1;	                	
 	                	if(result!=null && result.startsWith("OK")){	
-	                		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, salesActivityDTO.getId());
-	                		ParkingValTicketStatus pvts = new ParkingValTicketStatus();
-	                		pvts.setId(salesActivityDTO.getId());
-	                		pvts.setCreatedDateTime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()));
-	                		ticketStatusService.createParkingValTicketStatus(pvts);
+	                		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, salesActivityDTO.getId());	                		
+	                		ticketStatusService.createParkingValTicketStatus(salesActivityDTO.getId(),Constants.PARKING_TICKET_TYPE_ENTER,DateTime.now());
 	                		return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
 	                	}
-	                	else if(result==null || result.startsWith("ERROR")){    
+	                	else{    
 	                		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, salesActivityDTO.getId());
 	                		return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate.", "/gate"),
 	                				org.springframework.http.HttpStatus.BAD_REQUEST);
-	                	}          	    
-	                	
+	                	}                	
                 	}
                 	else{
                 		return new ResponseEntity<>(genericBadReq("ERROR-Failed to create parking record.", "/gate"),
                 				org.springframework.http.HttpStatus.BAD_REQUEST);
-                	}                  
-
-                } else {
+                	} 
+                }
+                else{
                    return new ResponseEntity<>(genericBadReq("ERROR-Incorrect parking lot.", "/gate"),
                 		   org.springframework.http.HttpStatus.BAD_REQUEST);
                 }
-            } else {
+            } 
+            else{
                 return new ResponseEntity<>(genericBadReq("ERROR-Fetching plan data.", "/gate"),
                 		org.springframework.http.HttpStatus.BAD_REQUEST);
             }
-        } else {
+        } 
+        else{
             return new ResponseEntity<>(genericBadReq("ERROR-User haven't subscribed.", "/gate"),
             		org.springframework.http.HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(genericBadReq("ERROR-", "/gate"),
-        		org.springframework.http.HttpStatus.BAD_REQUEST);
+        }        
     }
-
+    
+    private String openGate(int gateId, String ticketNo){
+    	parkgateCmdClient parkClient = new parkgateCmdClient("52.71.192.103",2222);
+    	return parkClient.openGate(gateId,ticketNo);
+    }
+    
     @RequestMapping(value = "/exit",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -116,11 +114,28 @@ public class GateResource {
             		org.springframework.http.HttpStatus.BAD_REQUEST);
         }
         ParkingSaleActivity parkingSaleActivity = salesActivityService.findInFlightActivityByUser(user).get(0);
-        salesActivityService.updateExitTime(new DateTime(new Date()), parkingSaleActivity.getId());      
-        //closeGate Function
-        salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_COMPLETED, parkingSaleActivity.getId());
-        SalesActivityDTO salesActivityDTO = salesActivityService.contructDTO(parkingSaleActivity, user);
-        return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
+        if(parkingSaleActivity!=null){
+        	String result1 = openGate(Constants.ENTER_GATE,Long.toString(parkingSaleActivity.getId()));
+        	if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
+        		result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
+        	}
+        	final String result = result1;
+        	if(result!=null && result.startsWith("OK")){
+        		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingSaleActivity.getId());
+        		ticketStatusService.createParkingValTicketStatus(parkingSaleActivity.getId(),Constants.PARKING_TICKET_TYPE_EXIT,DateTime.now());
+        		SalesActivityDTO salesActivityDTO = salesActivityService.contructDTO(parkingSaleActivity, user);
+        		return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
+        	}        	
+        	else{
+        		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, parkingSaleActivity.getId());
+        		return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate.", "/gate"),
+        				org.springframework.http.HttpStatus.BAD_REQUEST);
+        	}
+        }
+        else{
+        	return new ResponseEntity<>(genericBadReq("ERROR-failed to find parking record.", "/gate"),
+            		org.springframework.http.HttpStatus.BAD_REQUEST);
+        }
     }
 
     @RequestMapping(value = "/systemOpen",
