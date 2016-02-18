@@ -58,7 +58,7 @@ public class GateResource {
             ParkingPlan subscribedPlan = user.getPlanSubscriptions().iterator().next().getPlanGroup();
             if (subscribedPlan != null) {
                 if (subscribedPlan.getLotId() == req.getLotId()) {
-                	SalesActivityDTO salesActivityDTO = salesActivityService.createParkingActivityForPlanUser(user, subscribedPlan);
+                	SalesActivityDTO salesActivityDTO = salesActivityService.createSaleActivityForPlanUser(user, subscribedPlan);
                 	if(salesActivityDTO!=null){
                 		//open gate
 	                	String result1 = openGate(Constants.ENTER_GATE, salesActivityDTO.getId().toString());
