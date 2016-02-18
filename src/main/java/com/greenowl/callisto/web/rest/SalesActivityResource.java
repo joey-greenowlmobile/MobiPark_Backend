@@ -23,42 +23,41 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/api/{apiVersion}/parking")
 public class SalesActivityResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SalesActivityResource.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SalesActivityResource.class);
 
-    @Inject
-    private SalesActivityService salesActivityService;
+	@Inject
+	private SalesActivityService salesActivityService;
 
-    @Inject
-    private SalesActivityRepository salesActivityRepository;
+	@Inject
+	private SalesActivityRepository salesActivityRepository;
 
-    /**
-     * GET /api/{version}/parking/records -> Returns a list of records between a start and end date of type :type.
-     */
-    @RequestMapping(value = "/records",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional(readOnly = false)
-    public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion, @RequestParam(defaultValue = "all") final String type,
-                                        @RequestParam(required = false) final Long start, @RequestParam(required = false) final Long end) {
-        LOG.debug("Checking for records using type = {}, for start date = and end date = {}", type, start, end);
-        List<ParkingSaleActivity> parkingSaleActivities;
+	/**
+	 * GET /api/{version}/parking/records -> Returns a list of records between a
+	 * start and end date of type :type.
+	 */
+	@RequestMapping(value = "/records", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@Transactional(readOnly = false)
+	public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion,
+			@RequestParam(defaultValue = "all") final String type, @RequestParam(required = false) final Long start,
+			@RequestParam(required = false) final Long end) {
+		LOG.debug("Checking for records using type = {}, for start date = {} and end date = {}", type, start, end);
+		List<ParkingSaleActivity> parkingSaleActivities;
+		if (type.equals("all")) {
+			parkingSaleActivities = salesActivityRepository.findAll();
+		} else {
+			DateTime startDate = new DateTime(start*1000);
+			DateTime endDate = new DateTime(end*1000);
+			parkingSaleActivities = salesActivityService.findAllFilteredActivityBetweenStartAndEndDate(startDate,
+					endDate, type);
+		}
 
-        if (type.equals("all")) {
-            parkingSaleActivities = salesActivityRepository.findAll();
-        } else {
-            DateTime startDate = new DateTime(start);
-            DateTime endDate = new DateTime(end);
-            parkingSaleActivities = salesActivityService.findAllActivityBetween(startDate, endDate);
-        }
+		List<SalesActivityDTO> salesActivityDTOs = new ArrayList<>();
+		salesActivityDTOs.addAll(parkingSaleActivities.stream().map(parkingSaleActivity -> salesActivityService
+				.contructDTO(parkingSaleActivity, parkingSaleActivity.getActivityHolder()))
+				.collect(Collectors.toList()));
+		LOG.info("Returning {} records", salesActivityDTOs.size());
+		return new ResponseEntity<>(salesActivityDTOs, OK);
 
-        List<SalesActivityDTO> salesActivityDTOs = new ArrayList<>();
-        List<ParkingSaleActivity> filteredParkingSaleActivities = salesActivityService.filter(parkingSaleActivities, type);
-
-        salesActivityDTOs.addAll(filteredParkingSaleActivities.stream().map(parkingSaleActivity -> salesActivityService.contructDTO(parkingSaleActivity, parkingSaleActivity.getActivityHolder())).collect(Collectors.toList()));
-        LOG.info("Returning {} records", salesActivityDTOs.size());
-        return new ResponseEntity<>(salesActivityDTOs, OK);
-
-    }
+	}
 
 }
-

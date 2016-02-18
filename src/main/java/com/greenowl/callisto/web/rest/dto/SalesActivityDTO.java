@@ -57,7 +57,7 @@ public class SalesActivityDTO {
 	public SalesActivityDTO() {
     }
 
-    public SalesActivityDTO(Long id, Long lotId, User user, Long planId, DateTime planSubscriptionDate,
+    public SalesActivityDTO(Long id, Long lotId, User user, Long planId, String planName, DateTime planSubscriptionDate,
     		DateTime planExpiryDate, Double chargeAmount, Double serviceAmount,
                             Double netAmount, Long ppId, DateTime entryDateTime, DateTime exitDateTime, String parkingStatus,
                             String exceptionFlag, String invoiceId) {
@@ -67,6 +67,7 @@ public class SalesActivityDTO {
         this.userEmail = user.getLogin();
         this.userPhoneNumber = user.getMobileNumber();
         this.userLicensePlate = user.getLicensePlate();
+        this.planName=planName;
         this.planId = planId;
         this.planSubscriptionDate = planSubscriptionDate;
         this.planExpiryDate = planExpiryDate;
