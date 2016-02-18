@@ -2,8 +2,6 @@ package com.greenowl.callisto.repository;
 
 import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.domain.User;
-import java.sql.Timestamp;
-
 import org.joda.time.DateTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,5 +34,5 @@ public interface SalesActivityRepository extends JpaRepository<ParkingSaleActivi
     
     @Modifying
     @Query("update ParkingSaleActivity u set u.exitDatetime=?1 where u.id = ?2")
-    void setExitTime(Timestamp timestamp, long id);
+    void setExitTime(DateTime time, long id);
 }

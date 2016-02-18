@@ -33,6 +33,7 @@ public class SalesActivityService {
 	public SalesActivityDTO savePlanSaleRecord(User user, PlanSubscription plan) throws AuthenticationException,
 			InvalidRequestException, APIConnectionException, CardException, APIException {
 		return createPlanSaleRecord(user, plan);
+
 	}
 
 	/**
@@ -67,7 +68,7 @@ public class SalesActivityService {
 		newActivity.setUserEmail(user.getLogin());
 		newActivity.setUserPhoneNumber(user.getMobileNumber());
 		newActivity.setUserLicensePlate(user.getLicensePlate());
-		newActivity.setPlanSubscriptionDate(new java.sql.Timestamp(plan.getPlanStartDate().getMillis()));
+		newActivity.setPlanSubscriptionDate(plan.getPlanStartDate());
 		Double totalCharge = plan.getPlanChargeAmount();
 		newActivity.setChargeAmount(totalCharge);
 		newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
@@ -99,7 +100,6 @@ public class SalesActivityService {
 		newActivity.setChargeAmount(totalCharge);
 		newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
 		newActivity.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
-		newActivity.setEntryDatetime(new java.sql.Timestamp(Calendar.getInstance().getTimeInMillis()));
 		newActivity.setParkingStatus(Constants.PARKING_STATUS_PARKING_START);
 		salesActivityRepository.save(newActivity);
 		SalesActivityDTO salesActivityDTO = contructDTO(newActivity, user);
@@ -198,7 +198,7 @@ public class SalesActivityService {
 		salesActivityRepository.setGateResponse(gateResponse, id);
 	}
 
-	public void updateExitTime(java.sql.Timestamp timestamp, long id) {
+	public void updateExitTime(DateTime timestamp, long id) {
 		salesActivityRepository.setExitTime(timestamp, id);
 	}
 }
