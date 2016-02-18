@@ -33,7 +33,6 @@ public class SalesActivityService {
 	public SalesActivityDTO savePlanSaleRecord(User user, PlanSubscription plan) throws AuthenticationException,
 			InvalidRequestException, APIConnectionException, CardException, APIException {
 		return createPlanSaleRecord(user, plan);
-
 	}
 
 	/**
