@@ -6,7 +6,9 @@ import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.repository.ParkingPlanRepository;
+import com.greenowl.callisto.repository.PlanSubscriptionRepository;
 import com.greenowl.callisto.repository.SalesActivityRepository;
+import com.greenowl.callisto.repository.UserRepository;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.stripe.Stripe;
 import com.stripe.exception.*;
@@ -27,6 +29,12 @@ public class SalesActivityService {
 
 	@Inject
 	private SalesActivityRepository salesActivityRepository;
+
+	@Inject
+	private UserRepository userRepository;
+
+	@Inject
+	private PlanSubscriptionRepository planSubscriptionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(SalesActivityService.class);
 
@@ -73,6 +81,7 @@ public class SalesActivityService {
 		newActivity.setChargeAmount(totalCharge);
 		newActivity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
 		newActivity.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
+		newActivity.setParkingStatus("PAYMENT_COMPLETED");
 		newActivity.setPpId(plan.getPaymentProfile().getId());
 		salesActivityRepository.save(newActivity);
 		SalesActivityDTO salesActivityDTO = contructDTO(newActivity, user);
@@ -112,10 +121,10 @@ public class SalesActivityService {
 
 	public SalesActivityDTO contructDTO(ParkingSaleActivity activity, User user) {
 		SalesActivityDTO salesActivityDTO = new SalesActivityDTO(activity.getId(), activity.getLotId(), user,
-				activity.getPlanId(), activity.getPlanName(),activity.getPlanSubscriptionDate(), activity.getPlanExpiryDate(),
-				activity.getChargeAmount(), activity.getServiceAmount(), activity.getNetAmount(), activity.getPpId(),
-				activity.getEntryDatetime(), activity.getEntryDatetime(), activity.getParkingStatus(),
-				activity.getExceptionFlag(), activity.getInvoiceId());
+				activity.getPlanId(), activity.getPlanName(), activity.getPlanSubscriptionDate(),
+				activity.getPlanExpiryDate(), activity.getChargeAmount(), activity.getServiceAmount(),
+				activity.getNetAmount(), activity.getPpId(), activity.getEntryDatetime(), activity.getEntryDatetime(),
+				activity.getParkingStatus(), activity.getExceptionFlag(), activity.getInvoiceId());
 		salesActivityDTO.setGateResponse(activity.getGateResponse());
 		return salesActivityDTO;
 	}
@@ -184,6 +193,95 @@ public class SalesActivityService {
 			}
 		}
 		return filteredList;
+	}
+
+	public List<SalesActivityDTO> createPreTransaction(List<PlanSubscription> nextDaySubscriptions) {
+		List<SalesActivityDTO> activities = new ArrayList<>();
+		for (PlanSubscription plan : nextDaySubscriptions) {
+			activities.add(createActivity(plan));
+		}
+		return activities;
+	}
+
+	private SalesActivityDTO createActivity(PlanSubscription subscription) {
+		ParkingSaleActivity activity = new ParkingSaleActivity();
+		activity.setActivityHolder(subscription.getUser());
+		activity.setPlanId(subscription.getPlanGroup().getId());
+		activity.setPlanName(subscription.getPlanGroup().getPlanName());
+		activity.setLotId(subscription.getPlanGroup().getLotId());
+		activity.setUserEmail(subscription.getUser().getLogin());
+		activity.setUserPhoneNumber(subscription.getUser().getMobileNumber());
+		activity.setUserLicensePlate(subscription.getUser().getLicensePlate());
+		Double totalCharge = subscription.getPlanGroup().getUnitChargeAmount();
+		activity.setChargeAmount(totalCharge);
+		activity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
+		activity.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
+		activity.setParkingStatus("PRE_TRANSACTION");
+		salesActivityRepository.save(activity);
+		SalesActivityDTO salesActivityDTO = contructDTO(activity, subscription.getUser());
+		return salesActivityDTO;
+	}
+
+	public boolean validNewTransaction(User user, DateTime startDate, DateTime endDate) {
+		List<ParkingSaleActivity> activities = salesActivityRepository.getParkingSaleActivityBetweenForUser(startDate,
+				endDate, user);
+		for (ParkingSaleActivity activity : activities) {
+			if (activity.getChargeAmount() != 0 && activity.getParkingStatus().equals("PRE_TRANSACTION")) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public Long checkEndOfDayTransaction(DateTime startDate) {
+		Long number = (long) 0;
+		List<ParkingSaleActivity> activities = salesActivityRepository
+				.getParkingSaleActivitiesByParkingStatus("PRE_TRANSACTION", startDate);
+		System.out.println(activities.size());
+		Stripe.apiKey = Constants.STRIPE_TEST_KEY;
+		Map<String, Object> date = new HashMap<String, Object>();
+		date.put("gt", startDate);
+		for (ParkingSaleActivity activity : activities) {
+			LOG.debug("activity ={}", activity.getId());
+			User user = userRepository.findSingleUserByLogin(activity.getUserEmail());
+			Long time = activity.getCreatedDate().getMillis() / 1000;
+			Map<String, Object> invoiceParams = new HashMap<String, Object>();
+			invoiceParams.put("limit", 3);
+			invoiceParams.put("customer", user.getStripeToken());
+			try {
+				List<Invoice> invoices = Invoice.list(invoiceParams).getData();
+				if (planSubscriptionRepository.getPlanSubscriptionByUser(user).size() == 0) {
+					LOG.debug("User {} is not subscribed", user.getLogin());
+					break;
+				}
+				PlanSubscription subscription = planSubscriptionRepository.getPlanSubscriptionByUser(user).get(0);
+				String subToken = subscription.getStripeId();
+				for (Invoice invoice : invoices) {
+					if (invoice.getSubscription().equals(subToken) && invoice.getDate() > time) {
+						if (invoice.getPaid()) {
+							if (invoice.getAmountDue().doubleValue() / 100 == subscription.getPlanChargeAmount()) {
+								LOG.debug("The amount match for subscription ={}", subToken);
+								activity.setInvoiceId(invoice.getId());
+								activity.setParkingStatus("PAYMENT_COMPLETED");
+								salesActivityRepository.save(activity);
+								number += 1;
+								break;
+							} else {
+								LOG.debug("The amount doesn't match for subscription ={}", subToken);
+							}
+						} else {
+							LOG.debug("Unpaid invoice {} for user {}", invoice.getId(), user.getStripeToken());
+						}
+					}
+				}
+			} catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
+					| APIException e) {
+				LOG.debug("Failed at talking to stripe for user ={}", user.getLogin());
+				e.printStackTrace();
+			}
+		}
+		return number;
 	}
 
 	public ParkingSaleActivity getParkingSaleActivityById(long id) {

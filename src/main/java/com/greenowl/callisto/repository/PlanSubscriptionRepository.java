@@ -27,4 +27,6 @@ public interface PlanSubscriptionRepository extends JpaRepository<PlanSubscripti
     @Query("select u from PlanSubscription u where u.stripeId = ?1")
     PlanSubscription getPlanSubscriptionByStripeId(Long stripeId);
 
+    @Query("select u from PlanSubscription u")
+    List<PlanSubscription> getAllPlanSubscription();
 }
