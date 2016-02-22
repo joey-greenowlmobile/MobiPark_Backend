@@ -15,12 +15,16 @@ import org.springframework.stereotype.Service;
 import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.PaymentProfile;
+import com.greenowl.callisto.domain.PlanEligibleUser;
 import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.factory.PaymentProfileFactory;
 import com.greenowl.callisto.repository.ParkingPlanRepository;
 import com.greenowl.callisto.repository.PaymentProfileRepository;
+import com.greenowl.callisto.repository.PlanEligibleUserRepository;
 import com.greenowl.callisto.repository.PlanSubscriptionRepository;
 import com.greenowl.callisto.repository.UserRepository;
+import com.greenowl.callisto.web.rest.dto.payment.CardProfile;
 import com.stripe.Stripe;
 import com.stripe.exception.APIConnectionException;
 import com.stripe.exception.APIException;
@@ -46,6 +50,12 @@ public class SubscriptionService {
 	@Inject
 	SalesActivityService salesActivityService;
 
+	@Inject
+	UserRepository userRepository;
+	
+	@Inject 
+	PlanEligibleUserRepository planEligibleUserRepository;
+	
 	public PlanSubscription getPlanSubscriptionById(Long id) {
 		return planSubscriptionRepository.getPlanSubscriptionById(id);
 	}
@@ -111,5 +121,28 @@ public class SubscriptionService {
 				| APIException e) {
 			return false;
 		}
+	}
+	
+	public PlanSubscription autoSubscribe(Long userId, Long planId){
+		User user= userRepository.findOne(userId);
+		CardProfile fakeCard = new CardProfile();
+		fakeCard.setExpMonth((long) 12);
+		fakeCard.setExpYear((long) 2099);
+		fakeCard.setLast4("9999");
+		PaymentProfile savedProfile = PaymentProfileFactory.create(fakeCard, "admin", true, false, user, "Remote Subscriber");
+		paymentProfileRepository.save(savedProfile);
+		//might need to change this one later
+		List<PlanEligibleUser> users = planEligibleUserRepository.getEligibleUsersByUserEmail(user.getLogin());
+		for (PlanEligibleUser eligibleUser : users) {
+			if (eligibleUser.getPlanGroup().getId().equals(planId)) {
+				eligibleUser.setSubscribed(true);
+				planEligibleUserRepository.save(eligibleUser);
+				break;
+			}
+		}
+		PlanSubscription planSubscription = createPlanSubscription(user,planId,
+				savedProfile.getId(), "Remote Subscribed");
+		return planSubscription;
+		
 	}
 }
