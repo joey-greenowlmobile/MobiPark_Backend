@@ -61,12 +61,12 @@ public class GateResource {
                 	SalesActivityDTO salesActivityDTO = salesActivityService.createParkingActivityForPlanUser(user, subscribedPlan);
                 	if(salesActivityDTO!=null){
                 		//open gate
-	                	String result1 = openGate(Constants.ENTER_GATE, salesActivityDTO.getId().toString());
-	                	if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
-	                		result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
-	                	}
-	                	final String result = result1;	                	
-	                	if(result!=null && result.startsWith("OK")){	
+	                	final String result = openGate(1, salesActivityDTO.getId().toString());
+	                	//if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
+	                	//	result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
+	                	//}
+	                	//final String result = result1;	                	
+	                	if(result!=null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){	
 	                		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, salesActivityDTO.getId());	                		
 	                		ticketStatusService.createParkingValTicketStatus(salesActivityDTO.getId(),Constants.PARKING_TICKET_TYPE_ENTER,DateTime.now());
 	                		return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
@@ -99,7 +99,7 @@ public class GateResource {
     }
     
     private String openGate(int gateId, String ticketNo){
-    	parkgateCmdClient parkClient = new parkgateCmdClient("52.71.192.103",2222);
+    	parkgateCmdClient parkClient = new parkgateCmdClient("localhost",2222);
     	return parkClient.openGate(gateId,ticketNo);
     }
     
@@ -115,12 +115,12 @@ public class GateResource {
         }
         ParkingSaleActivity parkingSaleActivity = salesActivityService.findInFlightActivityByUser(user).get(0);
         if(parkingSaleActivity!=null){
-        	String result1 = openGate(Constants.ENTER_GATE,Long.toString(parkingSaleActivity.getId()));
-        	if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
-        		result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
-        	}
-        	final String result = result1;
-        	if(result!=null && result.startsWith("OK")){
+        	final String result = openGate(2,Long.toString(parkingSaleActivity.getId()));
+        	//if(result1!=null && result1.indexOf("OPEN-GATE: NOT-PRESENT")>0){
+        	//	result1 = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";										
+        	//}
+        	//final String result = result1;
+        	if(result!=null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){
         		salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingSaleActivity.getId());
         		ticketStatusService.createParkingValTicketStatus(parkingSaleActivity.getId(),Constants.PARKING_TICKET_TYPE_EXIT,DateTime.now());
         		SalesActivityDTO salesActivityDTO = salesActivityService.contructDTO(parkingSaleActivity, user);

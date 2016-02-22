@@ -38,5 +38,8 @@ public final class Constants {
     public static final int PARKING_TICKET_TYPE_ENTER = 1;
     public static final int PARKING_TICKET_TYPE_EXIT = 2;
     
+    public static final String GATE_OPEN_RESPONSE_1 = "OPEN-GATE: OPEN";
+    public static final String GATE_OPEN_RESPONSE_2 = "OPEN-GATE: ALREADY OPEN";
+    
     
 }
