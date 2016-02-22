@@ -10,6 +10,7 @@ import com.greenowl.callisto.security.AuthoritiesConstants;
 import com.greenowl.callisto.security.SecurityUtils;
 import com.greenowl.callisto.service.EligiblePlanUserService;
 import com.greenowl.callisto.service.ParkingPlanService;
+import com.greenowl.callisto.service.SubscriptionService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.service.register.RegistrationService;
 import com.greenowl.callisto.service.util.UserUtil;
@@ -75,6 +76,9 @@ public class AccountResource {
 	@Inject
 	private ParkingPlanService parkingPlanService;
 
+	@Inject
+	private SubscriptionService subscriptionService;
+
 	/**
 	 * POST /register -> register the user while adding a stripe token and
 	 * return parking plans the user can subscribe.
@@ -98,7 +102,6 @@ public class AccountResource {
 		if (users.size() == 0) {
 			return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"), BAD_REQUEST);
 		}
-
 		String stripeToken = registrationService.stripeRegister(req);
 		if (stripeToken == null) {
 			return new ResponseEntity<>(genericBadReq(STRIPE_FAILED, "/register"), BAD_REQUEST);
@@ -110,14 +113,21 @@ public class AccountResource {
 		if (users.size() == 1) {
 			ParkingPlanDTO parkingPlanDTO = parkingPlanService
 					.createParkingPlanInformation(users.get(0).getPlanGroup());
+			if (users.get(0).getPlanGroup().getUnitChargeAmount() == 0) {
+				LOG.debug("Oh yeah");
+				subscriptionService.autoSubscribe(dto.getId(), parkingPlanDTO.getPlanId());
+			}
 			return new ResponseEntity<>(parkingPlanDTO, OK);
 		}
 		for (PlanEligibleUser user : users) {
 			ParkingPlan plan = user.getPlanGroup();
 			if (plan != null) {
-				parkingPlanDTOs.add(parkingPlanService.createParkingPlanInformation(plan));
+				ParkingPlanDTO parkingPlanDTO = parkingPlanService.createParkingPlanInformation(plan);
+				parkingPlanDTOs.add(parkingPlanDTO);
+				if (user.getPlanGroup().getUnitChargeAmount() == 0) {
+					subscriptionService.autoSubscribe(dto.getId(), parkingPlanDTO.getPlanId());
+				}
 			}
-
 		}
 		return new ResponseEntity<>(parkingPlanDTOs, OK);
 	}
