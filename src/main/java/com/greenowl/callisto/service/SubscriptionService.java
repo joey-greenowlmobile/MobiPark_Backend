@@ -52,10 +52,10 @@ public class SubscriptionService {
 
 	@Inject
 	UserRepository userRepository;
-	
-	@Inject 
+
+	@Inject
 	PlanEligibleUserRepository planEligibleUserRepository;
-	
+
 	public PlanSubscription getPlanSubscriptionById(Long id) {
 		return planSubscriptionRepository.getPlanSubscriptionById(id);
 	}
@@ -88,28 +88,44 @@ public class SubscriptionService {
 		}
 	}
 
+	/**
+	 * Get the all the next day subscription that should be charged.
+	 * 
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
 	public List<PlanSubscription> getNextDayRenewSubscription(DateTime startDate, DateTime endDate) {
 		List<PlanSubscription> nextDaySubscriptions = new ArrayList<>();
 		List<PlanSubscription> allPlanSubscriptions = planSubscriptionRepository.getAllPlanSubscription();
 		for (PlanSubscription plan : allPlanSubscriptions) {
-			if (checkNextDaySubscription(plan, startDate, endDate)&& salesActivityService.validNewTransaction(plan.getUser(), startDate, endDate)) {
+			if (checkNextDaySubscription(plan, startDate, endDate)
+					&& salesActivityService.validNewTransaction(plan.getUser(), startDate, endDate)) {
 				nextDaySubscriptions.add(plan);
 			}
 		}
 		return nextDaySubscriptions;
 	}
 
+	/**
+	 * Check if the subscription should be charged the next day.
+	 * 
+	 * @param subscription
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
 	private boolean checkNextDaySubscription(PlanSubscription subscription, DateTime startDate, DateTime endDate) {
 		Stripe.apiKey = Constants.STRIPE_TEST_KEY;
 		String token = subscription.getUser().getStripeToken();
 		String subToken = subscription.getStripeId();
-		LOG.debug("User token ={} with subToken= {}" ,token,subToken);
+		LOG.debug("User token ={} with subToken= {}", token, subToken);
 		try {
 			Long startTime = Customer.retrieve(token).getSubscriptions().retrieve(subToken).getCurrentPeriodEnd();
-			if (startTime==null){
+			if (startTime == null) {
 				LOG.debug("stripe can't find startTime for user={}", subscription.getUser().getLogin());
 				return false;
-			
+
 			}
 			DateTime rewNewDate = new DateTime(startTime * 1000);
 			if (rewNewDate.isAfter(startDate) && rewNewDate.isBefore(endDate)) {
@@ -122,16 +138,25 @@ public class SubscriptionService {
 			return false;
 		}
 	}
-	
-	public PlanSubscription autoSubscribe(Long userId, Long planId){
-		User user= userRepository.findOne(userId);
+
+	/**
+	 * Auto subscribe the user to plan table if they already paid outside the
+	 * system.
+	 * 
+	 * @param userId
+	 * @param planId
+	 * @return
+	 */
+	public PlanSubscription autoSubscribe(Long userId, Long planId) {
+		User user = userRepository.findOne(userId);
 		CardProfile fakeCard = new CardProfile();
 		fakeCard.setExpMonth((long) 12);
 		fakeCard.setExpYear((long) 2099);
 		fakeCard.setLast4("9999");
-		PaymentProfile savedProfile = PaymentProfileFactory.create(fakeCard, "admin", true, false, user, "Remote Subscriber");
+		PaymentProfile savedProfile = PaymentProfileFactory.create(fakeCard, "admin", true, false, user,
+				"Remote Subscriber");
 		paymentProfileRepository.save(savedProfile);
-		//might need to change this one later
+		// might need to change this one later
 		List<PlanEligibleUser> users = planEligibleUserRepository.getEligibleUsersByUserEmail(user.getLogin());
 		for (PlanEligibleUser eligibleUser : users) {
 			if (eligibleUser.getPlanGroup().getId().equals(planId)) {
@@ -140,9 +165,9 @@ public class SubscriptionService {
 				break;
 			}
 		}
-		PlanSubscription planSubscription = createPlanSubscription(user,planId,
-				savedProfile.getId(), "Remote Subscribed");
+		PlanSubscription planSubscription = createPlanSubscription(user, planId, savedProfile.getId(),
+				"Remote Subscribed");
 		return planSubscription;
-		
+
 	}
 }

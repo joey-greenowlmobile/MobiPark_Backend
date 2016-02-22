@@ -75,7 +75,7 @@ public class AccountResource {
 
 	@Inject
 	private ParkingPlanService parkingPlanService;
-	
+
 	@Inject
 	private SubscriptionService subscriptionService;
 
@@ -113,7 +113,7 @@ public class AccountResource {
 		if (users.size() == 1) {
 			ParkingPlanDTO parkingPlanDTO = parkingPlanService
 					.createParkingPlanInformation(users.get(0).getPlanGroup());
-			if (users.get(0).getPlanGroup().getUnitChargeAmount()==0){
+			if (users.get(0).getPlanGroup().getUnitChargeAmount() == 0) {
 				LOG.debug("Oh yeah");
 				subscriptionService.autoSubscribe(dto.getId(), parkingPlanDTO.getPlanId());
 			}
@@ -122,10 +122,10 @@ public class AccountResource {
 		for (PlanEligibleUser user : users) {
 			ParkingPlan plan = user.getPlanGroup();
 			if (plan != null) {
-				ParkingPlanDTO parkingPlanDTO=parkingPlanService.createParkingPlanInformation(plan);
+				ParkingPlanDTO parkingPlanDTO = parkingPlanService.createParkingPlanInformation(plan);
 				parkingPlanDTOs.add(parkingPlanDTO);
-				if (user.getPlanGroup().getUnitChargeAmount()==0){
-					subscriptionService.autoSubscribe(dto.getId(),parkingPlanDTO.getPlanId());
+				if (user.getPlanGroup().getUnitChargeAmount() == 0) {
+					subscriptionService.autoSubscribe(dto.getId(), parkingPlanDTO.getPlanId());
 				}
 			}
 		}
