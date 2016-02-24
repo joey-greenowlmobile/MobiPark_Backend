@@ -85,6 +85,7 @@ angular.module('mainApp').controller('TransactionTemplateController', function (
     };
 
     $scope.status = getStatus();
+
     $scope.ok = function () {
         $modalInstance.close(function () {
             $log.info("Closing modal instance.");

@@ -19,12 +19,10 @@ public final class Constants {
     public static final String SYSTEM_ACCOUNT = "system";
 
 	public static final String STRIPE_TEST_KEY="sk_test_ZJmc3FVt5QFtpOp2eAWEGaFJ ";
-    
+
     public static final String RUNTIME_CONFIG_FILE_PATH = "config/config.json";
     public static final Double SERVICE_FEES_PERCENTAGE = 0.2;
-    
-    public static final String  GATE_SIMULATE_MODE = "gate_simulate_mode";
-    
+
 
     public static final String PARKING_STATUS_PARKING_START = "PARKING_START";
     public static final String PARKING_STATUS_PENDING = "PENDING";
@@ -34,12 +32,12 @@ public final class Constants {
     public static final String PARKING_STATUS_EXCEPTION_NO_PASSED = "EXCEPTION_NO PASSED";
     public static final String PARKING_STATUS_EXCEPTION_NO_COMM = "EXCEPTION_NO_COMM";
     public static final String PARKING_STATUS_EXCEPTION_NO_COMM_NO_PASSED = "EXCEPTION_NO_COMM_NO_PASSED";
-    
+
     public static final int PARKING_TICKET_TYPE_ENTER = 1;
     public static final int PARKING_TICKET_TYPE_EXIT = 2;
-    
+
     public static final String GATE_OPEN_RESPONSE_1 = "OPEN-GATE: OPEN";
     public static final String GATE_OPEN_RESPONSE_2 = "OPEN-GATE: ALREADY-OPEN";
-    
-    
+
+
 }
