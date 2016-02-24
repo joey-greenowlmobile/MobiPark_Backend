@@ -23,7 +23,7 @@ public final class Constants {
     public static final String RUNTIME_CONFIG_FILE_PATH = "config/config.json";
     public static final Double SERVICE_FEES_PERCENTAGE = 0.2;
     
-    public static final int  ENTER_GATE = 1;
+    public static final String  GATE_SIMULATE_MODE = "gate_simulate_mode";
     
 
     public static final String PARKING_STATUS_PARKING_START = "PARKING_START";
@@ -39,7 +39,7 @@ public final class Constants {
     public static final int PARKING_TICKET_TYPE_EXIT = 2;
     
     public static final String GATE_OPEN_RESPONSE_1 = "OPEN-GATE: OPEN";
-    public static final String GATE_OPEN_RESPONSE_2 = "OPEN-GATE: ALREADY OPEN";
+    public static final String GATE_OPEN_RESPONSE_2 = "OPEN-GATE: ALREADY-OPEN";
     
     
 }
