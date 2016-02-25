@@ -8,6 +8,7 @@ import com.greenowl.callisto.repository.PaymentProfileRepository;
 import com.greenowl.callisto.service.*;
 import com.greenowl.callisto.web.rest.dto.PaymentProfileDTO;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
+import com.greenowl.callisto.web.rest.dto.SalesRecordDTO;
 import com.greenowl.callisto.web.rest.dto.payment.PaymentPlanRequest;
 import com.stripe.Stripe;
 import com.stripe.exception.*;
@@ -54,6 +55,9 @@ public class PaymentResource {
 
 	@Inject
 	private SalesActivityService salesActivityService;
+	
+	@Inject
+	private SalesRecordService salesRecordService;
 
 	/**
 	 * POST /api/{version}/user/payment -> Register the payment profile for a
@@ -78,13 +82,27 @@ public class PaymentResource {
 			PlanSubscription planSubscription = subscriptionService.createPlanSubscription(user, req.getPlanId(),
 					paymentProfileDTO.getId(), response);
 			if (planSubscription != null) {
-				SalesActivityDTO salesActivityDTO = salesActivityService.savePlanSaleRecord(user,
-						planSubscription);
-				if (salesActivityDTO != null) {
-					return new ResponseEntity<>(OK);
-				} else {
-					LOG.error("Failed at adding to the sales activity table");
+				switch(version){
+				case "v2":
+					SalesRecordDTO salesRecordDTO = salesRecordService.savePlanSaleRecord(user,
+							planSubscription);
+					if (salesRecordDTO != null) {
+						return new ResponseEntity<>(OK);
+					} else {
+						LOG.error("Failed at adding to the sales activity table");
+					}
+					break;
+				default:
+					SalesActivityDTO salesActivityDTO = salesActivityService.savePlanSaleRecord(user,
+							planSubscription);
+					if (salesActivityDTO != null) {
+						return new ResponseEntity<>(OK);
+					} else {
+						LOG.error("Failed at adding to the sales activity table");
+					}
+					break;
 				}
+				
 			}
 			LOG.error("Failed at adding to the subscription table");
 
