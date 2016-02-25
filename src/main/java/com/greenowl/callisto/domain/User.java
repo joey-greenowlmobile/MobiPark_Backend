@@ -86,6 +86,9 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "activityHolder", targetEntity = ParkingSaleActivity.class, fetch = FetchType.LAZY)
     private Set<ParkingSaleActivity> parkingSalesActivities = new HashSet<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "activityHolder", targetEntity = ParkingActivity.class, fetch = FetchType.LAZY)
+    private Set<ParkingActivity> parkingActivities = new HashSet<>();
 
     public User() {
     }

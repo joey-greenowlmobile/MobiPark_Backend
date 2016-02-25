@@ -33,13 +33,20 @@ public class EligiblePlanUserService {
 	@Inject
 	private UserService userService;
 
-	private boolean userIsEligible(String userEmail, Long planId) {
-		Optional<PlanEligibleUser> optionalPlan = planEligibleUserRepository.findOneByUserEmail(userEmail);
-		if (optionalPlan.isPresent()) {
-			PlanEligibleUser existingPlan = optionalPlan.get();
-			return (existingPlan.getId().equals(planId));
+	private String userIsEligible(String userEmail, Long planId) {
+		List<PlanEligibleUser> planList = planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
+		if (planList.size() != 0) {
+			for (PlanEligibleUser plan : planList) {
+				if (plan.getPlanGroup().getId().equals(planId)) {
+					if (plan.getSubscribed() == false) {
+						return "valid";
+					} else {
+						return "User already subscribed";
+					}
+				}
+			}
 		}
-		return false;
+		return "Not eligible plan user";
 	}
 
 	public List<PlanEligibleUser> getPlansByUserEmail(String userEmail) {
@@ -49,9 +56,8 @@ public class EligiblePlanUserService {
 	public String subscribePlan(String userEmail, Long planId) {
 		String userToken = userService.getUser(userEmail).getStripeToken();
 		ParkingPlan parkingPlan = parkingPlanRepository.getOneParkingPlanById(planId);
-		if (userIsEligible(userEmail, parkingPlan.getId())) {
-			return "Already Subscribed";
-		} else {
+		String response=userIsEligible(userEmail, parkingPlan.getId());
+		if (response.equals("valid")) {
 			Stripe.apiKey = Constants.STRIPE_TEST_KEY;
 			Customer cu;
 			try {
@@ -80,6 +86,10 @@ public class EligiblePlanUserService {
 				return "Subscribe Failed";
 			}
 			return "Failed unexpected";
+
+		} else {
+
+			return response;
 		}
 	}
 }

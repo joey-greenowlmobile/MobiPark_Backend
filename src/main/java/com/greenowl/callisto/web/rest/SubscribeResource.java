@@ -53,6 +53,9 @@ public class SubscribeResource {
 
 	@Inject
 	private SalesActivityService salesActivityService;
+	
+	@Inject
+	private SalesRecordService salesRecordService;
 
 	/**
 	 * GET /api/{version}/user/plan -> Return all the plans that user can
@@ -104,7 +107,17 @@ public class SubscribeResource {
 					paymentProfile.getId(), response);
 			if (planSubscription != null) {
 				try {
-					salesActivityService.savePlanSaleRecord(user, planSubscription);
+					switch(apiVersion){
+					case "v1":
+
+						salesRecordService.savePlanSaleRecord(user, planSubscription);
+						break;
+					default:
+
+						salesActivityService.savePlanSaleRecord(user, planSubscription);
+					}
+						
+					
 				} catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
 						| APIException e) {
 					return new ResponseEntity<>(genericBadReq("Failed talking to stripe", "/register"), BAD_REQUEST);
