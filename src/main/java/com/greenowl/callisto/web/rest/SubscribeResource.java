@@ -53,7 +53,7 @@ public class SubscribeResource {
 
 	@Inject
 	private SalesActivityService salesActivityService;
-	
+
 	@Inject
 	private SalesRecordService salesRecordService;
 
@@ -107,17 +107,13 @@ public class SubscribeResource {
 					paymentProfile.getId(), response);
 			if (planSubscription != null) {
 				try {
-					switch(apiVersion){
-					case "v1":
-
+					switch (apiVersion) {
+					case "v2":
 						salesRecordService.savePlanSaleRecord(user, planSubscription);
 						break;
 					default:
-
 						salesActivityService.savePlanSaleRecord(user, planSubscription);
 					}
-						
-					
 				} catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
 						| APIException e) {
 					return new ResponseEntity<>(genericBadReq("Failed talking to stripe", "/register"), BAD_REQUEST);

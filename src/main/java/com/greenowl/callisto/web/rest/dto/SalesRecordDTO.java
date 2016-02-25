@@ -13,13 +13,13 @@ public class SalesRecordDTO {
 	private Long userId;
 
 	private Long planId;
-	
+
 	private String userEmail;
 
 	private String userPhoneNumber;
 
 	private String userLicensePlate;
-	
+
 	private Double chargeAmount;
 
 	private Double serviceAmount;
@@ -27,25 +27,31 @@ public class SalesRecordDTO {
 	private Double netAmount;
 
 	private Long ppId;
-	
+
+	private String invoiceId;
+
+	private DateTime createdDate;
 	private String type;
+
 	public SalesRecordDTO() {
 
 	}
 
 	public SalesRecordDTO(SalesRecord record, User user) {
-		this.id=record.getId();
-		this.lotId=record.getLotId();
-		this.userId=user.getId();
-		this.planId=record.getPlanId();
-		this.userEmail=user.getLogin();
-		this.userPhoneNumber=user.getMobileNumber();
-		this.userLicensePlate=user.getLicensePlate();
-		this.chargeAmount=record.getChargeAmount();
-		this.serviceAmount=record.getServiceAmount();
-		this.netAmount=record.getNetAmount();
-		this.ppId=record.getPpId();
-		this.type=record.getType();
+		this.id = record.getId();
+		this.lotId = record.getLotId();
+		this.userId = user.getId();
+		this.planId = record.getPlanId();
+		this.userEmail = user.getLogin();
+		this.userPhoneNumber = user.getMobileNumber();
+		this.userLicensePlate = user.getLicensePlate();
+		this.chargeAmount = record.getChargeAmount();
+		this.serviceAmount = record.getServiceAmount();
+		this.netAmount = record.getNetAmount();
+		this.ppId = record.getPpId();
+		this.type = record.getType();
+		this.invoiceId = record.getInvoiceId();
+		this.createdDate = record.getCreatedDate();
 	}
 
 	public Long getId() {
@@ -134,6 +140,22 @@ public class SalesRecordDTO {
 
 	public void setPpId(Long ppId) {
 		this.ppId = ppId;
+	}
+
+	public String getInvoiceId() {
+		return invoiceId;
+	}
+
+	public void setInvoiceId(String invoiceId) {
+		this.invoiceId = invoiceId;
+	}
+
+	public DateTime getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(DateTime createdDate) {
+		this.createdDate = createdDate;
 	}
 
 	public String getType() {

@@ -117,7 +117,7 @@ public class ParkingActivityService {
 		return filteredList;
 	}
 	
-	private ParkingActivityDTO contructDTO(ParkingActivity activity, User user){
+	public ParkingActivityDTO contructDTO(ParkingActivity activity, User user){
 		return new ParkingActivityDTO(activity,user);
 	}
 	
