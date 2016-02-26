@@ -12,6 +12,7 @@ import com.greenowl.callisto.service.ParkingValTicketStatusService;
 import com.greenowl.callisto.service.SalesActivityService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.service.config.ConfigService;
+import com.greenowl.callisto.util.ApiUtil;
 import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
@@ -44,17 +45,26 @@ public class GateResource {
 
     @Inject
     private ConfigService configService;
-    
+
     @Inject
     private ParkingActivityService parkingActivityService;
 
-    private Logger logger = LoggerFactory.getLogger(GateResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GateResource.class);
 
     @RequestMapping(value = "/enter",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
     public ResponseEntity<?> enterParkingLot(@PathVariable("apiVersion") final String apiVersion, @RequestBody GateOpenRequest req) {
+        if (ApiUtil.getVersion().getValue() == 2) {
+            LOG.info("Returning V2 for Enter Parking Lot API.");
+            return enterParkingLotV2(req);
+        }
+        LOG.info("Returning V1 for Enter Parking Lot API.");
+        return enterParkingLotV1(req);
+    }
+
+    private ResponseEntity<?> enterParkingLotV1(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (salesActivityService.findInFlightActivityByUser(user).size() != 0) {
             return new ResponseEntity<>(genericBadReq("User already inside parking lot, can't open gate.", "/gate"),
@@ -96,11 +106,7 @@ public class GateResource {
         }
     }
 
-    @RequestMapping(value = "/enterV2",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional(readOnly = false)
-    public ResponseEntity<?> enterParkingLotV2(@PathVariable("apiVersion") final String apiVersion, @RequestBody GateOpenRequest req) {
+    private ResponseEntity<?> enterParkingLotV2(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (parkingActivityService.findInFlightActivityByUser(user).size() != 0) {
             return new ResponseEntity<>(genericBadReq("User already inside parking lot, can't open gate.", "/gate"),
@@ -115,12 +121,12 @@ public class GateResource {
                         //open gate
                         final String result = openGate(1, parkingActivityDTO.getId().toString());
                         if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
-                        	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingActivityDTO.getId());
+                            parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingActivityDTO.getId());
                             ticketStatusService.createParkingValTicketStatus(parkingActivityDTO.getId(), Constants.PARKING_TICKET_TYPE_ENTER, DateTime.now());
                             return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
                         } else {
-                        	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, parkingActivityDTO.getId());
-                        	parkingActivityService.updateGateResponse(result, parkingActivityDTO.getId());
+                            parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, parkingActivityDTO.getId());
+                            parkingActivityService.updateGateResponse(result, parkingActivityDTO.getId());
                             return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate：" + result, "/gate"),
                                     org.springframework.http.HttpStatus.BAD_REQUEST);
                         }
@@ -142,16 +148,15 @@ public class GateResource {
         }
     }
 
-    
-    
+
     private String openGate(int gateId, String ticketNo) {
         parkgateCmdClient parkClient = new parkgateCmdClient("localhost", 2222);
         String response = parkClient.openGate(gateId, ticketNo);
-        Boolean simulateMode = configService.get(AppConfigKey.GATE_SIMULATION_MODE.name(), Boolean.class);
-        logger.info("GATE_SIMULATE_MODE:" + simulateMode);
-        if (simulateMode != null && simulateMode && response != null && response.contains("OPEN-GATE: NOT-PRESENT")) {
+        Boolean simulateMode = configService.get(AppConfigKey.GATE_SIMULATION_MODE.name(), Boolean.class, false);
+        LOG.info("GATE_SIMULATE_MODE:" + simulateMode);
+        if (simulateMode && response != null && response.contains("OPEN-GATE: NOT-PRESENT")) {
             response = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";
-            logger.info("replace response with \"OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'\"");
+            LOG.info("replace response with \"OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'\"");
         }
         return response;
     }
@@ -161,6 +166,15 @@ public class GateResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
     public ResponseEntity<?> exitParkingLot(@PathVariable("apiVersion") final String apiVersion, @RequestBody GateOpenRequest req) {
+        if (ApiUtil.getVersion().getValue() == 2) {
+            LOG.info("Returning V2 for Exit Parking Lot API.");
+            return exitParkingLotV1(req);
+        }
+        LOG.info("Returning V1 for Exit Parking Lot API.");
+        return exitParkingLotV2(req);
+    }
+
+    private ResponseEntity<?> exitParkingLotV1(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (salesActivityService.findInFlightActivityByUser(user).size() == 0) {
             return new ResponseEntity<>(genericBadReq("User not in the parking lot, can't open gate.", "/gate"),
@@ -186,12 +200,8 @@ public class GateResource {
         }
     }
 
-    
-    @RequestMapping(value = "/exitV2",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional(readOnly = false)
-    public ResponseEntity<?> exitParkingLotV2(@PathVariable("apiVersion") final String apiVersion, @RequestBody GateOpenRequest req) {
+
+    private ResponseEntity<?> exitParkingLotV2(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (parkingActivityService.findInFlightActivityByUser(user).size() == 0) {
             return new ResponseEntity<>(genericBadReq("User not in the parking lot, can't open gate.", "/gate"),
@@ -201,13 +211,13 @@ public class GateResource {
         if (parkingActivity != null) {
             final String result = openGate(2, Long.toString(parkingActivity.getId()));
             if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
-            	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingActivity.getId());
+                parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingActivity.getId());
                 ticketStatusService.createParkingValTicketStatus(parkingActivity.getId(), Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());
                 ParkingActivityDTO parkingActivityDTO = parkingActivityService.contructDTO(parkingActivity, user);
                 return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
             } else {
-            	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, parkingActivity.getId());
-            	parkingActivityService.updateGateResponse(result, parkingActivity.getId());
+                parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, parkingActivity.getId());
+                parkingActivityService.updateGateResponse(result, parkingActivity.getId());
                 return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate:" + result, "/gate"),
                         org.springframework.http.HttpStatus.BAD_REQUEST);
             }
