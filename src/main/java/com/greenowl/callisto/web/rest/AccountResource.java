@@ -1,6 +1,7 @@
 package com.greenowl.callisto.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.greenowl.callisto.config.ErrorCodeConstants;
 import com.greenowl.callisto.domain.Authority;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.PlanEligibleUser;
@@ -19,6 +20,9 @@ import com.greenowl.callisto.web.rest.dto.PasswordUpdateDTO;
 import com.greenowl.callisto.web.rest.dto.UserDTO;
 import com.greenowl.callisto.web.rest.dto.user.CreateUserRequest;
 import com.greenowl.callisto.web.rest.dto.user.UpdateAccountRequest;
+
+import io.swagger.annotations.ApiOperation;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,25 +90,32 @@ public class AccountResource {
 	@RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Timed
 	@Transactional(readOnly = false)
+	@ApiOperation(notes = "Test Test", value = "registerAccount")
 	public ResponseEntity<?> registerAccount(@PathVariable("apiVersion") final String apiVersion,
 			@Valid @RequestBody CreateUserRequest req) {
 		Optional<User> optional = userRepository.findOneByLogin(req.getEmail()); // login
 																					// available
 		if (optional.isPresent()) {
-			return new ResponseEntity<>(genericBadReq(USERNAME_TAKEN, "/register"), BAD_REQUEST);
+			return new ResponseEntity<>(
+					genericBadReq(USERNAME_TAKEN, "/register", ErrorCodeConstants.REGISTER_USERNAME_TAKEN),
+					BAD_REQUEST);
 		}
 		Optional<User> optUSer = userRepository.findOneByMobileNumber(req.getMobileNumber());
 		if (optUSer.isPresent()) {
-			return new ResponseEntity<>(genericBadReq(PHONE_NUM_TAKEN, "/register"), BAD_REQUEST);
+			return new ResponseEntity<>(
+					genericBadReq(PHONE_NUM_TAKEN, "/register", ErrorCodeConstants.REGISTER_PHONENUM_TAKEN),
+					BAD_REQUEST);
 		}
 		// Check for plan eligibility
 		List<PlanEligibleUser> users = eligiblePlanUserService.getPlansByUserEmail(req.getEmail());
 		if (users.size() == 0) {
-			return new ResponseEntity<>(genericBadReq(PLAN_NOT_FOUND, "/register"), BAD_REQUEST);
+			return new ResponseEntity<>(
+					genericBadReq(PLAN_NOT_FOUND, "/register", ErrorCodeConstants.REGISTER_PLAN_NOTFOUND), BAD_REQUEST);
 		}
 		String stripeToken = registrationService.stripeRegister(req);
 		if (stripeToken == null) {
-			return new ResponseEntity<>(genericBadReq(STRIPE_FAILED, "/register"), BAD_REQUEST);
+			return new ResponseEntity<>(
+					genericBadReq(STRIPE_FAILED, "/register", ErrorCodeConstants.REGISTER_STRIPE_FAILED), BAD_REQUEST);
 		}
 
 		UserDTO dto = registrationService.register(req, stripeToken);

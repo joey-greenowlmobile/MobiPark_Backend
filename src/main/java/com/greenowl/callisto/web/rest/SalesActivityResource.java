@@ -1,10 +1,28 @@
 package com.greenowl.callisto.web.rest;
 
-import com.greenowl.callisto.config.Constants;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.SalesRecord;
-import com.greenowl.callisto.repository.PlanSubscriptionRepository;
 import com.greenowl.callisto.repository.SalesActivityRepository;
 import com.greenowl.callisto.repository.SalesRecordRepository;
 import com.greenowl.callisto.service.SalesActivityService;
@@ -13,32 +31,6 @@ import com.greenowl.callisto.service.SubscriptionService;
 import com.greenowl.callisto.util.ApiUtil;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.dto.SalesRecordDTO;
-import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
-import com.stripe.Stripe;
-import com.stripe.exception.APIConnectionException;
-import com.stripe.exception.APIException;
-import com.stripe.exception.AuthenticationException;
-import com.stripe.exception.CardException;
-import com.stripe.exception.InvalidRequestException;
-import com.stripe.model.Invoice;
-
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/{apiVersion}/parking")
