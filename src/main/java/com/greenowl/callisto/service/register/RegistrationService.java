@@ -29,63 +29,69 @@ import static com.greenowl.callisto.security.AuthoritiesConstants.USER;
 @Service
 public class RegistrationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RegistrationService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RegistrationService.class);
 
-    @Inject
-    private PasswordEncoder passwordEncoder;
+	@Inject
+	private PasswordEncoder passwordEncoder;
 
-    @Inject
-    private AuthorityRepository authorityRepository;
+	@Inject
+	private AuthorityRepository authorityRepository;
 
-    @Inject
-    private UserRepository userRepository;
+	@Inject
+	private UserRepository userRepository;
 
-    @Inject
-    private MailService mailService;
+	@Inject
+	private MailService mailService;
 
-    public UserDTO register(CreateUserRequest req, String stripeToken) {
-        return createUserInformation(req.getEmail(), req.getFirstName(), req.getLastName(),
-                req.getRegion(), req.getLicensePlate(), req.getMobileNumber(), req.getPassword(), stripeToken);
-    }
+	public UserDTO register(CreateUserRequest req, String stripeToken) {
+		return createUserInformation(req.getEmail(), req.getFirstName(), req.getLastName(), req.getRegion(),
+				req.getLicensePlate(), req.getMobileNumber(), req.getPassword(), stripeToken);
+	}
 
-    public String stripeRegister(CreateUserRequest req) {
-        Stripe.apiKey = Constants.STRIPE_TEST_KEY;
-        Map<String, Object> customerParams = new HashMap<String, Object>();
-        if (req.getFirstName() != null | req.getLastName() != null) {
-            customerParams.put("description", req.getFirstName() + req.getLastName());
-        }
-        customerParams.put("email", req.getEmail());
-        try {
-            Customer cu = Customer.create(customerParams);
-            return cu.getId();
-        } catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
-                | APIException e) {
-            return null;
-        }
+	/**
+	 * Register user based on user email on stripe.
+	 * 
+	 * @param req
+	 * @return
+	 */
+	public String stripeRegister(CreateUserRequest req) {
+		Stripe.apiKey = Constants.STRIPE_TEST_KEY;
+		Map<String, Object> customerParams = new HashMap<String, Object>();
+		if (req.getFirstName() != null | req.getLastName() != null) {
+			customerParams.put("description", req.getFirstName() + req.getLastName());
+		}
+		customerParams.put("email", req.getEmail());
+		try {
+			Customer cu = Customer.create(customerParams);
+			return cu.getId();
+		} catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
+				| APIException e) {
+			return null;
+		}
 
-    }
+	}
 
-    /**
-     * Create a new user and persist that user into the data store.
-     *
-     * @param email
-     * @param firstName
-     * @param lastName
-     * @return newUser
-     */
-    private UserDTO createUserInformation(String email, String firstName, String lastName,
-                                          String region, String licensePlate, String mobileNumber, String desiredPassword, String stripeToken) {
-        Authority authority = authorityRepository.findOne(USER);
-        Set<Authority> authorities = new HashSet<>();
-        authorities.add(authority);
-        String encryptedPassword = passwordEncoder.encode(desiredPassword);
-        User newUser = UserFactory.create(email, firstName, lastName, region, licensePlate, mobileNumber, encryptedPassword, authorities, stripeToken);
-        LOG.debug("Created Information for User: {}", newUser);
-        User savedUser = userRepository.save(newUser);
-        UserDTO dto = UserUtil.getUserDTO(savedUser);
-        LOG.info("Returning newly created user {}", dto);
-        return dto;
-    }
-
+	/**
+	 * Create a new user and persist that user into the data store.
+	 *
+	 * @param email
+	 * @param firstName
+	 * @param lastName
+	 * @return newUser
+	 */
+	private UserDTO createUserInformation(String email, String firstName, String lastName, String region,
+			String licensePlate, String mobileNumber, String desiredPassword, String stripeToken) {
+		Authority authority = authorityRepository.findOne(USER);
+		Set<Authority> authorities = new HashSet<>();
+		authorities.add(authority);
+		String encryptedPassword = passwordEncoder.encode(desiredPassword);
+		User newUser = UserFactory.create(email, firstName, lastName, region, licensePlate, mobileNumber,
+				encryptedPassword, authorities, stripeToken);
+		LOG.debug("Created Information for User: {}", newUser);
+		User savedUser = userRepository.save(newUser);
+		UserDTO dto = UserUtil.getUserDTO(savedUser);
+		LOG.info("Returning newly created user {}", dto);
+		return dto;
+	}
 
 }

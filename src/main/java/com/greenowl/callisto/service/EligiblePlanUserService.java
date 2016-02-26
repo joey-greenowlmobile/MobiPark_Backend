@@ -53,10 +53,18 @@ public class EligiblePlanUserService {
 		return planEligibleUserRepository.getEligibleUsersByUserEmail(userEmail);
 	}
 
+	/**
+	 * Subscribe the plan based on the username on stripe and create an instance
+	 * in the subscription table.
+	 * 
+	 * @param userEmail
+	 * @param planId
+	 * @return
+	 */
 	public String subscribePlan(String userEmail, Long planId) {
 		String userToken = userService.getUser(userEmail).getStripeToken();
 		ParkingPlan parkingPlan = parkingPlanRepository.getOneParkingPlanById(planId);
-		String response=userIsEligible(userEmail, parkingPlan.getId());
+		String response = userIsEligible(userEmail, parkingPlan.getId());
 		if (response.equals("valid")) {
 			Stripe.apiKey = Constants.STRIPE_TEST_KEY;
 			Customer cu;

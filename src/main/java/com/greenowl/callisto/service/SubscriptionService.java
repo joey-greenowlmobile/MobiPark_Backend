@@ -140,7 +140,7 @@ public class SubscriptionService {
 	}
 
 	/**
-	 * Auto subscribe the user to plan table if they already paid outside the
+	 * Auto subscribe the user to plan table if they already paid out of the
 	 * system.
 	 * 
 	 * @param userId

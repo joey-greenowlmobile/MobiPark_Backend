@@ -10,8 +10,10 @@ import com.greenowl.callisto.repository.SalesRecordRepository;
 import com.greenowl.callisto.service.SalesActivityService;
 import com.greenowl.callisto.service.SalesRecordService;
 import com.greenowl.callisto.service.SubscriptionService;
+import com.greenowl.callisto.util.ApiUtil;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.dto.SalesRecordDTO;
+import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
 import com.stripe.Stripe;
 import com.stripe.exception.APIConnectionException;
 import com.stripe.exception.APIException;
@@ -63,11 +65,27 @@ public class SalesActivityResource {
 	 * GET /api/{version}/parking/records -> Returns a list of records between a
 	 * start and end date of type :type.
 	 */
+
 	@RequestMapping(value = "/records", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Transactional(readOnly = false)
 	public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion,
 			@RequestParam(defaultValue = "all") final String type, @RequestParam(required = false) final Long start,
 			@RequestParam(required = false) final Long end) {
+		if (ApiUtil.getVersion().getValue() == 2) {
+			LOG.info("Returning V2 for Get Records API.");
+			return getRecordsV2(type, start, end);
+		}
+		LOG.info("Returning V1 for Get Records API.");
+		return getRecordsV1(type, start, end);
+	}
+	/**
+	 * Get parking and sales records for old table.
+	 * @param type
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	private ResponseEntity<?> getRecordsV1(String type, Long start, Long end) {
 		LOG.debug("Checking for records using type = {}, for start date = {} and end date = {}", type, start, end);
 		List<ParkingSaleActivity> parkingSaleActivities;
 		if (type.equals("all")) {
@@ -87,12 +105,15 @@ public class SalesActivityResource {
 		return new ResponseEntity<>(salesActivityDTOs, OK);
 
 	}
-
-	@RequestMapping(value = "/recordsV2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	@Transactional(readOnly = false)
-	public ResponseEntity<?> getRecordsV2(@PathVariable("apiVersion") final String apiVersion,
-			@RequestParam(defaultValue = "all") final String type, @RequestParam(required = false) final Long start,
-			@RequestParam(required = false) final Long end) {
+	
+	/**
+	 * Get sales records in new table.
+	 * @param type
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	private ResponseEntity<?> getRecordsV2(String type, Long start, Long end) {
 		LOG.debug("Checking for records using type = {}, for start date = {} and end date = {}", type, start, end);
 		List<SalesRecord> salesRecords;
 		if (type.equals("all")) {
@@ -100,13 +121,13 @@ public class SalesActivityResource {
 		} else {
 			DateTime startDate = new DateTime(start * 1000);
 			DateTime endDate = new DateTime(end * 1000);
-			salesRecords = salesRecordService.findAllFilteredSalesRecordsBetweenStartAndEndDate(startDate,
-					endDate, type);
+			salesRecords = salesRecordService.findAllFilteredSalesRecordsBetweenStartAndEndDate(startDate, endDate,
+					type);
 		}
 
 		List<SalesRecordDTO> salesRecordDTOs = new ArrayList<>();
-		salesRecordDTOs.addAll(salesRecords.stream().map(salesRecord -> salesRecordService
-				.contructDTO(salesRecord, salesRecord.getActivityHolder()))
+		salesRecordDTOs.addAll(salesRecords.stream()
+				.map(salesRecord -> salesRecordService.contructDTO(salesRecord, salesRecord.getActivityHolder()))
 				.collect(Collectors.toList()));
 		LOG.info("Returning {} records", salesRecordDTOs.size());
 		return new ResponseEntity<>(salesRecordDTOs, OK);
