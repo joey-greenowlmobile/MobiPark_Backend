@@ -39,5 +39,6 @@ public final class Constants {
     public static final String GATE_OPEN_RESPONSE_1 = "OPEN-GATE: OPEN";
     public static final String GATE_OPEN_RESPONSE_2 = "OPEN-GATE: ALREADY-OPEN";
 
-
+    public static final String  GATE_API_IP = "GATE_API_IP";
+    public static final String  GATE_API_PORT = "GATE_API_PORT";
 }

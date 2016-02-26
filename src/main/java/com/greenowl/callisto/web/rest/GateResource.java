@@ -163,7 +163,9 @@ public class GateResource {
 	}
 
 	private String openGate(int gateId, String ticketNo) {
-		parkgateCmdClient parkClient = new parkgateCmdClient("localhost", 2222);
+		String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
+    	Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
+    	parkgateCmdClient parkClient = new parkgateCmdClient(ip,port);
 		String response = parkClient.openGate(gateId, ticketNo);
 		Boolean simulateMode = configService.get(AppConfigKey.GATE_SIMULATION_MODE.name(), Boolean.class, false);
 		LOG.info("GATE_SIMULATE_MODE:" + simulateMode);
