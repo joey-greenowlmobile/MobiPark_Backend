@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,6 +37,9 @@ public class SubscriptionService {
 
 	@Inject
 	private PlanEligibleUserRepository planEligibleUserRepository;
+	
+	@Inject
+	private SalesRecordService salesRecordService;
 
 	public PlanSubscription getPlanSubscriptionById(Long id) {
 		return planSubscriptionRepository.getPlanSubscriptionById(id);
@@ -68,25 +73,24 @@ public class SubscriptionService {
 		}
 	}
 
-	//TODO: lingfei port to split SalesRecord and ParkingActivity
-//	/**
-//	 * Get the all the next day subscription that should be charged.
-//	 *
-//	 * @param startDate
-//	 * @param endDate
-//	 * @return
-//	 */
-//	public List<PlanSubscription> getNextDayRenewSubscription(DateTime startDate, DateTime endDate) {
-//		List<PlanSubscription> nextDaySubscriptions = new ArrayList<>();
-//		List<PlanSubscription> allPlanSubscriptions = planSubscriptionRepository.getAllPlanSubscription();
-//		for (PlanSubscription plan : allPlanSubscriptions) {
-//			if (checkNextDaySubscription(plan, startDate, endDate)
-//					&& salesActivityService.validNewTransaction(plan.getUser(), startDate, endDate)) {
-//				nextDaySubscriptions.add(plan);
-//			}
-//		}
-//		return nextDaySubscriptions;
-//	}
+	/**
+	 * Get the all the next day subscription that should be charged.
+	 *
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public List<PlanSubscription> getNextDayRenewSubscription(DateTime startDate, DateTime endDate) {
+		List<PlanSubscription> nextDaySubscriptions = new ArrayList<>();
+		List<PlanSubscription> allPlanSubscriptions = planSubscriptionRepository.getAllPlanSubscription();
+		for (PlanSubscription plan : allPlanSubscriptions) {
+			if (checkNextDaySubscription(plan, startDate, endDate)
+					&& salesRecordService.validNewTransaction(plan.getUser(), startDate, endDate)) {
+				nextDaySubscriptions.add(plan);
+			}
+		}
+		return nextDaySubscriptions;
+	}
 
 	/**
 	 * Check if the subscription should be charged the next day.
