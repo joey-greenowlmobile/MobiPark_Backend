@@ -1,0 +1,105 @@
+<h1>Sales</h1>
+
+<form>
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon"><i class="glyphicon glyphicon-search"></i></div>
+            <input type="text" class="form-control" placeholder="Search By Status" ng-model="searchRecord">
+        </div>
+    </div>
+</form>
+<table class="table table-bordered table-striped">
+
+    <thead>
+    <tr>
+        <td>
+            <a href="#" ng-click="sortType = 'id'; sortReverse = !sortReverse">
+                ID
+                <span ng-show="sortType == 'id' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'id' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            <a href="#" ng-click="sortType = 'invoiceId'; sortReverse = !sortReverse">
+                Lot Id
+                <span ng-show="sortType == 'invoiceId' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'invoiceId' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            <a href="#" ng-click="sortType = 'lotId'; sortReverse = !sortReverse">
+                Lot Id
+                <span ng-show="sortType == 'lotId' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'lotId' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            <a href="#" ng-click="sortType = 'planId'; sortReverse = !sortReverse">
+                Plan Id
+                <span ng-show="sortType == 'planId' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'planId' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            <a href="#" ng-click="sortType = 'userEmail'; sortReverse = !sortReverse">
+                Email
+                <span ng-show="sortType == 'userEmail' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'userEmail' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            <a href="#" ng-click="sortType = 'createdDate'; sortReverse = !sortReverse">
+                Created
+                <span ng-show="sortType == 'createdDate' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'createdDate' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            <a href="#" ng-click="sortType = 'chargeAmount'; sortReverse = !sortReverse">
+                Amount Charged
+                <span ng-show="sortType == 'chargeAmount' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'chargeAmount' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            Action
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="record in records | orderBy:sortType:sortReverse | filter:searchRecord">
+        <td>{{record.id}}</td>
+        <td>{{record.invoiceId}}</td>
+        <td>{{record.lotId}}</td>
+        <td>{{record.planId}}</td>
+        <td>{{record.userEmail}}</td>
+        <td>{{record.createdDate | date:'h:mma'}}</td>
+        <td>${{record.chargeAmount}}</td>
+        <td>
+            <button class="btn btn-sm btn-primary" ng-click="openModal(record)">View Details</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/ng-template" id="saleTemplate.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Sale: </h3>
+    </div>
+    <div class="modal-body">
+        <b> Id: </b> {{record.id}} </br>
+        </br>
+        <b> Email: </b> {{record.userEmail}} </br>
+        <b> Phone Number: </b> {{record.userPhoneNumber}} </br>
+        <b> License Plate: </b> {{record.userLicensePlate}} </br>
+        <b> Plan Id: </b> {{record.planId}}  </br>
+        <b> ppId: </b> {{record.ppId}}  </br>
+        <b> Invoice Id: </b> {{record.invoiceId}}  </br>
+        <b> Service Amount Id: </b> ${{record.serviceAmount}}  </br>
+        <b> Charge Amount: </b> ${{record.chargeAmount}}  </br>
+        <b> Date: </b> {{record.createdDate | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    </div>
+</script>

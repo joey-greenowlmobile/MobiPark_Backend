@@ -2,6 +2,7 @@ package com.greenowl.callisto.service.util;
 
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.security.AuthoritiesConstants;
+import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
 import com.greenowl.callisto.web.rest.dto.UserDTO;
 
 import javax.mail.internet.AddressException;
@@ -63,6 +64,19 @@ public class UserUtil {
                 user.getLicensePlate(),
                 user.getMobileNumber(),
                 user.getRegion());
+    }
+
+    public static UserDTO getUserDTOWithparkingStatus(User user, List<String> roles, ParkingActivityDTO dto) {
+        return new UserDTO(user.getId(),
+                user.getLogin(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getLangKey(),
+                roles,
+                user.getStripeToken(),
+                user.getLicensePlate(),
+                user.getMobileNumber(),
+                user.getRegion(), dto);
     }
 
     public static boolean isValidEmail(String input) {

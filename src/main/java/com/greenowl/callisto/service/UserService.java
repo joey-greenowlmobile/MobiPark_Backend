@@ -36,7 +36,6 @@ public class UserService {
     @Inject
     private AuthorityRepository authorityRepository;
 
-    @Async
     public void updateUserInformation(String login, String firstName, String lastName, String region) {
         Optional<User> optional = userRepository.findOneByLogin(login);
         if (!optional.isPresent()) {
