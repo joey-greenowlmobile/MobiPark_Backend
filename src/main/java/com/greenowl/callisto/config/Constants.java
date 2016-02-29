@@ -1,5 +1,6 @@
 package com.greenowl.callisto.config;
 
+
 /**
  * Application constants.
  */
@@ -25,9 +26,11 @@ public final class Constants {
 
 
     public static final String PARKING_STATUS_PARKING_START = "PARKING_START";
-    public static final String PARKING_STATUS_PENDING = "PENDING";
+    public static final String PARKING_STATUS_PENDING_ENTER = "PENDING_ENTER";
+    public static final String PARKING_STATUS_PENDING_EXIT = "PENDING_EXIT";
     public static final String PARKING_STATUS_IN_FLIGHT = "IN_FLIGHT";
-    public static final String PARKING_STATUS_EXCEPTION = "EXCEPTION";
+    public static final String PARKING_STATUS_EXCEPTION_ENTER = "EXCEPTION_ENTER";
+    public static final String PARKING_STATUS_EXCEPTION_EXIT = "EXCEPTION_EXIT";
     public static final String PARKING_STATUS_COMPLETED = "COMPLETED";
     public static final String PARKING_STATUS_EXCEPTION_NO_PASSED = "EXCEPTION_NO PASSED";
     public static final String PARKING_STATUS_EXCEPTION_NO_COMM = "EXCEPTION_NO_COMM";
