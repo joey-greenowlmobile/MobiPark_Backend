@@ -135,7 +135,7 @@ public class ErrorResponse {
 
 		public Builder errorCode(Integer errorCode) {
 			response.setErrorCode(errorCode);
-			return null;
+			return this;
 		}
 
         public ErrorResponse build() {
