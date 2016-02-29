@@ -5,7 +5,6 @@ import com.greenowl.callisto.domain.ParkingActivity;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.User;
 import com.greenowl.callisto.repository.ParkingActivityRepository;
-import com.greenowl.callisto.repository.SalesActivityRepository;
 import com.greenowl.callisto.util.PaginationUtil;
 import com.greenowl.callisto.util.ParkingActivityUtil;
 import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
@@ -27,9 +26,6 @@ public class ParkingActivityService {
 
     @Inject
     private ParkingActivityRepository parkingActivityRepository;
-
-    @Inject
-    private SalesActivityRepository salesActivityRepository;
 
     private List<ParkingActivity> findAllActivityBetween(DateTime startTime, DateTime endTime) {
         return parkingActivityRepository.getParkingActivityBetween(startTime, endTime);

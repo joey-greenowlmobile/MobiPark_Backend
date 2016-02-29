@@ -1,37 +1,20 @@
 package com.greenowl.callisto.service;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.jadira.usertype.dateandtime.joda.PersistentDateTime;
-import org.joda.time.DateTime;
-import org.springframework.stereotype.Service;
-
 import com.greenowl.callisto.config.Constants;
-import com.greenowl.callisto.domain.ParkingPlan;
-import com.greenowl.callisto.domain.PaymentProfile;
-import com.greenowl.callisto.domain.PlanEligibleUser;
-import com.greenowl.callisto.domain.PlanSubscription;
-import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.domain.*;
 import com.greenowl.callisto.factory.PaymentProfileFactory;
-import com.greenowl.callisto.repository.ParkingPlanRepository;
-import com.greenowl.callisto.repository.PaymentProfileRepository;
-import com.greenowl.callisto.repository.PlanEligibleUserRepository;
-import com.greenowl.callisto.repository.PlanSubscriptionRepository;
-import com.greenowl.callisto.repository.UserRepository;
+import com.greenowl.callisto.repository.*;
 import com.greenowl.callisto.web.rest.dto.payment.CardProfile;
 import com.stripe.Stripe;
-import com.stripe.exception.APIConnectionException;
-import com.stripe.exception.APIException;
-import com.stripe.exception.AuthenticationException;
-import com.stripe.exception.CardException;
-import com.stripe.exception.InvalidRequestException;
+import com.stripe.exception.*;
 import com.stripe.model.Customer;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.List;
 
 @Service
 public class SubscriptionService {
@@ -39,22 +22,19 @@ public class SubscriptionService {
 	private final Logger LOG = LoggerFactory.getLogger(SubscriptionService.class);
 
 	@Inject
-	PlanSubscriptionRepository planSubscriptionRepository;
+	private PlanSubscriptionRepository planSubscriptionRepository;
 
 	@Inject
-	ParkingPlanRepository parkingPlanRepository;
+	private ParkingPlanRepository parkingPlanRepository;
 
 	@Inject
-	PaymentProfileRepository paymentProfileRepository;
+	private PaymentProfileRepository paymentProfileRepository;
 
 	@Inject
-	SalesActivityService salesActivityService;
+	private UserRepository userRepository;
 
 	@Inject
-	UserRepository userRepository;
-
-	@Inject
-	PlanEligibleUserRepository planEligibleUserRepository;
+	private PlanEligibleUserRepository planEligibleUserRepository;
 
 	public PlanSubscription getPlanSubscriptionById(Long id) {
 		return planSubscriptionRepository.getPlanSubscriptionById(id);
@@ -62,7 +42,7 @@ public class SubscriptionService {
 
 	/**
 	 * Update plan subscription for a user based on one payment.
-	 * 
+	 *
 	 * @param user
 	 * @param planId
 	 * @param paymentProfileId
@@ -88,28 +68,29 @@ public class SubscriptionService {
 		}
 	}
 
-	/**
-	 * Get the all the next day subscription that should be charged.
-	 * 
-	 * @param startDate
-	 * @param endDate
-	 * @return
-	 */
-	public List<PlanSubscription> getNextDayRenewSubscription(DateTime startDate, DateTime endDate) {
-		List<PlanSubscription> nextDaySubscriptions = new ArrayList<>();
-		List<PlanSubscription> allPlanSubscriptions = planSubscriptionRepository.getAllPlanSubscription();
-		for (PlanSubscription plan : allPlanSubscriptions) {
-			if (checkNextDaySubscription(plan, startDate, endDate)
-					&& salesActivityService.validNewTransaction(plan.getUser(), startDate, endDate)) {
-				nextDaySubscriptions.add(plan);
-			}
-		}
-		return nextDaySubscriptions;
-	}
+	//TODO: lingfei port to split SalesRecord and ParkingActivity
+//	/**
+//	 * Get the all the next day subscription that should be charged.
+//	 *
+//	 * @param startDate
+//	 * @param endDate
+//	 * @return
+//	 */
+//	public List<PlanSubscription> getNextDayRenewSubscription(DateTime startDate, DateTime endDate) {
+//		List<PlanSubscription> nextDaySubscriptions = new ArrayList<>();
+//		List<PlanSubscription> allPlanSubscriptions = planSubscriptionRepository.getAllPlanSubscription();
+//		for (PlanSubscription plan : allPlanSubscriptions) {
+//			if (checkNextDaySubscription(plan, startDate, endDate)
+//					&& salesActivityService.validNewTransaction(plan.getUser(), startDate, endDate)) {
+//				nextDaySubscriptions.add(plan);
+//			}
+//		}
+//		return nextDaySubscriptions;
+//	}
 
 	/**
 	 * Check if the subscription should be charged the next day.
-	 * 
+	 *
 	 * @param subscription
 	 * @param startDate
 	 * @param endDate
@@ -142,7 +123,7 @@ public class SubscriptionService {
 	/**
 	 * Auto subscribe the user to plan table if they already paid out of the
 	 * system.
-	 * 
+	 *
 	 * @param userId
 	 * @param planId
 	 * @return

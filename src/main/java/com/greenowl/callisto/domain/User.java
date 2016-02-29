@@ -84,10 +84,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private Set<PlanSubscription> planSubscriptions = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "activityHolder", targetEntity = ParkingSaleActivity.class, fetch = FetchType.LAZY)
-    private Set<ParkingSaleActivity> parkingSalesActivities = new HashSet<>();
-
-    @JsonIgnore
     @OneToMany(mappedBy = "activityHolder", targetEntity = ParkingActivity.class, fetch = FetchType.LAZY)
     private Set<ParkingActivity> parkingActivities = new HashSet<>();
 
@@ -220,14 +216,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setStripeToken(String stripeToken) {
         this.stripeToken = stripeToken;
-    }
-
-    public Set<ParkingSaleActivity> getParkingSalesActivities() {
-        return parkingSalesActivities;
-    }
-
-    public void setParkingSalesActivities(Set<ParkingSaleActivity> parkingSalesActivities) {
-        this.parkingSalesActivities = parkingSalesActivities;
     }
 
     public Set<ParkingActivity> getParkingActivities() {
