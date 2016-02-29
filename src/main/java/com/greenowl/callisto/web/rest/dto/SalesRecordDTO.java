@@ -1,169 +1,170 @@
 package com.greenowl.callisto.web.rest.dto;
 
-import org.joda.time.DateTime;
-
 import com.greenowl.callisto.domain.SalesRecord;
 import com.greenowl.callisto.domain.User;
 
 public class SalesRecordDTO {
-	private Long id;
+    private Long id;
 
-	private Long lotId;
+    private Long lotId;
 
-	private Long userId;
+    private Long userId;
 
-	private Long planId;
+    private Long planId;
 
-	private String userEmail;
+    private String userEmail;
 
-	private String userPhoneNumber;
+    private String userPhoneNumber;
 
-	private String userLicensePlate;
+    private String userLicensePlate;
 
-	private Double chargeAmount;
+    private Double chargeAmount;
 
-	private Double serviceAmount;
+    private Double serviceAmount;
 
-	private Double netAmount;
+    private Double netAmount;
 
-	private Long ppId;
+    private Long ppId;
 
-	private String invoiceId;
+    private String invoiceId;
 
-	private DateTime createdDate;
-	private String type;
+    private Long createdDate;
 
-	public SalesRecordDTO() {
+    private String type;
 
-	}
+    public SalesRecordDTO() {
 
-	public SalesRecordDTO(SalesRecord record, User user) {
-		this.id = record.getId();
-		this.lotId = record.getLotId();
-		this.userId = user.getId();
-		this.planId = record.getPlanId();
-		this.userEmail = user.getLogin();
-		this.userPhoneNumber = user.getMobileNumber();
-		this.userLicensePlate = user.getLicensePlate();
-		this.chargeAmount = record.getChargeAmount();
-		this.serviceAmount = record.getServiceAmount();
-		this.netAmount = record.getNetAmount();
-		this.ppId = record.getPpId();
-		this.type = record.getType();
-		this.invoiceId = record.getInvoiceId();
-		this.createdDate = record.getCreatedDate();
-	}
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public SalesRecordDTO(SalesRecord record, User user) {
+        this.id = record.getId();
+        this.lotId = record.getLotId();
+        this.userId = user.getId();
+        this.planId = record.getPlanId();
+        this.userEmail = user.getLogin();
+        this.userPhoneNumber = user.getMobileNumber();
+        this.userLicensePlate = user.getLicensePlate();
+        this.chargeAmount = record.getChargeAmount();
+        this.serviceAmount = record.getServiceAmount();
+        this.netAmount = record.getNetAmount();
+        this.ppId = record.getPpId();
+        this.type = record.getType();
+        this.invoiceId = record.getInvoiceId();
+        if (record.getCreatedDate() != null) {
+            this.createdDate = record.getCreatedDate().getMillis();
+        }
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Long getLotId() {
-		return lotId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setLotId(Long lotId) {
-		this.lotId = lotId;
-	}
+    public Long getLotId() {
+        return lotId;
+    }
 
-	public Long getUserId() {
-		return userId;
-	}
+    public void setLotId(Long lotId) {
+        this.lotId = lotId;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public Long getPlanId() {
-		return planId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public void setPlanId(Long planId) {
-		this.planId = planId;
-	}
+    public Long getPlanId() {
+        return planId;
+    }
 
-	public String getUserEmail() {
-		return userEmail;
-	}
+    public void setPlanId(Long planId) {
+        this.planId = planId;
+    }
 
-	public void setUserEmail(String userEmail) {
-		this.userEmail = userEmail;
-	}
+    public String getUserEmail() {
+        return userEmail;
+    }
 
-	public String getUserPhoneNumber() {
-		return userPhoneNumber;
-	}
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
 
-	public void setUserPhoneNumber(String userPhoneNumber) {
-		this.userPhoneNumber = userPhoneNumber;
-	}
+    public String getUserPhoneNumber() {
+        return userPhoneNumber;
+    }
 
-	public String getUserLicensePlate() {
-		return userLicensePlate;
-	}
+    public void setUserPhoneNumber(String userPhoneNumber) {
+        this.userPhoneNumber = userPhoneNumber;
+    }
 
-	public void setUserLicensePlate(String userLicensePlate) {
-		this.userLicensePlate = userLicensePlate;
-	}
+    public String getUserLicensePlate() {
+        return userLicensePlate;
+    }
 
-	public Double getChargeAmount() {
-		return chargeAmount;
-	}
+    public void setUserLicensePlate(String userLicensePlate) {
+        this.userLicensePlate = userLicensePlate;
+    }
 
-	public void setChargeAmount(Double chargeAmount) {
-		this.chargeAmount = chargeAmount;
-	}
+    public Double getChargeAmount() {
+        return chargeAmount;
+    }
 
-	public Double getServiceAmount() {
-		return serviceAmount;
-	}
+    public void setChargeAmount(Double chargeAmount) {
+        this.chargeAmount = chargeAmount;
+    }
 
-	public void setServiceAmount(Double serviceAmount) {
-		this.serviceAmount = serviceAmount;
-	}
+    public Double getServiceAmount() {
+        return serviceAmount;
+    }
 
-	public Double getNetAmount() {
-		return netAmount;
-	}
+    public void setServiceAmount(Double serviceAmount) {
+        this.serviceAmount = serviceAmount;
+    }
 
-	public void setNetAmount(Double netAmount) {
-		this.netAmount = netAmount;
-	}
+    public Double getNetAmount() {
+        return netAmount;
+    }
 
-	public Long getPpId() {
-		return ppId;
-	}
+    public void setNetAmount(Double netAmount) {
+        this.netAmount = netAmount;
+    }
 
-	public void setPpId(Long ppId) {
-		this.ppId = ppId;
-	}
+    public Long getPpId() {
+        return ppId;
+    }
 
-	public String getInvoiceId() {
-		return invoiceId;
-	}
+    public void setPpId(Long ppId) {
+        this.ppId = ppId;
+    }
 
-	public void setInvoiceId(String invoiceId) {
-		this.invoiceId = invoiceId;
-	}
+    public String getInvoiceId() {
+        return invoiceId;
+    }
 
-	public DateTime getCreatedDate() {
-		return createdDate;
-	}
+    public void setInvoiceId(String invoiceId) {
+        this.invoiceId = invoiceId;
+    }
 
-	public void setCreatedDate(DateTime createdDate) {
-		this.createdDate = createdDate;
-	}
+    public Long getCreatedDate() {
+        return createdDate;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public void setCreatedDate(Long createdDate) {
+        this.createdDate = createdDate;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
 }

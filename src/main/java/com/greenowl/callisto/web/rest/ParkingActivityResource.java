@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequestMapping("/api/{apiVersion}/parkingActivity")
+@RequestMapping("/api/{apiVersion}/parking")
 public class ParkingActivityResource {
 
     @Inject

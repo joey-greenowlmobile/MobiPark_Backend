@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequestMapping("/api/{apiVersion}/parking")
+@RequestMapping("/api/{apiVersion}/sales")
 public class SalesActivityResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(SalesActivityResource.class);
