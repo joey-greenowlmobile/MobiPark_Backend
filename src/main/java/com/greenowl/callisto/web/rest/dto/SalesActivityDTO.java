@@ -22,9 +22,9 @@ public class SalesActivityDTO {
 
     private String planName;
 
-    private DateTime planSubscriptionDate;
+    private Long planSubscriptionDate;
 
-    private DateTime planExpiryDate;
+    private Long planExpiryDate;
 
     private Double chargeAmount;
 
@@ -34,31 +34,31 @@ public class SalesActivityDTO {
 
     private Long ppId;
 
-    private DateTime entryDateTime;
+    private Long entryDateTime;
 
-    private DateTime exitDateTime;
+    private Long exitDateTime;
 
     private String parkingStatus;
 
     private String exceptionFlag;
 
     private String invoiceId;
-    
+
     private String gateResponse;
 
     public String getGateResponse() {
-		return gateResponse;
-	}
+        return gateResponse;
+    }
 
-	public void setGateResponse(String gateResponse) {
-		this.gateResponse = gateResponse;
-	}
+    public void setGateResponse(String gateResponse) {
+        this.gateResponse = gateResponse;
+    }
 
-	public SalesActivityDTO() {
+    public SalesActivityDTO() {
     }
 
     public SalesActivityDTO(Long id, Long lotId, User user, Long planId, String planName, DateTime planSubscriptionDate,
-    		DateTime planExpiryDate, Double chargeAmount, Double serviceAmount,
+                            DateTime planExpiryDate, Double chargeAmount, Double serviceAmount,
                             Double netAmount, Long ppId, DateTime entryDateTime, DateTime exitDateTime, String parkingStatus,
                             String exceptionFlag, String invoiceId) {
         this.id = id;
@@ -67,16 +67,24 @@ public class SalesActivityDTO {
         this.userEmail = user.getLogin();
         this.userPhoneNumber = user.getMobileNumber();
         this.userLicensePlate = user.getLicensePlate();
-        this.planName=planName;
+        this.planName = planName;
         this.planId = planId;
-        this.planSubscriptionDate = planSubscriptionDate;
-        this.planExpiryDate = planExpiryDate;
+        if (planSubscriptionDate != null) {
+            this.planSubscriptionDate = planSubscriptionDate.getMillis();
+        }
+        if (planExpiryDate != null) {
+            this.planExpiryDate = planExpiryDate.getMillis();
+        }
         this.chargeAmount = chargeAmount;
         this.serviceAmount = serviceAmount;
         this.netAmount = netAmount;
         this.ppId = ppId;
-        this.entryDateTime = entryDateTime;
-        this.exitDateTime = exitDateTime;        
+        if (entryDateTime != null) {
+            this.entryDateTime = entryDateTime.getMillis();
+        }
+        if (exitDateTime != null) {
+            this.exitDateTime = exitDateTime.getMillis();
+        }
         this.parkingStatus = parkingStatus;
         this.exceptionFlag = exceptionFlag;
         this.invoiceId = invoiceId;
@@ -146,22 +154,6 @@ public class SalesActivityDTO {
         this.planName = planName;
     }
 
-    public DateTime getPlanSubscriptionDate() {
-        return planSubscriptionDate;
-    }
-
-    public void setPlanSubscriptionDate(DateTime planSubscriptionDate) {
-        this.planSubscriptionDate = planSubscriptionDate;
-    }
-
-    public DateTime getPlanExpiryDate() {
-        return planExpiryDate;
-    }
-
-    public void setPlanExpiryDate(DateTime planExpiryDate) {
-        this.planExpiryDate = planExpiryDate;
-    }
-
     public Double getChargeAmount() {
         return chargeAmount;
     }
@@ -194,22 +186,6 @@ public class SalesActivityDTO {
         this.ppId = ppId;
     }
 
-    public DateTime getEntryDateTime() {
-        return entryDateTime;
-    }
-
-    public void setEntryDateTime(DateTime entryDateTime) {
-        this.entryDateTime = entryDateTime;
-    }
-
-    public DateTime getExitDateTime() {
-        return exitDateTime;
-    }
-
-    public void setExitDateTime(DateTime exitDateTime) {
-        this.exitDateTime = exitDateTime;
-    }
-
     public String getParkingStatus() {
         return parkingStatus;
     }
@@ -232,6 +208,38 @@ public class SalesActivityDTO {
 
     public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
+    }
+
+    public Long getPlanSubscriptionDate() {
+        return planSubscriptionDate;
+    }
+
+    public void setPlanSubscriptionDate(Long planSubscriptionDate) {
+        this.planSubscriptionDate = planSubscriptionDate;
+    }
+
+    public Long getPlanExpiryDate() {
+        return planExpiryDate;
+    }
+
+    public void setPlanExpiryDate(Long planExpiryDate) {
+        this.planExpiryDate = planExpiryDate;
+    }
+
+    public Long getEntryDateTime() {
+        return entryDateTime;
+    }
+
+    public void setEntryDateTime(Long entryDateTime) {
+        this.entryDateTime = entryDateTime;
+    }
+
+    public Long getExitDateTime() {
+        return exitDateTime;
+    }
+
+    public void setExitDateTime(Long exitDateTime) {
+        this.exitDateTime = exitDateTime;
     }
 
     @Override

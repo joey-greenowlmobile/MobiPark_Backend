@@ -21,7 +21,6 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User activityHolder;
 
-
     @Column(name = "user_email")
     private String userEmail;
 
@@ -74,11 +73,11 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
 
     @Column(name = "invoice_id")
     private String invoiceId;
-       
+
     @Column(name = "gate_response")
     private String gateResponse;
 
-    
+
 	public Long getId() {
         return id;
     }
@@ -239,5 +238,5 @@ public class ParkingSaleActivity extends AbstractAuditingEntity implements Seria
 		this.gateResponse = gateResponse;
 	}
 
-    
+
 }

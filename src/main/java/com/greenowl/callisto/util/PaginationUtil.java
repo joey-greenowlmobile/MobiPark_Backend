@@ -37,7 +37,7 @@ public class PaginationUtil {
         return new PageRequest(offset - 1, limit);
     }
 
-    public static Pageable generateDescSortedIdequest(Integer offset, Integer limit){
+    public static Pageable generateDescSortedIdrequest(Integer offset, Integer limit){
         if (offset == null || offset < MIN_OFFSET) {
             offset = DEFAULT_OFFSET;
         }

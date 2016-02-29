@@ -38,6 +38,8 @@ public class UserDTO implements Serializable {
 
     private List<String> roles;
 
+    private ParkingActivityDTO latestParkingActivityStatus; // user's latest parking status
+
     public UserDTO() {
     }
 
@@ -53,6 +55,21 @@ public class UserDTO implements Serializable {
         this.licensePlate = licensePlate;
         this.mobileNumber = mobileNumber;
         this.region = region;
+    }
+
+    public UserDTO(Long id, String email, String firstName, String lastName,
+                   String langKey, List<String> roles, String stripeToken, String licensePlate, String mobileNumber, String region, ParkingActivityDTO parkingActivityDTO) {
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.langKey = langKey;
+        this.roles = roles;
+        this.stripeToken = stripeToken;
+        this.licensePlate = licensePlate;
+        this.mobileNumber = mobileNumber;
+        this.region = region;
+        this.latestParkingActivityStatus = parkingActivityDTO;
     }
 
     public Long getId() {
@@ -135,6 +152,14 @@ public class UserDTO implements Serializable {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public ParkingActivityDTO getLatestParkingActivityStatus() {
+        return latestParkingActivityStatus;
+    }
+
+    public void setLatestParkingActivityStatus(ParkingActivityDTO latestParkingActivityStatus) {
+        this.latestParkingActivityStatus = latestParkingActivityStatus;
     }
 
     @Override

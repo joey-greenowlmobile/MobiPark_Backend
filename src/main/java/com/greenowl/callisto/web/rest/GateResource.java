@@ -14,6 +14,8 @@ import com.greenowl.callisto.service.SalesActivityService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.service.config.ConfigService;
 import com.greenowl.callisto.util.ApiUtil;
+import com.greenowl.callisto.util.ParkingActivityUtil;
+import com.greenowl.callisto.util.SalesActivityUtil;
 import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
 import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
@@ -226,7 +228,7 @@ public class GateResource {
 				salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingSaleActivity.getId());
 				ticketStatusService.createParkingValTicketStatus(parkingSaleActivity.getId(),
 						Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());
-				SalesActivityDTO salesActivityDTO = salesActivityService.contructDTO(parkingSaleActivity, user);
+				SalesActivityDTO salesActivityDTO = SalesActivityUtil.constructDTO(parkingSaleActivity, user);
 				return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
 			} else {
 				salesActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION,
@@ -257,7 +259,7 @@ public class GateResource {
 				parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING, parkingActivity.getId());
 				ticketStatusService.createParkingValTicketStatus(parkingActivity.getId(),
 						Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());
-				ParkingActivityDTO parkingActivityDTO = parkingActivityService.contructDTO(parkingActivity, user);
+				ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
 				return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
 			} else {
 				parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION, parkingActivity.getId());
@@ -285,7 +287,7 @@ public class GateResource {
 		parkingSaleActivity.setExceptionFlag(reason);
 		// Gate Open
 		// salesActivityRepository.save(parkingSaleActivity);
-		SalesActivityDTO salesActivityDTO = salesActivityService.contructDTO(parkingSaleActivity, user);
+		SalesActivityDTO salesActivityDTO = SalesActivityUtil.constructDTO(parkingSaleActivity, user);
 		return new ResponseEntity<>(salesActivityDTO, org.springframework.http.HttpStatus.OK);
 	}
 }
