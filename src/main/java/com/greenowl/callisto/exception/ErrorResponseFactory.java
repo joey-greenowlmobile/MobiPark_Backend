@@ -42,10 +42,21 @@ public class ErrorResponseFactory {
                     .build();
     }
 
+    public static ErrorResponse fullMessage(String message, Integer status, String error, String api, Integer errorCode){
+    	return ErrorResponse.getBuidler()
+                .message(message)
+                .error(error)
+                .path(api)
+                .status(status)
+                .errorCode(errorCode)
+                .build();
+    }
     public static ErrorResponse genericBadReq(String message, String api){
         return fullMessage(message, HttpStatus.SC_BAD_REQUEST, BAD_REQUEST_MSG, api);
     }
-
+    public static ErrorResponse genericBadReq(String message, String api, Integer errorCode){
+    	return fullMessage(message, HttpStatus.SC_BAD_REQUEST, BAD_REQUEST_MSG, api, errorCode);
+    }
     public static ErrorResponse notFound(String message, String api){
         return fullMessage(message, HttpStatus.SC_NOT_FOUND, NOT_FOUND_MSG, api);
     }

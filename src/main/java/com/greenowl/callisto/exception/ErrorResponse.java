@@ -1,6 +1,7 @@
 package com.greenowl.callisto.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.greenowl.callisto.exception.ErrorResponse.Builder;
 import com.greenowl.callisto.util.ApiUtil;
 import org.joda.time.DateTime;
 
@@ -21,7 +22,9 @@ public class ErrorResponse {
     private String message;
 
     private String path;
-
+    
+    private Integer errorCode;
+    
     private String apiVersion;
 
     @JsonIgnore
@@ -83,7 +86,15 @@ public class ErrorResponse {
         this.apiVersion = apiVersion;
     }
 
-    public static Builder getBuidler() {
+    public Integer getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(Integer errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	public static Builder getBuidler() {
         return new Builder();
     }
 
@@ -122,10 +133,16 @@ public class ErrorResponse {
             return this;
         }
 
+		public Builder errorCode(Integer errorCode) {
+			response.setErrorCode(errorCode);
+			return null;
+		}
+
         public ErrorResponse build() {
             response.setTimestamp(DateTime.now().getMillis());
             return response;
         }
+
 
 
     }

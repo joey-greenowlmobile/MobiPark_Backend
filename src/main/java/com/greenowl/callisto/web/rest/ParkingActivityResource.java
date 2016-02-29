@@ -28,14 +28,17 @@ import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
 @RestController
 @RequestMapping("/api/{apiVersion}/parkingActivity")
 public class ParkingActivityResource {
-	
+
 	@Inject
 	private ParkingActivityRepository parkingActivityRepository;
-	
+
 	@Inject
 	private ParkingActivityService parkingActivityService;
 	private static final Logger LOG = LoggerFactory.getLogger(ParkingActivityResource.class);
 
+	/**
+	 * POST /records -> get the parking activities based on type.
+	 */
 	@RequestMapping(value = "/records", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Transactional(readOnly = false)
 	public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion,
@@ -53,9 +56,8 @@ public class ParkingActivityResource {
 		}
 
 		List<ParkingActivityDTO> parkingActivityDTOs = new ArrayList<>();
-		parkingActivityDTOs.addAll(parkingActivities.stream()
-				.map(parkingActivity -> parkingActivityService.contructDTO(parkingActivity, parkingActivity.getActivityHolder()))
-				.collect(Collectors.toList()));
+		parkingActivityDTOs.addAll(parkingActivities.stream().map(parkingActivity -> parkingActivityService
+				.contructDTO(parkingActivity, parkingActivity.getActivityHolder())).collect(Collectors.toList()));
 		LOG.info("Returning {} records", parkingActivityDTOs.size());
 		return new ResponseEntity<>(parkingActivityDTOs, OK);
 

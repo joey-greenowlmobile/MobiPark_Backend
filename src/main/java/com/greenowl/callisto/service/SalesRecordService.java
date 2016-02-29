@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.greenowl.callisto.config.Constants;
-import com.greenowl.callisto.domain.ParkingSaleActivity;
 import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.SalesRecord;
 import com.greenowl.callisto.domain.User;
@@ -21,7 +20,6 @@ import com.greenowl.callisto.repository.ParkingPlanRepository;
 import com.greenowl.callisto.repository.PlanSubscriptionRepository;
 import com.greenowl.callisto.repository.SalesRecordRepository;
 import com.greenowl.callisto.repository.UserRepository;
-import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
 import com.greenowl.callisto.web.rest.dto.SalesRecordDTO;
 import com.stripe.Stripe;
 import com.stripe.exception.APIConnectionException;

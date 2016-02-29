@@ -1,36 +1,52 @@
 package com.greenowl.callisto.web.rest.stripe;
 
-import com.greenowl.callisto.config.Constants;
-import com.greenowl.callisto.domain.PaymentProfile;
-import com.greenowl.callisto.domain.PlanSubscription;
-import com.greenowl.callisto.domain.User;
-import com.greenowl.callisto.repository.PaymentProfileRepository;
-import com.greenowl.callisto.service.*;
-import com.greenowl.callisto.web.rest.dto.PaymentProfileDTO;
-import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
-import com.greenowl.callisto.web.rest.dto.SalesRecordDTO;
-import com.greenowl.callisto.web.rest.dto.payment.PaymentPlanRequest;
-import com.stripe.Stripe;
-import com.stripe.exception.*;
-import com.stripe.model.Customer;
-import com.stripe.model.ExternalAccount;
+import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
+import com.greenowl.callisto.config.Constants;
+import com.greenowl.callisto.domain.PaymentProfile;
+import com.greenowl.callisto.domain.PlanSubscription;
+import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.repository.PaymentProfileRepository;
+import com.greenowl.callisto.service.EligiblePlanUserService;
+import com.greenowl.callisto.service.SalesActivityService;
+import com.greenowl.callisto.service.SalesRecordService;
+import com.greenowl.callisto.service.StripeAccountService;
+import com.greenowl.callisto.service.SubscriptionService;
+import com.greenowl.callisto.service.UserService;
+import com.greenowl.callisto.web.rest.dto.PaymentProfileDTO;
+import com.greenowl.callisto.web.rest.dto.SalesActivityDTO;
+import com.greenowl.callisto.web.rest.dto.SalesRecordDTO;
+import com.greenowl.callisto.web.rest.dto.payment.PaymentPlanRequest;
+import com.stripe.Stripe;
+import com.stripe.exception.APIConnectionException;
+import com.stripe.exception.APIException;
+import com.stripe.exception.AuthenticationException;
+import com.stripe.exception.CardException;
+import com.stripe.exception.InvalidRequestException;
+import com.stripe.model.Customer;
+import com.stripe.model.ExternalAccount;
 
 @RestController
 @RequestMapping("/api/{version}/user/")
