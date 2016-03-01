@@ -1,5 +1,6 @@
 package com.greenowl.callisto.web.rest;
-  
+
+import com.codahale.metrics.annotation.Timed;
 import com.greenowl.callisto.config.AppConfigKey;
 import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.config.ErrorCodeConstants;
@@ -21,29 +22,29 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-  
+
 import javax.inject.Inject;
-  
+
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
-  
+
 @RestController
 @RequestMapping("/api/{apiVersion}/parking")
 public class GateResource {
-  
+
     @Inject
     private ParkingValTicketStatusService ticketStatusService;
-  
+
     @Inject
     private UserService userService;
-  
+
     @Inject
     private ConfigService configService;
-  
+
     @Inject
     private ParkingActivityService parkingActivityService;
-  
+
     private static final Logger LOG = LoggerFactory.getLogger(GateResource.class);
-  
+
     /**
      * POST /enter -> open the entrance gate of the parking lot.
      */
@@ -53,7 +54,8 @@ public class GateResource {
                                              @RequestBody GateOpenRequest req) {
         return enterParkingLot(req);
     }
-  
+
+    @Timed
     private ResponseEntity<?> enterParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (parkingActivityService.findInFlightActivityByUser(user).size() != 0) {
@@ -110,7 +112,8 @@ public class GateResource {
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
     }
-  
+
+    @Timed
     private String openGate(int gateId, String ticketNo) {
         String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
         Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
@@ -124,7 +127,7 @@ public class GateResource {
         }
         return response;
     }
-  
+
     /**
      * POST /exit -> open the exit gate of the parking lot.
      */
@@ -134,8 +137,9 @@ public class GateResource {
                                             @RequestBody GateOpenRequest req) {
         return exitParkingLot(req);
     }
-  
-  
+
+
+    @Timed
     private ResponseEntity<?> exitParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (parkingActivityService.findInFlightActivityByUser(user).size() == 0) {
@@ -165,5 +169,5 @@ public class GateResource {
                     ErrorCodeConstants.GATE_RECORD_NOTFOUND), org.springframework.http.HttpStatus.BAD_REQUEST);
         }
     }
-  
+
 }
