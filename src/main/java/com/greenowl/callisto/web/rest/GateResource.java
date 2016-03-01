@@ -1,5 +1,6 @@
 package com.greenowl.callisto.web.rest;
 
+import com.codahale.metrics.annotation.Timed;
 import com.greenowl.callisto.config.AppConfigKey;
 import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.config.ErrorCodeConstants;
@@ -54,6 +55,7 @@ public class GateResource {
         return enterParkingLot(req);
     }
 
+    @Timed
     private ResponseEntity<?> enterParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (parkingActivityService.findInFlightActivityByUser(user).size() != 0) {
@@ -111,6 +113,7 @@ public class GateResource {
         }
     }
 
+    @Timed
     private String openGate(int gateId, String ticketNo) {
         String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
         Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
@@ -136,6 +139,7 @@ public class GateResource {
     }
 
 
+    @Timed
     private ResponseEntity<?> exitParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         if (parkingActivityService.findInFlightActivityByUser(user).size() == 0) {

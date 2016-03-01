@@ -94,7 +94,7 @@ public class ErrorResponse {
 		this.errorCode = errorCode;
 	}
 
-	public static Builder getBuidler() {
+	public static Builder getBuilder() {
         return new Builder();
     }
 

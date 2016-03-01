@@ -34,7 +34,7 @@ public class ErrorResponseFactory {
     }
 
     public static ErrorResponse fullMessage(String message, Integer status, String error, String api){
-        return ErrorResponse.getBuidler()
+        return ErrorResponse.getBuilder()
                     .message(message)
                     .error(error)
                     .path(api)
@@ -43,7 +43,7 @@ public class ErrorResponseFactory {
     }
 
     public static ErrorResponse fullMessage(String message, Integer status, String error, String api, Integer errorCode){
-    	return ErrorResponse.getBuidler()
+    	return ErrorResponse.getBuilder()
                 .message(message)
                 .error(error)
                 .path(api)
@@ -74,7 +74,7 @@ public class ErrorResponseFactory {
     }
 
     public static ErrorResponse serverError(String message, String exception, String api){
-        return ErrorResponse.getBuidler()
+        return ErrorResponse.getBuilder()
                 .message(message)
                 .path(api)
                 .exception(exception)
