@@ -27,6 +27,9 @@ public interface ParkingActivityRepository extends JpaRepository<ParkingActivity
     @Query("select u from ParkingActivity u where u.activityHolder = ?1")
     List<ParkingActivity> getParkingActivitiesByUser(User activityHolder);
 
+    @Query("select u from ParkingActivity u where u.activityHolder = ?1 and u.type = ?2")
+    ParkingActivity getParkingActivityByUserAndType(User user, String type);
+
     @Query("select u from ParkingActivity u where u.type = ?1")
     List<ParkingActivity> getParkingActivitiesByType(String type);
 

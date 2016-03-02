@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 
@@ -58,7 +59,9 @@ public class GateResource {
     @Timed
     private ResponseEntity<?> enterParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
-        if (parkingActivityService.findInFlightActivityByUser(user).size() != 0) {
+        // No in flight record Exists.
+        Optional<ParkingActivity> optional = parkingActivityService.getInFlightRecordForUser(user);
+        if (optional.isPresent()) {
             return new ResponseEntity<>(
                     genericBadReq("User already inside parking lot, can't open gate.", "/gate",
                             ErrorCodeConstants.GATE_USER_INSIDE_PARKING_LOT),
@@ -85,7 +88,7 @@ public class GateResource {
                                     parkingActivityDTO.getId());
                             parkingActivityService.updateGateResponse(result, parkingActivityDTO.getId());
                             return new ResponseEntity<>(
-                                    genericBadReq("ERROR-Failed to open parking gateďź" + result, "/gate",
+                                    genericBadReq("ERROR-Failed to open parking gate" + result, "/gate",
                                             ErrorCodeConstants.GATE_OPEN_FAILED),
                                     org.springframework.http.HttpStatus.BAD_REQUEST);
                         }
@@ -116,7 +119,7 @@ public class GateResource {
     @Timed
     private String openGate(int gateId, String ticketNo) {
         String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
-        Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
+        Integer port = configService.get(Constants.GATE_API_PORT, Integer.class, 2222);
         parkgateCmdClient parkClient = new parkgateCmdClient(ip, port);
         String response = parkClient.openGate(gateId, ticketNo);
         Boolean simulateMode = configService.get(AppConfigKey.GATE_SIMULATION_MODE.name(), Boolean.class, false);

@@ -65,6 +65,20 @@ public class ParkingActivityService {
         return inFlightActivities;
     }
 
+    /**
+     * Returning the latest in flight parking activity for a particular user.
+     *
+     * @param user the User this parking activity should belong to.
+     * @return
+     */
+    public Optional<ParkingActivity> getInFlightRecordForUser(User user) {
+        return findByTypeAndUser(user, Constants.PARKING_STATUS_IN_FLIGHT);
+    }
+
+    private Optional<ParkingActivity> findByTypeAndUser(User user, String type) {
+        ParkingActivity activity = parkingActivityRepository.getParkingActivityByUserAndType(user, type);
+        return (activity == null) ? Optional.empty() : Optional.of(activity);
+    }
 
     /**
      * Return all the activities between start date and end date based on the
