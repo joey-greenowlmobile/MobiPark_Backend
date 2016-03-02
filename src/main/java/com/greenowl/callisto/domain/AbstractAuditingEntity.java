@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -32,7 +33,7 @@ public abstract class AbstractAuditingEntity {
     @CreatedDate
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     @Column(name = "created_date", nullable = false)
-    private DateTime createdDate = DateTime.now();
+    private DateTime createdDate = DateTime.now(DateTimeZone.UTC);
 
     @LastModifiedBy
     @Column(name = "last_modified_by", length = 50)
@@ -42,7 +43,7 @@ public abstract class AbstractAuditingEntity {
     @LastModifiedDate
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     @Column(name = "last_modified_date")
-    private DateTime lastModifiedDate = DateTime.now();
+    private DateTime lastModifiedDate = DateTime.now(DateTimeZone.UTC);
 
     public String getCreatedBy() {
         return createdBy;
