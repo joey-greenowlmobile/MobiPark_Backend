@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ParkingActivityRepository extends JpaRepository<ParkingActivity, String> {
+public interface ParkingActivityRepository extends JpaRepository<ParkingActivity, Long> {
 
 
     @Query("select u from ParkingActivity u where u.id = ?1")
