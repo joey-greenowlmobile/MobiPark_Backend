@@ -1,12 +1,14 @@
 package com.greenowl.callisto.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.greenowl.callisto.config.AppConfigKey;
 import com.greenowl.callisto.config.ErrorCodeConstants;
 import com.greenowl.callisto.domain.*;
 import com.greenowl.callisto.repository.UserRepository;
 import com.greenowl.callisto.security.AuthoritiesConstants;
 import com.greenowl.callisto.security.SecurityUtils;
 import com.greenowl.callisto.service.*;
+import com.greenowl.callisto.service.config.ConfigService;
 import com.greenowl.callisto.service.register.RegistrationService;
 import com.greenowl.callisto.service.util.UserUtil;
 import com.greenowl.callisto.util.ParkingActivityUtil;
@@ -76,6 +78,9 @@ public class AccountResource {
     @Inject
     private ParkingActivityService parkingActivityService;
 
+    @Inject
+    private ConfigService configService;
+
     /**
      * POST /register -> register the user while adding a stripe token and
      * return parking plans the user can subscribe.
@@ -105,10 +110,18 @@ public class AccountResource {
             return new ResponseEntity<>(
                     genericBadReq(PLAN_NOT_FOUND, "/register", ErrorCodeConstants.REGISTER_PLAN_NOTFOUND), BAD_REQUEST);
         }
-        String stripeToken = registrationService.stripeRegister(req);
-        if (stripeToken == null) {
-            return new ResponseEntity<>(
-                    genericBadReq(STRIPE_FAILED, "/register", ErrorCodeConstants.REGISTER_STRIPE_FAILED), BAD_REQUEST);
+        // Check to see if payment is enabled atm.
+        Boolean stripeEnabled = configService.get(AppConfigKey.STRIPE_ENABLED.name(), Boolean.class, false);
+        String stripeToken = null;
+        if (stripeEnabled) {
+            LOG.info("Stripe payment provider is currently enabled. Attempting to add payment info during registration flow.");
+            stripeToken = registrationService.stripeRegister(req);
+            if (stripeToken == null) {
+                return new ResponseEntity<>(
+                        genericBadReq(STRIPE_FAILED, "/register", ErrorCodeConstants.REGISTER_STRIPE_FAILED), BAD_REQUEST);
+            }
+        } else {
+            LOG.info("Stripe is currently disabled. Not proceeding with payment info during registration flow.");
         }
 
         UserDTO dto = registrationService.register(req, stripeToken);
