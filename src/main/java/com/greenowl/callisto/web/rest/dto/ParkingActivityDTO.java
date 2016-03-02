@@ -19,9 +19,9 @@ public class ParkingActivityDTO {
 
     private Long saleId;
 
-    private Long entryDatetime;
+    private Long entryDateTime;
 
-    private Long exitDatetime;
+    private Long exitDateTime;
 
     private String parkingStatus;
 
@@ -42,10 +42,10 @@ public class ParkingActivityDTO {
         this.type = activity.getType();
         this.saleId = activity.getSaleId();
         if (activity.getEntryDatetime() != null) {
-            this.entryDatetime = activity.getEntryDatetime().getMillis();
+            this.entryDateTime = activity.getEntryDatetime().getMillis();
         }
         if (activity.getEntryDatetime() != null) {
-            this.exitDatetime = activity.getEntryDatetime().getMillis();
+            this.exitDateTime = activity.getEntryDatetime().getMillis();
         }
         this.parkingStatus = activity.getParkingStatus();
         this.exceptionFlag = activity.getExceptionFlag();
@@ -55,7 +55,7 @@ public class ParkingActivityDTO {
     }
 
     public ParkingActivityDTO(Long id, Long lotId, String userEmail, String userPhoneNumber, String userPlateNumber, String type,
-                              Long saleId, Long entryDatetime, Long exitDatetime, String parkingStatus, String exceptionFlag, Long createdDate) {
+                              Long saleId, Long entryDateTime, Long exitDateTime, String parkingStatus, String exceptionFlag, Long createdDate) {
         this.id = id;
         this.lotId = lotId;
         this.userEmail = userEmail;
@@ -63,8 +63,8 @@ public class ParkingActivityDTO {
         this.userPlateNumber = userPlateNumber;
         this.type = type;
         this.saleId = saleId;
-        this.entryDatetime = entryDatetime;
-        this.exitDatetime = exitDatetime;
+        this.entryDateTime = entryDateTime;
+        this.exitDateTime = exitDateTime;
         this.parkingStatus = parkingStatus;
         this.exceptionFlag = exceptionFlag;
         this.createdDate = createdDate;
@@ -126,20 +126,20 @@ public class ParkingActivityDTO {
         this.saleId = saleId;
     }
 
-    public Long getEntryDatetime() {
-        return entryDatetime;
+    public Long getEntryDateTime() {
+        return entryDateTime;
     }
 
-    public void setEntryDatetime(Long entryDatetime) {
-        this.entryDatetime = entryDatetime;
+    public void setEntryDateTime(Long entryDateTime) {
+        this.entryDateTime = entryDateTime;
     }
 
-    public Long getExitDatetime() {
-        return exitDatetime;
+    public Long getExitDateTime() {
+        return exitDateTime;
     }
 
-    public void setExitDatetime(Long exitDatetime) {
-        this.exitDatetime = exitDatetime;
+    public void setExitDateTime(Long exitDateTime) {
+        this.exitDateTime = exitDateTime;
     }
 
     public String getParkingStatus() {
@@ -177,8 +177,8 @@ public class ParkingActivityDTO {
                 ", userPlateNumber='" + userPlateNumber + '\'' +
                 ", type='" + type + '\'' +
                 ", saleId=" + saleId +
-                ", entryDatetime=" + entryDatetime +
-                ", exitDatetime=" + exitDatetime +
+                ", entryDateTime=" + entryDateTime +
+                ", exitDateTime=" + exitDateTime +
                 ", parkingStatus='" + parkingStatus + '\'' +
                 ", exceptionFlag='" + exceptionFlag + '\'' +
                 '}';
