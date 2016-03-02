@@ -8,6 +8,9 @@ angular.module('mainApp')
         TransactionService.findAll().then(function (response) {
             $log.info("Found " + response.length + " records");
             $scope.records = response;
+            for (var i = 0; i < $scope.records.length; i++) {
+                $scope.records[i].pType = $scope.getType($scope.records[i].parkingStatus);
+            }
         });
 
         // Table sorting
@@ -31,6 +34,29 @@ angular.module('mainApp')
                 $log.info('Modal for transaction template dismissed at: ' + new Date());
             });
         };
+
+        $scope.getUpdatedTime = function (t) {
+            if (t != null) {
+                return t - (5 * 60 * 60 * 1000);
+            }
+            return t;
+        };
+
+        $scope.getType = function (status) {
+            if (status.indexOf("EXCEPTION") > -1) {
+                return -1;
+            }
+
+            if (status.indexOf("COMPLETED") > -1) {
+                return 0;
+            }
+
+            if (status.indexOf("PENDING") > -1) {
+                return 1;
+            }
+            return 2;
+
+        }
 
     });
 
@@ -78,6 +104,12 @@ angular.module('mainApp').controller('TransactionTemplateController', function (
         });
     };
 
+    $scope.getUpdatedTime = function (t) {
+        if (t != null) {
+            return t - (5 * 60 * 60 * 1000);
+        }
+        return t;
+    };
 
     $scope.openGate = function () {
         $scope.cancel();
@@ -108,6 +140,12 @@ angular.module('mainApp').controller('OpenGateController', function ($rootScope,
         alert("Succesfully opened gated.");
     };
 
+    $scope.getUpdatedTime = function (t) {
+        if (t != null) {
+            return t - (5 * 60 * 60 * 1000);
+        }
+        return t;
+    };
 
     $scope.ok = function () {
         $modalInstance.close(function () {

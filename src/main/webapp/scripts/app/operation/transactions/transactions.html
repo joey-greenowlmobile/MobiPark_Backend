@@ -8,7 +8,7 @@
         </div>
     </div>
 </form>
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped" style="text-align:center;vertical-align:middle;">
 
     <thead>
     <tr>
@@ -27,16 +27,31 @@
             </a>
         </td>
         <td>
-            Time in
+            <a href="#" ng-click="sortType = 'entryDateTime'; sortReverse = !sortReverse">
+                Time in
+                <span ng-show="sortType == 'entryDateTime' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'entryDateTime' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
         </td>
         <td>
-            Time Out
+            <a href="#" ng-click="sortType = 'exitDateTime'; sortReverse = !sortReverse">
+                Time in
+                <span ng-show="sortType == 'exitDateTime' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'exitDateTime' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
         </td>
         <td>
-            <a href="#" ng-click="sortType = 'entryDatetime'; sortReverse = !sortReverse">
+            <a href="#" ng-click="sortType = 'userLicensePlate'; sortReverse = !sortReverse">
                 License Plate
-                <span ng-show="sortType == 'entryDatetime' && !sortReverse" class="fa fa-caret-down"></span>
-                <span ng-show="sortType == 'entryDatetime' && sortReverse" class="fa fa-caret-up"></span>
+                <span ng-show="sortType == 'userLicensePlate' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'userLicensePlate' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
+            <a href="#" ng-click="sortType = 'userEmail'; sortReverse = !sortReverse">
+                Email
+                <span ng-show="sortType == 'userEmail' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'userEmail' && sortReverse" class="fa fa-caret-up"></span>
             </a>
         </td>
         <td>
@@ -47,10 +62,16 @@
     <tbody>
     <tr ng-repeat="record in records | orderBy:sortType:sortReverse | filter:searchRecord">
         <td>{{record.id}}</td>
-        <td>{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</td>
-        <td>{{record.entryDateTime | date:'h:mma' }}</td>
-        <td>{{record.exitDateTime | date:'h:mma'}}</td>
+        <td>
+            <span ng-show="record.pType == 2" class="label label-default">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+            <span ng-show="record.pType == -1" class="label label-danger">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+            <span ng-show="record.pType == 0" class="label label-success">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+            <span ng-show="record.pType == 1" class="label label-primary">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+        </td>
+        <td>{{getUpdatedTime(record.entryDateTime) | date: "h:mm a" }}</td>
+        <td>{{getUpdatedTime(record.entryDateTime) | date: "h:mm a" }}</td>
         <td>{{record.userLicensePlate}}</td>
+        <td>{{record.userEmail}}</td>
         <td>
             <button class="btn btn-sm btn-success" ng-click="openModal(record)">manage</button>
         </td>
@@ -77,10 +98,11 @@
         <b> Phone Number: </b> {{record.userPhoneNumber}} </br>
         <b> License Plate: </b> {{record.userLicensePlate}} </br>
         <b> Payment Method: </b>  </br>
-        <b> Subscription Date: </b> {{record.planSubscriptionDate | date:"EEEE MMMM dd, yyyy 'at' h:mma" }} </br>
+        <b> Subscription Date: </b> {{getUpdatedTime(record.planSubscriptionDate) | date:"EEEE MMMM dd, yyyy 'at' h:mma"
+        }} </br>
         <b> Plan: </b> {{record.planName}} </br>
-        <b> Time in: </b> {{record.entryDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
-        <b> Time Out: </b> {{record.exitDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+        <b> Time in: </b> {{getUpdatedTime(record.entryDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+        <b> Time Out: </b> {{getUpdatedTime(record.exitDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" ng-click="openGate()">Gate Operations</button>

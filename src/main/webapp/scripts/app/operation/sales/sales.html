@@ -73,7 +73,7 @@
         <td>{{record.lotId}}</td>
         <td>{{record.planId}}</td>
         <td>{{record.userEmail}}</td>
-        <td>{{record.createdDate | date:'h:mma'}}</td>
+        <td>{{record.createdDate | date:'h:mma' : -0500}}</td>
         <td>${{record.chargeAmount}}</td>
         <td>
             <button class="btn btn-sm btn-primary" ng-click="openModal(record)">View Details</button>
@@ -97,7 +97,7 @@
         <b> Invoice Id: </b> {{record.invoiceId}}  </br>
         <b> Service Amount Id: </b> ${{record.serviceAmount}}  </br>
         <b> Charge Amount: </b> ${{record.chargeAmount}}  </br>
-        <b> Date: </b> {{record.createdDate | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+        <b> Date: </b> {{record.createdDate | date:"EEEE MMMM dd, yyyy 'at' h:mma" : -0500}}</br>
     </div>
     <div class="modal-footer">
         <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
