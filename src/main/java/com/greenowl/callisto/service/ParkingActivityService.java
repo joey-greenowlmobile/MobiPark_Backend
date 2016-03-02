@@ -49,23 +49,6 @@ public class ParkingActivityService {
     }
 
     /**
-     * Return all the in-flight activities for the user.
-     *
-     * @param user
-     * @return
-     */
-    public List<ParkingActivity> findInFlightActivityByUser(User user) {
-        List<ParkingActivity> parkingActivities = parkingActivityRepository.getParkingActivitiesByUser(user);
-        List<ParkingActivity> inFlightActivities = new ArrayList<ParkingActivity>();
-        for (ParkingActivity activity : parkingActivities) {
-            if (activity.getEntryDatetime() != null && activity.getExitDatetime() == null) {
-                inFlightActivities.add(activity);
-            }
-        }
-        return inFlightActivities;
-    }
-
-    /**
      * Returning the latest in flight parking activity for a particular user.
      *
      * @param user the User this parking activity should belong to.

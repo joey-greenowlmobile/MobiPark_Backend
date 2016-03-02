@@ -145,31 +145,27 @@ public class GateResource {
     @Timed
     private ResponseEntity<?> exitParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
-        if (parkingActivityService.findInFlightActivityByUser(user).size() == 0) {
+        Optional<ParkingActivity> opt = parkingActivityService.getInFlightRecordForUser(user);
+        if (!opt.isPresent()) {
             return new ResponseEntity<>(
                     genericBadReq("User not in the parking lot, can't open gate.", "/gate",
                             ErrorCodeConstants.GATE_USER_NOT_INSIDE_PARKING_LOT),
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
-        ParkingActivity parkingActivity = parkingActivityService.findInFlightActivityByUser(user).get(0);
-        if (parkingActivity != null) {
-            final String result = openGate(2, Long.toString(parkingActivity.getId()));
-            if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
-                    || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
-                parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT, parkingActivity.getId());
-                ticketStatusService.createParkingValTicketStatus(parkingActivity.getId(),
-                        Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());
-                ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
-                return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
-            } else {
-                parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT, parkingActivity.getId());
-                parkingActivityService.updateGateResponse(result, parkingActivity.getId());
-                return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate:" + result, "/gate",
-                        ErrorCodeConstants.GATE_OPEN_FAILED), org.springframework.http.HttpStatus.BAD_REQUEST);
-            }
+        ParkingActivity parkingActivity = opt.get();
+        final String result = openGate(2, Long.toString(parkingActivity.getId()));
+        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
+                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
+            parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT, parkingActivity.getId());
+            ticketStatusService.createParkingValTicketStatus(parkingActivity.getId(),
+                    Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());
+            ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
+            return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(genericBadReq("ERROR-failed to find parking record.", "/gate",
-                    ErrorCodeConstants.GATE_RECORD_NOTFOUND), org.springframework.http.HttpStatus.BAD_REQUEST);
+            parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT, parkingActivity.getId());
+            parkingActivityService.updateGateResponse(result, parkingActivity.getId());
+            return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate:" + result, "/gate",
+                    ErrorCodeConstants.GATE_OPEN_FAILED), org.springframework.http.HttpStatus.BAD_REQUEST);
         }
     }
 
