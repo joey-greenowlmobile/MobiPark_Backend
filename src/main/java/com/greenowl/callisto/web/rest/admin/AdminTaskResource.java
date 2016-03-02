@@ -54,7 +54,7 @@ public class AdminTaskResource {
         if (exitDateTime != null) {
             DateTime dateTime = new DateTime(exitDateTime);
             LOG.info("Setting exit date time for parking activity id = {} to {}", id, exitDateTime);
-            activity.setEntryDatetime(dateTime);
+            activity.setExitDatetime(dateTime);
         }
 
         if (!StringUtils.isEmpty(gateResponse)) {
