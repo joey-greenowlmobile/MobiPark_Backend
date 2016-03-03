@@ -27,10 +27,10 @@ public interface ParkingActivityRepository extends JpaRepository<ParkingActivity
     @Query("select u from ParkingActivity u where u.activityHolder = ?1")
     List<ParkingActivity> getParkingActivitiesByUser(User activityHolder);
 
-    @Query("select u from ParkingActivity u where u.activityHolder = ?1 and u.type = ?2")
+    @Query("select u from ParkingActivity u where u.activityHolder = ?1 and u.parkingStatus = ?2")
     ParkingActivity getParkingActivityByUserAndType(User user, String type);
 
-    @Query("select u from ParkingActivity u where u.type = ?1")
+    @Query("select u from ParkingActivity u where u.parkingStatus = ?1")
     List<ParkingActivity> getParkingActivitiesByType(String type);
 
 
@@ -51,4 +51,8 @@ public interface ParkingActivityRepository extends JpaRepository<ParkingActivity
     @Query("update ParkingActivity u set u.exitDatetime=?1 where u.id = ?2")
     void setExitTime(DateTime time, long id);
 
+    @Modifying
+    @Query("update ParkingActivity u set u.exceptionFlag=?1 where u.id = ?2")
+    void setExceptionFlag(String exceptionFlag, long id);
+    
 }

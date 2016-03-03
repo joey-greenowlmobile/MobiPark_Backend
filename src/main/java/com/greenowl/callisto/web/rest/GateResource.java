@@ -119,12 +119,12 @@ public class GateResource {
     @Timed
     private String openGate(int gateId, String ticketNo) {
         String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
-        Integer port = configService.get(Constants.GATE_API_PORT, Integer.class, 2222);
+        Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
         parkgateCmdClient parkClient = new parkgateCmdClient(ip, port);
         String response = parkClient.openGate(gateId, ticketNo);
-        Boolean simulateMode = configService.get(AppConfigKey.GATE_SIMULATION_MODE.name(), Boolean.class, false);
+        Boolean simulateMode = Boolean.parseBoolean(configService.get(AppConfigKey.GATE_SIMULATION_MODE.name(), String.class, "false"));
         LOG.info("GATE_SIMULATE_MODE:" + simulateMode);
-        if (simulateMode && response != null && response.contains("OPEN-GATE: NOT-PRESENT")) {
+        if (simulateMode && response != null && (response.contains("OPEN-GATE: NOT-PRESENT") || response.contains("Process exited with an error"))) {
             response = "OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'";
             LOG.info("replace response with \"OK Response with 33 chars:'TICKET: T12345 OPEN-GATE: OPEN OK'\"");
         }
@@ -147,6 +147,21 @@ public class GateResource {
         User user = userService.getCurrentUser();
         Optional<ParkingActivity> opt = parkingActivityService.getInFlightRecordForUser(user);
         if (!opt.isPresent()) {
+        	LOG.info("ALARM-ENFORCE-OPEN----user id:"+user.getId()+",request:"+req.toString());
+        	opt = parkingActivityService.getLatestActivityForUser(user);
+        	if(opt.isPresent()){
+        		ParkingActivity parkingActivity = opt.get();
+        	    final String result = openGate(2,parkingActivity.getId().toString());
+        	    if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
+                        || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
+                    parkingActivityService.updateExceptionFlag(Constants.PARKING_EXCEPTION_ENFORCE_OPEN, parkingActivity.getId());
+                    ticketStatusService.createParkingValTicketStatus(parkingActivity.getId(),
+                            Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());        	
+                }
+        	}
+        	else{
+        		LOG.info("ALARM-ENFORCE-OPEN----user id:"+user.getId()+",no parking records");
+        	}
             return new ResponseEntity<>(
                     genericBadReq("User not in the parking lot, can't open gate.", "/gate",
                             ErrorCodeConstants.GATE_USER_NOT_INSIDE_PARKING_LOT),

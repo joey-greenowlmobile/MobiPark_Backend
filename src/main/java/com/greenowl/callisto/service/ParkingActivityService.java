@@ -129,4 +129,8 @@ public class ParkingActivityService {
         return Optional.empty();
     }
 
+    public void updateExceptionFlag(String exceptionFlag, long id){
+    	parkingActivityRepository.setExceptionFlag(exceptionFlag, id);
+    }
+    
 }

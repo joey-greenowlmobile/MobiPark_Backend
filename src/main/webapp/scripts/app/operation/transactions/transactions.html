@@ -1,4 +1,4 @@
-<h1>Transactions</h1>
+<h1>Today Transactions</h1>
 
 <form>
     <div class="form-group">
@@ -35,7 +35,7 @@
         </td>
         <td>
             <a href="#" ng-click="sortType = 'exitDateTime'; sortReverse = !sortReverse">
-                Time in
+                Time out
                 <span ng-show="sortType == 'exitDateTime' && !sortReverse" class="fa fa-caret-down"></span>
                 <span ng-show="sortType == 'exitDateTime' && sortReverse" class="fa fa-caret-up"></span>
             </a>
@@ -69,7 +69,7 @@
             <span ng-show="record.pType == 1" class="label label-primary">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
         </td>
         <td>{{getUpdatedTime(record.entryDateTime) | date: "h:mm a" }}</td>
-        <td>{{getUpdatedTime(record.entryDateTime) | date: "h:mm a" }}</td>
+        <td>{{getUpdatedTime(record.exitDateTime) | date: "h:mm a" }}</td>
         <td>{{record.userLicensePlate}}</td>
         <td>{{record.userEmail}}</td>
         <td>

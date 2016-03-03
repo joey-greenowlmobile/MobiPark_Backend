@@ -44,8 +44,8 @@ public class ParkingActivityDTO {
         if (activity.getEntryDatetime() != null) {
             this.entryDateTime = activity.getEntryDatetime().getMillis();
         }
-        if (activity.getEntryDatetime() != null) {
-            this.exitDateTime = activity.getEntryDatetime().getMillis();
+        if (activity.getExitDatetime() != null) {
+            this.exitDateTime = activity.getExitDatetime().getMillis();
         }
         this.parkingStatus = activity.getParkingStatus();
         this.exceptionFlag = activity.getExceptionFlag();
