@@ -71,8 +71,22 @@ public class GateResource {
             ParkingPlan subscribedPlan = user.getPlanSubscriptions().iterator().next().getPlanGroup();
             if (subscribedPlan != null) {
                 if (subscribedPlan.getLotId() == req.getLotId()) {
-                    ParkingActivityDTO parkingActivityDTO = parkingActivityService
-                            .createParkingActivityForPlanUser(user, subscribedPlan);
+                	ParkingActivityDTO parkingActivityDTO = null;
+                	Optional<ParkingActivity> activities = parkingActivityService.getLatestActivityForUser(user);
+                	if(activities.isPresent()){
+                		ParkingActivity parkingActivity = activities.get();
+                		String parkingStatus = parkingActivity.getParkingStatus();
+                		if(Constants.PARKING_STATUS_PARKING_START.equals(parkingStatus) || Constants.PARKING_STATUS_PENDING_ENTER.equals(parkingStatus) || Constants.PARKING_STATUS_IN_FLIGHT.equals(parkingStatus)){
+                			parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
+                		}
+                		else{
+                			parkingActivityDTO = parkingActivityService.createParkingActivityForPlanUser(user, subscribedPlan);
+                		}
+                	}
+                	else{
+                		parkingActivityDTO = parkingActivityService.createParkingActivityForPlanUser(user, subscribedPlan);
+                	}
+                    
                     if (parkingActivityDTO != null) {
                         // open gate
                         final String result = openGate(1, parkingActivityDTO.getId().toString());
