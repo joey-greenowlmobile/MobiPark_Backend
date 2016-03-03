@@ -77,12 +77,18 @@ public class SalesActivityResource {
 
 	}
 
+	/**
+	 * POST /api/{version}/parking/nextDayTrans -> Create next day transaction.
+	 * 
+	 * @param apiVersion
+	 * @param date
+	 * @return
+	 */
 	@RequestMapping(value = "/nextDayTrans", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Transactional(readOnly = false)
 	public ResponseEntity<?> generateRecords(@PathVariable("apiVersion") final String apiVersion,
 			@RequestParam(required = false) final Long date) {
 		LOG.debug("Generate Pre transaction for  day = {}", date);
-
 		DateTime generateDate;
 		if (date == null) {
 			generateDate = DateTime.now();

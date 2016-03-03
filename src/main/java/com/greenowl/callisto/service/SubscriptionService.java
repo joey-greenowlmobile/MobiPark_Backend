@@ -105,6 +105,9 @@ public class SubscriptionService {
 		String token = subscription.getUser().getStripeToken();
 		String subToken = subscription.getStripeId();
 		LOG.debug("User token ={} with subToken= {}", token, subToken);
+		if(!subToken.startsWith("sub_")){
+			return false;
+		}
 		try {
 			Long startTime = Customer.retrieve(token).getSubscriptions().retrieve(subToken).getCurrentPeriodEnd();
 			if (startTime == null) {

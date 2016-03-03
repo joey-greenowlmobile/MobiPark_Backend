@@ -4,6 +4,7 @@ import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.domain.PlanSubscription;
 import com.greenowl.callisto.domain.SalesRecord;
 import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.repository.PlanSubscriptionRepository;
 import com.greenowl.callisto.repository.SalesRecordRepository;
 import com.greenowl.callisto.util.SalesActivityUtil;
 import com.greenowl.callisto.web.rest.dto.SalesRecordDTO;
@@ -26,6 +27,9 @@ public class SalesRecordService {
 
 	@Inject
 	private SalesRecordRepository salesRecordRepository;
+	
+	@Inject
+	private PlanSubscriptionRepository planSubscriptionRepository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(SalesRecordService.class);
 
@@ -40,7 +44,7 @@ public class SalesRecordService {
 	}
 
 	/**
-	 * Return all the activities between start date and end date based on the
+	 * Return all the records between start date and end date based on the
 	 * filtered type.
 	 *
 	 * @param startTime
@@ -75,9 +79,9 @@ public class SalesRecordService {
 	}
 
 	public boolean validNewTransaction(User user, DateTime startDate, DateTime endDate) {
-		List<SalesRecord> activities = salesRecordRepository.getSalesRecordsBetweenForUser(startDate, endDate, user);
-		for (SalesRecord activity : activities) {
-			if (activity.getChargeAmount() != 0 && activity.getType().equals("PRE_TRANSACTION")) {
+		List<SalesRecord> records = salesRecordRepository.getSalesRecordsBetweenForUser(startDate, endDate, user);
+		for (SalesRecord record : records) {
+			if (record.getChargeAmount() != 0 && record.getType().equals("PRE_TRANSACTION")) {
 				return false;
 			}
 		}
@@ -124,24 +128,80 @@ public class SalesRecordService {
 	}
 
 	public List<SalesRecordDTO> createPreTransaction(List<PlanSubscription> nextDaySubscriptions) {
-		List<SalesRecordDTO> activities = new ArrayList<>();
+		List<SalesRecordDTO> records = new ArrayList<>();
 		for (PlanSubscription plan : nextDaySubscriptions) {
-			activities.add(createActivity(plan));
+			records.add(createrecord(plan));
 		}
-		return activities;
+		return records;
 	}
 
-	private SalesRecordDTO createActivity(PlanSubscription subscription) {
-		SalesRecord activity = new SalesRecord();
-		activity.setPlanId(subscription.getPlanGroup().getId());
-		activity.setLotId(subscription.getPlanGroup().getLotId());
-		activity.setActivityHolder(subscription.getUser());
+	private SalesRecordDTO createrecord(PlanSubscription subscription) {
+		SalesRecord record = new SalesRecord();
+		record.setPlanId(subscription.getPlanGroup().getId());
+		record.setLotId(subscription.getPlanGroup().getLotId());
+		record.setActivityHolder(subscription.getUser());
 		Double totalCharge = subscription.getPlanGroup().getUnitChargeAmount();
-		activity.setChargeAmount(totalCharge);
-		activity.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
-		activity.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
-		activity.setType("PRE_TRANSACTION");
-		salesRecordRepository.save(activity);
-		return SalesActivityUtil.constructDTO(activity, subscription.getUser());
+		record.setChargeAmount(totalCharge);
+		record.setServiceAmount(totalCharge * Constants.SERVICE_FEES_PERCENTAGE);
+		record.setNetAmount(totalCharge * (1 - Constants.SERVICE_FEES_PERCENTAGE));
+		record.setType("PRE_TRANSACTION");
+		salesRecordRepository.save(record);
+		return SalesActivityUtil.constructDTO(record, subscription.getUser());
 	}
+
+//  /**
+//   * Get all the pre-transactions and check the status on stripe, update if
+//   * the payment has been made. (Not fully tested yet)
+//   *
+//   * @param startDate
+//   * @return
+//   */
+  public Long checkEndOfDayTransaction(DateTime startDate) {
+      Long number = (long) 0;
+      List<SalesRecord> records =salesRecordRepository
+              .getSalesRecordsByType("PRE_TRANSACTION");
+      System.out.println(records.size());
+      Stripe.apiKey = Constants.STRIPE_TEST_KEY;
+      for (SalesRecord record : records) {
+          LOG.debug("record ={}", record.getId());
+          User user = record.getActivityHolder();
+          Long time = record.getCreatedDate().getMillis() / 1000;
+          Map<String, Object> invoiceParams = new HashMap<String, Object>();
+          invoiceParams.put("limit", 3);
+          invoiceParams.put("customer", user.getStripeToken());
+          try {
+              List<Invoice> invoices = Invoice.list(invoiceParams).getData();
+              if (planSubscriptionRepository.getPlanSubscriptionByUser(user).size() == 0) {
+                  LOG.debug("User {} is not subscribed", user.getLogin());
+                  break;
+              }
+              PlanSubscription subscription = planSubscriptionRepository.getPlanSubscriptionByUser(user).get(0);
+              String subToken = subscription.getStripeId();
+              for (Invoice invoice : invoices) {
+                  if (invoice.getSubscription().equals(subToken) && invoice.getDate() > time) {
+                      if (invoice.getPaid()) {
+                          if (invoice.getAmountDue().doubleValue() / 100 == subscription.getPlanChargeAmount()) {
+                              LOG.debug("The amount match for subscription ={}", subToken);
+                              record.setInvoiceId(invoice.getId());
+                              record.setType("PAYMENT_COMPLETED");
+                              salesRecordRepository.save(record);
+                              number += 1;
+                              break;
+                          } else {
+                              LOG.debug("The amount doesn't match for subscription ={}", subToken);
+                          }
+                      } else {
+                          LOG.debug("Unpaid invoice {} for user {}", invoice.getId(), user.getStripeToken());
+                      }
+                  }
+              }
+          } catch (AuthenticationException | InvalidRequestException | APIConnectionException | CardException
+                  | APIException e) {
+              LOG.debug("Failed at talking to stripe for user ={}", user.getLogin());
+              e.printStackTrace();
+          }
+      }
+      return number;
+  }
+
 }

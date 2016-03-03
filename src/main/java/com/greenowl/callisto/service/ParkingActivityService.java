@@ -55,11 +55,11 @@ public class ParkingActivityService {
      * @return
      */
     public Optional<ParkingActivity> getInFlightRecordForUser(User user) {
-        return findByTypeAndUser(user, Constants.PARKING_STATUS_IN_FLIGHT);
+        return findByStatusAndUser(user, Constants.PARKING_STATUS_IN_FLIGHT);
     }
 
-    private Optional<ParkingActivity> findByTypeAndUser(User user, String type) {
-        ParkingActivity activity = parkingActivityRepository.getParkingActivityByUserAndType(user, type);
+    private Optional<ParkingActivity> findByStatusAndUser(User user, String status) {
+        ParkingActivity activity = parkingActivityRepository.getParkingActivityByUserAndStatus(user, status);
         return (activity == null) ? Optional.empty() : Optional.of(activity);
     }
 
