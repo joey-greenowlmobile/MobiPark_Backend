@@ -5,17 +5,49 @@ angular.module('mainApp')
 
         $scope.records = [];
 
-        TransactionService.findAll().then(function (response) {
-            $log.info("Found " + response.length + " records");
-            $scope.records = response;
-            for (var i = 0; i < $scope.records.length; i++) {
-                $scope.records[i].pType = $scope.getType($scope.records[i].parkingStatus);
-            }
-        });
+        $scope.daily = true;
+        $scope.loading = false;
+
+        $scope.getRecords = function () {
+            $scope.loading = true;
+
+            TransactionService.findAll().then(function (response) {
+                $log.info("Found " + response.length + " records");
+                $scope.records = response;
+                for (var i = 0; i < $scope.records.length; i++) {
+                    $scope.records[i].pType = $scope.getType($scope.records[i].parkingStatus);
+                }
+                $scope.loading = false;
+            });
+            $scope.daily = false;
+        };
+
+        $scope.getDailyRecords = function () {
+            $scope.loading = true;
+            var start = new Date();
+            start.setHours(0, 0, 0, 0);
+            var estStart = start.getTime() + (5 * 60 * 60 * 1000)
+
+            var end = new Date();
+            end.setHours(23, 59, 59, 999);
+            var estEnd = end.getTime() + (5 * 60 * 60 * 1000);
+
+            TransactionService.findByDateAndType(estStart, estEnd).then(function (response) {
+                $log.info("Found " + response.length + " records");
+                $scope.records = response;
+                for (var i = 0; i < $scope.records.length; i++) {
+                    $scope.records[i].pType = $scope.getType($scope.records[i].parkingStatus);
+                }
+                $scope.loading = false;
+            });
+
+            $scope.daily = true;
+
+        };
 
         // Table sorting
         $scope.sortType = 'id'; // set the default sort type
-        $scope.sortReverse = false;  // set the default sort order
+        $scope.sortReverse = true;  // set the default sort order
         $scope.searchRecord = '';     // set the default search/filter term
 
         $scope.openModal = function (transaction) {
@@ -56,7 +88,9 @@ angular.module('mainApp')
             }
             return 2;
 
-        }
+        };
+
+        $scope.getDailyRecords();
 
     });
 

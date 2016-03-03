@@ -10,19 +10,7 @@ angular.module('mainApp')
             },
             findByDateAndType: function (fromDate, toDate) {
 
-                var formatDate = function (dateToFormat) {
-                    if (dateToFormat !== undefined && !angular.isString(dateToFormat)) {
-                        return dateToFormat.getYear() + '-' + dateToFormat.getMonth() + '-' + dateToFormat.getDay();
-                    }
-                    return dateToFormat;
-                };
-
-                return $http.get('api/audits/byDates', {
-                    params: {
-                        fromDate: formatDate(fromDate),
-                        toDate: formatDate(toDate)
-                    }
-                }).then(function (response) {
+                return $http.get('api/' + API_VERSION + '/parking/records?start=' + fromDate + "&end=" + toDate).then(function (response) {
                     return response.data;
                 });
             }

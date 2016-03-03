@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +27,7 @@ public class ParkingActivityService {
     private ParkingActivityRepository parkingActivityRepository;
 
     private List<ParkingActivity> findAllActivityBetween(DateTime startTime, DateTime endTime) {
+        LOG.debug("Looking for records between startTime = {} and endTime = {}", startTime, endTime);
         return parkingActivityRepository.getParkingActivityBetween(startTime, endTime);
     }
 
@@ -67,44 +67,10 @@ public class ParkingActivityService {
      * Return all the activities between start date and end date based on the
      * filtered type.
      *
-     * @param type
      * @return
      */
-    public List<ParkingActivity> findAllFilteredActivityBetweenStartAndEndDate(DateTime start, DateTime end,
-                                                                               String type) {
-        List<ParkingActivity> filteredList = new ArrayList<>();
-        List<ParkingActivity> parkingActivities = findAllActivityBetween(start, end);
-        for (ParkingActivity activity : parkingActivities) {
-            switch (type.toLowerCase()) {
-                case "all":
-                    filteredList.add(activity);
-                    break;
-                case "inflight":
-                    if (activity.getParkingStatus() != null) {
-                        if (activity.getParkingStatus().equals("IN_FLIGHT")) {
-                            filteredList.add(activity);
-                        }
-                    }
-                    break;
-                case "park":
-                    if (activity.getEntryDatetime() != null) {
-                        if (activity.getParkingStatus().equals("COMPLETED")) {
-                            filteredList.add(activity);
-                        }
-                    }
-                    break;
-                case "exception":
-                    if (activity.getParkingStatus() != null) {
-                        if (activity.getParkingStatus().equals("EXCEPTION")) {
-                            filteredList.add(activity);
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        return filteredList;
+    public List<ParkingActivity> findAllActivitiesBetweenStartAndEndDates(DateTime start, DateTime end) {
+        return findAllActivityBetween(start, end);
     }
 
     public void updateParkingStatus(String parkingStatus, long id) {
@@ -130,7 +96,7 @@ public class ParkingActivityService {
     }
 
     public void updateExceptionFlag(String exceptionFlag, long id){
-    	parkingActivityRepository.setExceptionFlag(exceptionFlag, id);
+        parkingActivityRepository.setExceptionFlag(exceptionFlag, id);
     }
-    
+
 }

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,17 +37,17 @@ public class ParkingActivityResource {
     @RequestMapping(value = "/records", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
     public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion,
-                                        @RequestParam(defaultValue = "all") final String type, @RequestParam(required = false) final Long start,
+                                        @RequestParam(required = false) final Long start,
                                         @RequestParam(required = false) final Long end) {
-        LOG.debug("Checking for records using type = {}, for start date = {} and end date = {}", type, start, end);
         List<ParkingActivity> parkingActivities;
-        if (type.equals("all")) {
+        if (start == null && end == null) {
+            LOG.debug("No start and end date requested. Returning all records.");
             parkingActivities = parkingActivityRepository.findAll();
         } else {
+            LOG.debug("Checking for records for start date = {} and end date = {}", start, end);
             DateTime startDate = new DateTime(start);
             DateTime endDate = new DateTime(end);
-            parkingActivities = parkingActivityService.findAllFilteredActivityBetweenStartAndEndDate(startDate, endDate,
-                    type);
+            parkingActivities = parkingActivityService.findAllActivitiesBetweenStartAndEndDates(startDate, endDate);
         }
 
         List<ParkingActivityDTO> parkingActivityDTOs = parkingActivities.stream().map(ParkingActivityUtil::constructDTO).collect(Collectors.toList());

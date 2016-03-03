@@ -1,54 +1,58 @@
-<h1>Today Transactions</h1>
+<h1>{{ daily ? 'Daily Transactions' : 'All Transactions'}}</h1>
 
 <form>
     <div class="form-group">
+        <button ng-show="daily" ng-click="getRecords()" class="btn btn-sm btn-success"> Get All Records</button>
+        <button ng-show="!daily" ng-click="getDailyRecords()" class="btn btn-sm btn-primary"> Get Daily Records</button>
+        <div style="margin: 3%;"></div>
         <div class="input-group">
             <div class="input-group-addon"><i class="glyphicon glyphicon-search"></i></div>
             <input type="text" class="form-control" placeholder="Search By Status" ng-model="searchRecord">
         </div>
     </div>
 </form>
-<table class="table table-bordered table-striped" style="text-align:center;vertical-align:middle;">
+<div ng-show="loading" class="loader">Loading...</div>
 
+<table ng-show="!loading" class="table table-bordered table-striped" style="text-align:center;vertical-align:middle;">
     <thead>
     <tr>
         <td>
-            <a href="#" ng-click="sortType = 'id'; sortReverse = !sortReverse">
+            <a href="#/transactions" ng-click="sortType = 'id'; sortReverse = !sortReverse">
                 ID
                 <span ng-show="sortType == 'id' && !sortReverse" class="fa fa-caret-down"></span>
                 <span ng-show="sortType == 'id' && sortReverse" class="fa fa-caret-up"></span>
             </a>
         </td>
         <td>
-            <a href="#" ng-click="sortType = 'parkingStatus'; sortReverse = !sortReverse">
+            <a href="#/transactions" ng-click="sortType = 'parkingStatus'; sortReverse = !sortReverse">
                 Record Status
                 <span ng-show="sortType == 'parkingStatus' && !sortReverse" class="fa fa-caret-down"></span>
                 <span ng-show="sortType == 'parkingStatus' && sortReverse" class="fa fa-caret-up"></span>
             </a>
         </td>
         <td>
-            <a href="#" ng-click="sortType = 'entryDateTime'; sortReverse = !sortReverse">
+            <a href="#/transactions" ng-click="sortType = 'entryDateTime'; sortReverse = !sortReverse">
                 Time in
                 <span ng-show="sortType == 'entryDateTime' && !sortReverse" class="fa fa-caret-down"></span>
                 <span ng-show="sortType == 'entryDateTime' && sortReverse" class="fa fa-caret-up"></span>
             </a>
         </td>
         <td>
-            <a href="#" ng-click="sortType = 'exitDateTime'; sortReverse = !sortReverse">
-                Time out
+            <a href="#/transactions" ng-click="sortType = 'exitDateTime'; sortReverse = !sortReverse">
+                Time Out
                 <span ng-show="sortType == 'exitDateTime' && !sortReverse" class="fa fa-caret-down"></span>
                 <span ng-show="sortType == 'exitDateTime' && sortReverse" class="fa fa-caret-up"></span>
             </a>
         </td>
         <td>
-            <a href="#" ng-click="sortType = 'userLicensePlate'; sortReverse = !sortReverse">
+            <a href="#/transactions" ng-click="sortType = 'userLicensePlate'; sortReverse = !sortReverse">
                 License Plate
                 <span ng-show="sortType == 'userLicensePlate' && !sortReverse" class="fa fa-caret-down"></span>
                 <span ng-show="sortType == 'userLicensePlate' && sortReverse" class="fa fa-caret-up"></span>
             </a>
         </td>
         <td>
-            <a href="#" ng-click="sortType = 'userEmail'; sortReverse = !sortReverse">
+            <a href="#/transactions" ng-click="sortType = 'userEmail'; sortReverse = !sortReverse">
                 Email
                 <span ng-show="sortType == 'userEmail' && !sortReverse" class="fa fa-caret-down"></span>
                 <span ng-show="sortType == 'userEmail' && sortReverse" class="fa fa-caret-up"></span>
@@ -59,6 +63,7 @@
         </td>
     </tr>
     </thead>
+
     <tbody>
     <tr ng-repeat="record in records | orderBy:sortType:sortReverse | filter:searchRecord">
         <td>{{record.id}}</td>
