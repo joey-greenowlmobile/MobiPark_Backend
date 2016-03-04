@@ -7,7 +7,7 @@
         <div style="margin: 3%;"></div>
         <div class="input-group">
             <div class="input-group-addon"><i class="glyphicon glyphicon-search"></i></div>
-            <input type="text" class="form-control" placeholder="Search By Status" ng-model="searchRecord">
+            <input type="text" class="form-control" placeholder="Search By Status" ng-model="searchRecord"/>
         </div>
     </div>
 </form>
@@ -45,10 +45,10 @@
             </a>
         </td>
         <td>
-            <a href="#/transactions" ng-click="sortType = 'userLicensePlate'; sortReverse = !sortReverse">
+            <a href="#/transactions" ng-click="sortType = 'userPlateNumber'; sortReverse = !sortReverse">
                 License Plate
-                <span ng-show="sortType == 'userLicensePlate' && !sortReverse" class="fa fa-caret-down"></span>
-                <span ng-show="sortType == 'userLicensePlate' && sortReverse" class="fa fa-caret-up"></span>
+                <span ng-show="sortType == 'userPlateNumber' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'userPlateNumber' && sortReverse" class="fa fa-caret-up"></span>
             </a>
         </td>
         <td>
@@ -75,7 +75,7 @@
         </td>
         <td>{{getUpdatedTime(record.entryDateTime) | date: "h:mm a" }}</td>
         <td>{{getUpdatedTime(record.exitDateTime) | date: "h:mm a" }}</td>
-        <td>{{record.userLicensePlate}}</td>
+        <td>{{record.userPlateNumber}}</td>
         <td>{{record.userEmail}}</td>
         <td>
             <button class="btn btn-sm btn-success" ng-click="openModal(record)">manage</button>
@@ -101,11 +101,8 @@
         </br>
         <b> Email: </b> {{record.userEmail}} </br>
         <b> Phone Number: </b> {{record.userPhoneNumber}} </br>
-        <b> License Plate: </b> {{record.userLicensePlate}} </br>
-        <b> Payment Method: </b>  </br>
-        <b> Subscription Date: </b> {{getUpdatedTime(record.planSubscriptionDate) | date:"EEEE MMMM dd, yyyy 'at' h:mma"
-        }} </br>
-        <b> Plan: </b> {{record.planName}} </br>
+        <b> License Plate: </b> {{record.userPlateNumber}} </br>
+        <b> Payment Method: </b> Payroll </br>
         <b> Time in: </b> {{getUpdatedTime(record.entryDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
         <b> Time Out: </b> {{getUpdatedTime(record.exitDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
     </div>
