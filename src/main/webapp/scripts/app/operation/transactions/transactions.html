@@ -1,4 +1,4 @@
-<h1>{{ daily ? 'Daily Transactions' : 'All Transactions'}}</h1>
+<h1>{{ daily ? 'Daily Transactions' : 'All Transactions'}} [{{today}}]</h1>
 
 <form>
     <div class="form-group">
@@ -73,8 +73,8 @@
             <span ng-show="record.pType == 0" class="label label-success">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
             <span ng-show="record.pType == 1" class="label label-primary">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
         </td>
-        <td>{{getUpdatedTime(record.entryDateTime) | date: "h:mm a" }}</td>
-        <td>{{getUpdatedTime(record.exitDateTime) | date: "h:mm a" }}</td>
+        <td>{{record.entryDateTime | date: "h:mm a" }}</td>
+        <td>{{record.exitDateTime | date: "h:mm a" }}</td>
         <td>{{record.userPlateNumber}}</td>
         <td>{{record.userEmail}}</td>
         <td>
@@ -103,8 +103,8 @@
         <b> Phone Number: </b> {{record.userPhoneNumber}} </br>
         <b> License Plate: </b> {{record.userPlateNumber}} </br>
         <b> Payment Method: </b> Payroll </br>
-        <b> Time in: </b> {{getUpdatedTime(record.entryDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
-        <b> Time Out: </b> {{getUpdatedTime(record.exitDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+        <b> Time in: </b> {{record.entryDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+        <b> Time Out: </b> {{record.exitDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" ng-click="openGate()">Gate Operations</button>

@@ -2,6 +2,7 @@ package com.greenowl.callisto.web.rest.dto;
 
 import com.greenowl.callisto.domain.ParkingActivity;
 import com.greenowl.callisto.domain.User;
+import org.joda.time.DateTimeZone;
 
 public class ParkingActivityDTO {
 
@@ -42,15 +43,15 @@ public class ParkingActivityDTO {
         this.type = activity.getType();
         this.saleId = activity.getSaleId();
         if (activity.getEntryDatetime() != null) {
-            this.entryDateTime = activity.getEntryDatetime().getMillis();
+            this.entryDateTime = activity.getEntryDatetime().withZone(DateTimeZone.UTC).getMillis();
         }
         if (activity.getExitDatetime() != null) {
-            this.exitDateTime = activity.getExitDatetime().getMillis();
+            this.exitDateTime = activity.getExitDatetime().withZone(DateTimeZone.UTC).getMillis();
         }
         this.parkingStatus = activity.getParkingStatus();
         this.exceptionFlag = activity.getExceptionFlag();
         if (activity.getCreatedDate() != null) {
-            this.createdDate = activity.getCreatedDate().getMillis();
+            this.createdDate = activity.getCreatedDate().withZone(DateTimeZone.UTC).getMillis();
         }
     }
 

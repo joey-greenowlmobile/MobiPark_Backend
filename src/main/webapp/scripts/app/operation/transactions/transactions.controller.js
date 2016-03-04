@@ -26,11 +26,11 @@ angular.module('mainApp')
             $scope.loading = true;
             var start = new Date();
             start.setHours(0, 0, 0, 0);
-            var estStart = start.getTime() + (5 * 60 * 60 * 1000)
+            var estStart = start.getTime();
 
             var end = new Date();
             end.setHours(23, 59, 59, 999);
-            var estEnd = end.getTime() + (5 * 60 * 60 * 1000);
+            var estEnd = end.getTime();
 
             TransactionService.findByDateAndType(estStart, estEnd).then(function (response) {
                 $log.info("Found " + response.length + " records");
@@ -90,6 +90,20 @@ angular.module('mainApp')
 
         };
 
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+        var yyyy = today.getFullYear();
+
+        if (dd < 10) {
+            dd = '0' + dd
+        }
+
+        if (mm < 10) {
+            mm = '0' + mm
+        }
+
+        $scope.today = mm + '/' + dd + '/' + yyyy;
         $scope.getDailyRecords();
 
     });
