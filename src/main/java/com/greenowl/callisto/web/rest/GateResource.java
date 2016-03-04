@@ -14,7 +14,14 @@ import com.greenowl.callisto.service.config.ConfigService;
 import com.greenowl.callisto.util.ParkingActivityUtil;
 import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
 import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
-import com.greenowlmobile.parkgateclient.parkgateCmdClient;
+
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,8 +141,26 @@ public class GateResource {
     private String openGate(int gateId, String ticketNo) {
         String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
         Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
-        parkgateCmdClient parkClient = new parkgateCmdClient(ip, port);
-        String response = parkClient.openGate(gateId, ticketNo);
+        String response = null;
+        try{
+	        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();  	        
+	        CloseableHttpClient closeableHttpClient = httpClientBuilder.build();
+	        StringBuilder url = new StringBuilder();
+	        url.append("http://");
+	        url.append(ip).append(":").append(port).append("/");
+	        url.append("gatecmd/gate_open_cmd?gate_id=");
+	        url.append(gateId);
+	        url.append("&ticket=");
+	        url.append(ticketNo);	        
+			LOG.info("open gate,url:"+url.toString());
+			HttpGet httpGet = new HttpGet(url.toString());							
+	        HttpResponse httpResponse = closeableHttpClient.execute(httpGet); 
+	        HttpEntity entity = httpResponse.getEntity();  
+	        response = EntityUtils.toString(entity,"utf-8").trim();		
+        }
+        catch(Exception e){
+        	LOG.error(e.getMessage(),e);
+        }       
         Boolean simulateMode = Boolean.parseBoolean(configService.get(AppConfigKey.GATE_SIMULATION_MODE.name(), String.class, "false"));
         LOG.info("GATE_SIMULATE_MODE:" + simulateMode);
         if (simulateMode && response != null && (response.contains("OPEN-GATE: NOT-PRESENT") || response.contains("Process exited with an error"))) {

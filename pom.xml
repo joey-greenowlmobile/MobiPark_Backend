@@ -64,8 +64,9 @@
         <springfox.version>2.3.0</springfox.version>
         <guava.version>19.0</guava.version>
         <jts.version>1.13</jts.version>
-        <stripe.version>1.40.1</stripe.version>
-        <parkgate.version>1.0.2</parkgate.version>
+        <stripe.version>1.40.1</stripe.version>        
+        <apache-http-client.version>4.5</apache-http-client.version>
+        <apache-http-core.version>4.4.1</apache-http-core.version>
     </properties>
 
     <dependencies>
@@ -321,11 +322,16 @@
             <artifactId>stripe-java</artifactId>
             <version>${stripe.version}</version>
         </dependency>
-        <!-- Adaptor for service responsible for operating the gate -->
+        
         <dependency>
-            <groupId>com.greenowlmobile</groupId>
-            <artifactId>parkgate</artifactId>
-            <version>${parkgate.version}</version>
+            <groupId>org.apache.httpcomponents</groupId>    
+            <artifactId>httpclient</artifactId>   
+            <version>${apache-http-client.version}</version> 
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>${apache-http-core.version}</version>
         </dependency>
     </dependencies>
     <build>
