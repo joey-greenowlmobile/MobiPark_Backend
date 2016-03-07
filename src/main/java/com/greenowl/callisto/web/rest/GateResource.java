@@ -152,11 +152,12 @@ public class GateResource {
 	        url.append(gateId);
 	        url.append("&ticket=");
 	        url.append(ticketNo);	        
-			LOG.info("open gate,url:"+url.toString());
+			
 			HttpGet httpGet = new HttpGet(url.toString());							
 	        HttpResponse httpResponse = closeableHttpClient.execute(httpGet); 
 	        HttpEntity entity = httpResponse.getEntity();  
-	        response = EntityUtils.toString(entity,"utf-8").trim();		
+	        response = EntityUtils.toString(entity,"utf-8").trim();	
+	        LOG.info("open gate,url:"+url.toString()+",response:"+response);
         }
         catch(Exception e){
         	LOG.error(e.getMessage(),e);
