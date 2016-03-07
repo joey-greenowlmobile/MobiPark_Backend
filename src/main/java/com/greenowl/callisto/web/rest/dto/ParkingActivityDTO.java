@@ -30,6 +30,8 @@ public class ParkingActivityDTO {
 
     private Long createdDate;
 
+    private String deviceInfo;
+
     public ParkingActivityDTO() {
 
     }
@@ -42,6 +44,7 @@ public class ParkingActivityDTO {
         this.userPlateNumber = user.getLicensePlate();
         this.type = activity.getType();
         this.saleId = activity.getSaleId();
+        this.deviceInfo = activity.getDeviceInfo();
         if (activity.getEntryDatetime() != null) {
             this.entryDateTime = activity.getEntryDatetime().withZone(DateTimeZone.UTC).getMillis();
         }
@@ -165,6 +168,14 @@ public class ParkingActivityDTO {
 
     public void setCreatedDate(Long createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(String deviceInfo) {
+        this.deviceInfo = deviceInfo;
     }
 
     @Override

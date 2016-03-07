@@ -1,5 +1,8 @@
 package com.greenowl.callisto.web.rest.parking;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GateOpenRequest {
 
     private Long lotId;
@@ -7,6 +10,8 @@ public class GateOpenRequest {
     private Double gateDistance;
 
     private Long gateId;
+
+    private String deviceInfo;
 
     public GateOpenRequest() {
     }
@@ -39,6 +44,14 @@ public class GateOpenRequest {
 
     public void setGateId(Long gateId) {
         this.gateId = gateId;
+    }
+
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(String deviceInfo) {
+        this.deviceInfo = deviceInfo;
     }
 
     @Override
