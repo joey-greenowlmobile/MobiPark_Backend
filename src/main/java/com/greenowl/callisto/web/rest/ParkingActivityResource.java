@@ -5,6 +5,7 @@ import com.greenowl.callisto.repository.ParkingActivityRepository;
 import com.greenowl.callisto.service.ParkingActivityService;
 import com.greenowl.callisto.util.ParkingActivityUtil;
 import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,16 +38,22 @@ public class ParkingActivityResource {
     @Transactional(readOnly = false)
     public ResponseEntity<?> getRecords(@PathVariable("apiVersion") final String apiVersion,
                                         @RequestParam(required = false) final Long start,
-                                        @RequestParam(required = false) final Long end) {
+                                        @RequestParam(required = false) final Long end,
+                                        @RequestParam(required = false) final String type) {
         List<ParkingActivity> parkingActivities;
         if (start == null && end == null) {
             LOG.debug("No start and end date requested. Returning all records.");
-            parkingActivities = parkingActivityRepository.findAll();
+            parkingActivities = (StringUtils.isEmpty(type)) ? parkingActivityRepository.findAll() : parkingActivityRepository.findAllByStatus(type);
         } else {
             LOG.debug("Checking for records for start date = {} and end date = {}", start, end);
             DateTime startDate = new DateTime(start);
             DateTime endDate = new DateTime(end);
-            parkingActivities = parkingActivityService.findAllActivitiesBetweenStartAndEndDates(startDate, endDate);
+            if (!StringUtils.isEmpty(type)) {
+                LOG.info("Looking for parking activities between {} and {} with type = {}", start, end, type);
+                parkingActivities = parkingActivityService.findAllActivitiesBetweenStartAndEndDates(startDate, endDate, type);
+            } else {
+                parkingActivities = parkingActivityService.findAllActivitiesBetweenStartAndEndDates(startDate, endDate);
+            }
         }
 
         List<ParkingActivityDTO> parkingActivityDTOs = parkingActivities.stream().map(ParkingActivityUtil::constructDTO).collect(Collectors.toList());

@@ -31,6 +31,12 @@ public class ParkingActivityService {
         return parkingActivityRepository.getParkingActivityBetween(startTime, endTime);
     }
 
+    private List<ParkingActivity> findAllActivityByTypeBetween(DateTime startTime, DateTime endTime, String type) {
+        LOG.debug("Looking for records between startTime = {} and endTime = {}", startTime, endTime);
+        return parkingActivityRepository.getParkingActivityByTypeBetween(startTime, endTime, type);
+    }
+
+
     /**
      * Create parking activity for plan user and store in the database.
      *
@@ -73,6 +79,11 @@ public class ParkingActivityService {
         return findAllActivityBetween(start, end);
     }
 
+    public List<ParkingActivity> findAllActivitiesBetweenStartAndEndDates(DateTime start, DateTime end, String type) {
+        return findAllActivityByTypeBetween(start, end, type);
+    }
+
+
     public void updateParkingStatus(String parkingStatus, long id) {
         parkingActivityRepository.setParkingStatusById(parkingStatus, id);
     }
@@ -95,7 +106,7 @@ public class ParkingActivityService {
         return Optional.empty();
     }
 
-    public void updateExceptionFlag(String exceptionFlag, long id){
+    public void updateExceptionFlag(String exceptionFlag, long id) {
         parkingActivityRepository.setExceptionFlag(exceptionFlag, id);
     }
 
