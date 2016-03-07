@@ -7,11 +7,33 @@ angular.module('mainApp')
 
         $scope.daily = true;
         $scope.loading = false;
+        $scope.inFlight = false;
 
         $scope.getRecords = function () {
-            $scope.loading = true;
+            $log.info("Fetching records. Daily = ", $scope.daily);
+            $scope.daily ? $scope.getDailyRecords() : $scope.getAllRecords();
+        };
 
-            TransactionService.findAll().then(function (response) {
+        $scope.getTitle = function () {
+            if ($scope.daily) {
+                if ($scope.inFlight) {
+                    return "Daily In Flight Transactions";
+                }
+                return "Daily Transactions";
+            }
+            if ($scope.inFlight) {
+                return "All In Flight Transactions";
+            }
+            return "All Transactions";
+        };
+
+        $scope.getAllRecords = function () {
+            $scope.loading = true;
+            var type;
+            if($scope.inFlight){
+                type = "IN_FLIGHT";
+            }
+            TransactionService.findAll(type).then(function (response) {
                 $log.info("Found " + response.length + " records");
                 $scope.records = response;
                 for (var i = 0; i < $scope.records.length; i++) {
@@ -24,15 +46,18 @@ angular.module('mainApp')
 
         $scope.getDailyRecords = function () {
             $scope.loading = true;
+            var type;
+            if($scope.inFlight){
+                type = "IN_FLIGHT";
+            }
             var start = new Date();
             start.setHours(0, 0, 0, 0);
-            var estStart = start.getTime() + (5 * 60 * 60 * 1000)
+            var estStart = start.getTime();
 
             var end = new Date();
             end.setHours(23, 59, 59, 999);
-            var estEnd = end.getTime() + (5 * 60 * 60 * 1000);
-
-            TransactionService.findByDateAndType(estStart, estEnd).then(function (response) {
+            var estEnd = end.getTime();
+            TransactionService.findByDateAndType(estStart, estEnd, type).then(function (response) {
                 $log.info("Found " + response.length + " records");
                 $scope.records = response;
                 for (var i = 0; i < $scope.records.length; i++) {
@@ -90,7 +115,21 @@ angular.module('mainApp')
 
         };
 
-        $scope.getDailyRecords();
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+        var yyyy = today.getFullYear();
+
+        if (dd < 10) {
+            dd = '0' + dd
+        }
+
+        if (mm < 10) {
+            mm = '0' + mm
+        }
+
+        $scope.today = mm + '/' + dd + '/' + yyyy;
+        $scope.getRecords();
 
     });
 

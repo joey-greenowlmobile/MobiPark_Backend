@@ -1,13 +1,17 @@
-<h1>{{ daily ? 'Daily Transactions' : 'All Transactions'}}</h1>
+<h1>{{ getTitle()}} [{{today}}]</h1>
 
 <form>
     <div class="form-group">
-        <button ng-show="daily" ng-click="getRecords()" class="btn btn-sm btn-success"> Get All Records</button>
-        <button ng-show="!daily" ng-click="getDailyRecords()" class="btn btn-sm btn-primary"> Get Daily Records</button>
+        <div style="margin: 3%;"></div>
+        <div class="checkbox">
+            <label><input ng-model="daily" ng-change="getRecords()" type="checkbox" value="">Daily</label>
+            <label style="margin-left: 2%;"><input ng-change="getRecords()" ng-model="inFlight" type="checkbox"
+                                                   value="">In Flight</label>
+        </div>
         <div style="margin: 3%;"></div>
         <div class="input-group">
             <div class="input-group-addon"><i class="glyphicon glyphicon-search"></i></div>
-            <input type="text" class="form-control" placeholder="Search By Status" ng-model="searchRecord"/>
+            <input type="text" class="form-control" placeholder="Search" ng-model="searchRecord"/>
         </div>
     </div>
 </form>
@@ -59,11 +63,17 @@
             </a>
         </td>
         <td>
+            <a href="#/transactions" ng-click="sortType = 'createDate'; sortReverse = !sortReverse">
+                Creation Date
+                <span ng-show="sortType == 'createDate' && !sortReverse" class="fa fa-caret-down"></span>
+                <span ng-show="sortType == 'createDate' && sortReverse" class="fa fa-caret-up"></span>
+            </a>
+        </td>
+        <td>
             Action
         </td>
     </tr>
     </thead>
-
     <tbody>
     <tr ng-repeat="record in records | orderBy:sortType:sortReverse | filter:searchRecord">
         <td>{{record.id}}</td>
@@ -73,16 +83,21 @@
             <span ng-show="record.pType == 0" class="label label-success">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
             <span ng-show="record.pType == 1" class="label label-primary">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
         </td>
-        <td>{{getUpdatedTime(record.entryDateTime) | date: "h:mm a" }}</td>
-        <td>{{getUpdatedTime(record.exitDateTime) | date: "h:mm a" }}</td>
+        <td>{{record.entryDateTime | date: "h:mm a" }}</td>
+        <td>{{record.exitDateTime | date: "h:mm a" }}</td>
         <td>{{record.userPlateNumber}}</td>
         <td>{{record.userEmail}}</td>
+        <td>{{record.createdDate | date: 'short'}}</td>
         <td>
             <button class="btn btn-sm btn-success" ng-click="openModal(record)">manage</button>
         </td>
     </tr>
     </tbody>
 </table>
+<div ng-show="!loading && (records == null || records.length == 0)" style="margin-left: 37%;"> There doesn't seem to be
+    any
+    transactions
+</div>
 
 <script type="text/ng-template" id="transactionTemplate.html">
     <div class="modal-header">
@@ -103,11 +118,12 @@
         <b> Phone Number: </b> {{record.userPhoneNumber}} </br>
         <b> License Plate: </b> {{record.userPlateNumber}} </br>
         <b> Payment Method: </b> Payroll </br>
-        <b> Time in: </b> {{getUpdatedTime(record.entryDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
-        <b> Time Out: </b> {{getUpdatedTime(record.exitDateTime) | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+        <b> Device Info: </b> {{record.deviceInfo}} </br>
+        <b> Time in: </b> {{record.entryDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+        <b> Time Out: </b> {{record.exitDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" ng-click="openGate()">Gate Operations</button>
+        <button class="btn btn-primary" ng-click="openGate()">Access Questions</button>
         <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
     </div>
 </script>
@@ -143,7 +159,7 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary" ng-click="open()">Open Gate</button>
+        <!--<button class="btn btn-primary" ng-click="open()">Open Gate</button>-->
         <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
     </div>
 </script>

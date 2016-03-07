@@ -20,6 +20,9 @@ public interface ParkingActivityRepository extends JpaRepository<ParkingActivity
     @Query("select u from ParkingActivity u where u.createdDate > ?1 and u.createdDate < ?2")
     List<ParkingActivity> getParkingActivityBetween(DateTime startTime, DateTime endTime);
 
+    @Query("select u from ParkingActivity u where u.parkingStatus = ?1")
+    List<ParkingActivity> findAllByStatus(String status);
+
     @Query("select u from ParkingActivity u where u.createdDate > ?1 and u.createdDate < ?2 and u.activityHolder = ?3")
     List<ParkingActivity> getParkingActivityBetweenForUser(DateTime startTime, DateTime endTime,
                                                            User activityHolder);
@@ -54,5 +57,7 @@ public interface ParkingActivityRepository extends JpaRepository<ParkingActivity
     @Modifying
     @Query("update ParkingActivity u set u.exceptionFlag=?1 where u.id = ?2")
     void setExceptionFlag(String exceptionFlag, long id);
-    
+
+    @Query("select u from ParkingActivity u where u.createdDate > ?1 and u.createdDate < ?2 and u.parkingStatus = ?3")
+    List<ParkingActivity> getParkingActivityByTypeBetween(DateTime startTime, DateTime endTime, String type);
 }

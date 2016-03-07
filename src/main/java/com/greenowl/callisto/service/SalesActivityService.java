@@ -109,7 +109,7 @@ public class SalesActivityService {
 //        List<ParkingSaleActivity> parkingSaleActivities = salesActivityRepository.getParkingSaleActivitiesByUser(user);
 //        List<ParkingSaleActivity> inFlightActivities = new ArrayList<ParkingSaleActivity>();
 //        for (ParkingSaleActivity activity : parkingSaleActivities) {
-//            if (activity.getEntryDatetime() != null && activity.getExitDatetime() == null) {
+//            if (activity.getEntryDateTime() != null && activity.getExitDateTime() == null) {
 //                inFlightActivities.add(activity);
 //            }
 //        }
@@ -123,7 +123,7 @@ public class SalesActivityService {
 //     * @param type
 //     * @return
 //     */
-//    public List<ParkingSaleActivity> findAllFilteredActivityBetweenStartAndEndDate(DateTime start, DateTime end,
+//    public List<ParkingSaleActivity> findAllActivitiesBetweenStartAndEndDates(DateTime start, DateTime end,
 //                                                                                   String type) {
 //        List<ParkingSaleActivity> filteredList = new ArrayList<>();
 //        List<ParkingSaleActivity> parkingSaleActivities = findAllActivityBetween(start, end);
@@ -145,7 +145,7 @@ public class SalesActivityService {
 //                    }
 //                    break;
 //                case "park":
-//                    if (activity.getEntryDatetime() != null) {
+//                    if (activity.getEntryDateTime() != null) {
 //                        filteredList.add(activity);
 //                    }
 //                    break;

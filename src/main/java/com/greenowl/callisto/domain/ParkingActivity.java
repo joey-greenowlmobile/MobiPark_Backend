@@ -45,6 +45,9 @@ public class ParkingActivity extends AbstractAuditingEntity implements Serializa
     @Column(name = "gate_response")
     private String gateResponse;
 
+    @Column(name = "device_info")
+    private String deviceInfo;
+
     public ParkingActivity() {
     }
 
@@ -128,6 +131,11 @@ public class ParkingActivity extends AbstractAuditingEntity implements Serializa
         this.gateResponse = gateResponse;
     }
 
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
 
-
+    public void setDeviceInfo(String deviceInfo) {
+        this.deviceInfo = deviceInfo;
+    }
 }

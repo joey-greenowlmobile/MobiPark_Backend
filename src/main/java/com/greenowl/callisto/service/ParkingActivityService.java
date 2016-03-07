@@ -4,6 +4,7 @@ import com.greenowl.callisto.config.Constants;
 import com.greenowl.callisto.domain.ParkingActivity;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.factory.ParkingActivityFactory;
 import com.greenowl.callisto.repository.ParkingActivityRepository;
 import com.greenowl.callisto.util.PaginationUtil;
 import com.greenowl.callisto.util.ParkingActivityUtil;
@@ -31,19 +32,22 @@ public class ParkingActivityService {
         return parkingActivityRepository.getParkingActivityBetween(startTime, endTime);
     }
 
+    private List<ParkingActivity> findAllActivityByTypeBetween(DateTime startTime, DateTime endTime, String type) {
+        LOG.debug("Looking for records between startTime = {} and endTime = {}", startTime, endTime);
+        return parkingActivityRepository.getParkingActivityByTypeBetween(startTime, endTime, type);
+    }
+
+
     /**
      * Create parking activity for plan user and store in the database.
      *
-     * @param user the user this plan belongs to.
-     * @param plan the parking plan.
+     * @param user       the user this plan belongs to.
+     * @param plan       the parking plan.
+     * @param deviceInfo user's device that he/she is using.
      * @return
      */
-    public ParkingActivityDTO createParkingActivityForPlanUser(User user, ParkingPlan plan) {
-        ParkingActivity newActivity = new ParkingActivity();
-        newActivity.setActivityHolder(user);
-        newActivity.setLotId(plan.getLotId());
-        newActivity.setType("subscription");
-        newActivity.setParkingStatus(Constants.PARKING_STATUS_PARKING_START);
+    public ParkingActivityDTO createParkingActivityForPlanUser(User user, ParkingPlan plan, String deviceInfo) {
+        ParkingActivity newActivity = ParkingActivityFactory.create(user, plan, Constants.PARKING_STATUS_PARKING_START, deviceInfo);
         parkingActivityRepository.save(newActivity);
         return ParkingActivityUtil.constructDTO(newActivity, user);
     }
@@ -73,6 +77,10 @@ public class ParkingActivityService {
         return findAllActivityBetween(start, end);
     }
 
+    public List<ParkingActivity> findAllActivitiesBetweenStartAndEndDates(DateTime start, DateTime end, String type) {
+        return findAllActivityByTypeBetween(start, end, type);
+    }
+
     public void updateParkingStatus(String parkingStatus, long id) {
         parkingActivityRepository.setParkingStatusById(parkingStatus, id);
     }
@@ -95,7 +103,7 @@ public class ParkingActivityService {
         return Optional.empty();
     }
 
-    public void updateExceptionFlag(String exceptionFlag, long id){
+    public void updateExceptionFlag(String exceptionFlag, long id) {
         parkingActivityRepository.setExceptionFlag(exceptionFlag, id);
     }
 

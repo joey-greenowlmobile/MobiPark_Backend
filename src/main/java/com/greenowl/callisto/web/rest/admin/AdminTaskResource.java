@@ -7,6 +7,7 @@ import com.greenowl.callisto.security.AuthoritiesConstants;
 import com.greenowl.callisto.security.SecurityUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -46,13 +47,13 @@ public class AdminTaskResource {
         }
 
         if (entryDateTime != null) {
-            DateTime dateTime = new DateTime(entryDateTime);
+            DateTime dateTime = new DateTime(entryDateTime, DateTimeZone.UTC);
             LOG.info("Setting entry date time for parking activity id = {} to {}", id, entryDateTime);
             activity.setEntryDatetime(dateTime);
         }
 
         if (exitDateTime != null) {
-            DateTime dateTime = new DateTime(exitDateTime);
+            DateTime dateTime = new DateTime(exitDateTime, DateTimeZone.UTC);
             LOG.info("Setting exit date time for parking activity id = {} to {}", id, exitDateTime);
             activity.setExitDatetime(dateTime);
         }
