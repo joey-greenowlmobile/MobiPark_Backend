@@ -14,4 +14,6 @@ public final class AuthoritiesConstants {
     public static final String OPERATOR = "ROLE_OPERATOR";
 
     public static final String ANONYMOUS = "ROLE_ANONYMOUS";
+    
+    public static final String TICKET = "ROLE_TICKET";
 }
