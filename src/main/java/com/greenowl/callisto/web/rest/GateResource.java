@@ -7,6 +7,7 @@ import com.greenowl.callisto.config.ErrorCodeConstants;
 import com.greenowl.callisto.domain.ParkingActivity;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.factory.ParkingActivityFactory;
 import com.greenowl.callisto.repository.ParkingActivityRepository;
 import com.greenowl.callisto.service.ParkingActivityService;
 import com.greenowl.callisto.service.ParkingValTicketStatusService;
@@ -14,9 +15,11 @@ import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.service.config.ConfigService;
 import com.greenowl.callisto.util.ParkingActivityUtil;
 import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
+import com.greenowl.callisto.web.rest.dto.LoopStatusDTO;
 import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -30,7 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+
+import java.util.Calendar;
 import java.util.Optional;
+import org.joda.time.DateTime;
 
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 
@@ -50,9 +56,7 @@ public class GateResource {
     @Inject
     private ParkingActivityService parkingActivityService;
 
-    @Inject
-    private ParkingActivityRepository parkingActivityRepository;
-
+   
     private static final Logger LOG = LoggerFactory.getLogger(GateResource.class);
 
     /**
@@ -69,8 +73,8 @@ public class GateResource {
     private ResponseEntity<?> enterParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
         // No in flight record Exists.
-        Optional<ParkingActivity> optional = parkingActivityService.getInFlightRecordForUser(user);
-        if (optional.isPresent()) {
+        Optional<ParkingActivity> optional = parkingActivityService.getLatestActivityForUser(user);
+        if (optional.isPresent() && Constants.PARKING_STATUS_IN_FLIGHT.equals(optional.get().getParkingStatus())) {
             return new ResponseEntity<>(
                     genericBadReq("User already inside parking lot, can't open gate.", "/gate",
                             ErrorCodeConstants.GATE_USER_INSIDE_PARKING_LOT),
@@ -101,6 +105,7 @@ public class GateResource {
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
 
+        /**  logic to handle duplicate request
         ParkingActivityDTO parkingActivityDTO;
         Optional<ParkingActivity> opt = parkingActivityService.getLatestActivityForUser(user);
         if (opt.isPresent()) {
@@ -116,16 +121,18 @@ public class GateResource {
         } else {
             parkingActivityDTO = parkingActivityService.createParkingActivityForPlanUser(user, subscribedPlan, req.getDeviceInfo());
         }
+        */
+        ParkingActivityDTO parkingActivityDTO=parkingActivityService.createParkingActivityForPlanUser(user, subscribedPlan, req.getDeviceInfo());
 
-        if (parkingActivityDTO != null) {
+                
+        if (parkingActivityDTO != null) {        	
             // open gate
             final String result = openGate(1, parkingActivityDTO.getId().toString());
             if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
                     || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
                 parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER,
                         parkingActivityDTO.getId());
-                ticketStatusService.createParkingValTicketStatus(parkingActivityDTO.getId(),
-                        Constants.PARKING_TICKET_TYPE_ENTER, DateTime.now());
+                parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);                
                 return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
             } else {
                 parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER,
@@ -192,47 +199,90 @@ public class GateResource {
     @Timed
     private ResponseEntity<?> exitParkingLot(GateOpenRequest req) {
         User user = userService.getCurrentUser();
-        Optional<ParkingActivity> opt = parkingActivityService.getInFlightRecordForUser(user);
-        if (!opt.isPresent()) {
-            LOG.info("ALARM-ENFORCE-OPEN----user id:" + user.getId() + ",request:" + req.toString());
-            opt = parkingActivityService.getLatestActivityForUser(user);
-            if (opt.isPresent()) {
-                ParkingActivity parkingActivity = opt.get();
-                final String result = openGate(2, parkingActivity.getId().toString());
-                if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
-                        || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
-                    parkingActivityService.updateExceptionFlag(Constants.PARKING_EXCEPTION_ENFORCE_OPEN, parkingActivity.getId());
-                    ticketStatusService.createParkingValTicketStatus(parkingActivity.getId(),
-                            Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());
-                }
-            } else {
-                LOG.info("ALARM-ENFORCE-OPEN----user id:" + user.getId() + ",no parking records");
-            }
-            return new ResponseEntity<>(
-                    genericBadReq("User not in the parking lot, can't open gate.", "/gate",
-                            ErrorCodeConstants.GATE_USER_NOT_INSIDE_PARKING_LOT),
-                    org.springframework.http.HttpStatus.BAD_REQUEST);
+        Optional<ParkingActivity> opt = parkingActivityService.getLatestActivityForUser(user);
+        ParkingActivity parkingActivity = null;
+        if(opt.isPresent() && opt.get().getExitDatetime()==null){
+        	parkingActivity = opt.get();
         }
-        ParkingActivity parkingActivity = opt.get();
+        else{
+        	ParkingPlan subscribedPlan = user.getPlanSubscriptions().iterator().next().getPlanGroup();
+        	parkingActivity = ParkingActivityFactory.create(user, subscribedPlan, Constants.PARKING_STATUS_PARKING_START, req.getDeviceInfo());        	
+        }        
+       
         final String result = openGate(2, Long.toString(parkingActivity.getId()));
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        parkingActivity.setExceptionFlag((parkingActivity.getExceptionFlag()==null?"":parkingActivity.getExceptionFlag())+" "+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
+        parkingActivity.setDeviceInfo(req.getDeviceInfo());
+        parkingActivity.setGateResponse((parkingActivity.getGateResponse()==null?"":parkingActivity.getGateResponse())+" "+sdf.format(Calendar.getInstance().getTime())+" "+result);  
         if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
-                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
-
-            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);
-            parkingActivity.setDeviceInfo(req.getDeviceInfo());
-            parkingActivityRepository.save(parkingActivity);
-            ticketStatusService.createParkingValTicketStatus(parkingActivity.getId(),
-                    Constants.PARKING_TICKET_TYPE_EXIT, DateTime.now());
+                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {            
+            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);            
+            parkingActivityService.save(parkingActivity);            
             ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
             return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
-        } else {
-            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);
-            parkingActivity.setGateResponse(result);
-            parkingActivity.setDeviceInfo(req.getDeviceInfo());
-            parkingActivityRepository.save(parkingActivity);
+        } else {        	
+            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);                     
+            parkingActivityService.save(parkingActivity);
             return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate:" + result, "/gate",
                     ErrorCodeConstants.GATE_OPEN_FAILED), org.springframework.http.HttpStatus.BAD_REQUEST);
         }
     }
+    
+    
+    
+    /**
+     *  /loopStatus -> check the loop status
+     */
+    @RequestMapping(value = "/loopStatus", method = {RequestMethod.GET, RequestMethod.POST}, produces = MediaType.APPLICATION_JSON_VALUE)    
+    public ResponseEntity<?> getLoopStatus(@PathVariable("apiVersion") final String apiVersion,
+    		@RequestParam(required = true) final String gateId) {
+    	String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
+        Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
+    	try{
+    		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();  	        
+ 	        CloseableHttpClient closeableHttpClient = httpClientBuilder.build();
+ 	        
+ 	        StringBuilder url = new StringBuilder();
+ 	        url.append("http://");
+ 	        url.append(ip).append(":").append(port).append("/");
+ 	        url.append("gatecmd/gate_open_ready?gate_id=");
+ 	        if(gateId.toLowerCase().contains("park-hospital-entry") || gateId.contains("HMSensor")){
+ 	        	url.append(Constants.PARKING_TICKET_TYPE_ENTER);
+ 	        }
+ 	        else if(gateId.toLowerCase().contains("park-hospital-exit")){
+ 	        	url.append(Constants.PARKING_TICKET_TYPE_EXIT);
+ 	        } 	        
+ 	        else{ 	        	
+ 	            url.append(gateId);
+ 	        }
+ 	        HttpGet httpGet = new HttpGet(url.toString());	
+ 	        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(20000).setConnectTimeout(10000).build();
+	        httpGet.setConfig(requestConfig);
+ 	        HttpResponse httpResponse = closeableHttpClient.execute(httpGet); 
+	        HttpEntity entity = httpResponse.getEntity();  
+	        String response = EntityUtils.toString(entity,"utf-8").trim();	
+	        LOG.info("check loop status,url:"+url.toString()+",response:"+response);
+ 	        LoopStatusDTO loopStatusDTO = new LoopStatusDTO();
+ 	        loopStatusDTO.setGateId(gateId);
+ 	        if(response!=null && response.contains("NCF")){		
+ 	        	loopStatusDTO.setStatus("ON");
+ 	        }
+ 	        else{
+ 	        	loopStatusDTO.setStatus("OFF");
+ 	        	loopStatusDTO.setErrorMessage(response);
+ 	        }
+ 	        return new ResponseEntity<>(loopStatusDTO, org.springframework.http.HttpStatus.OK);
+    	}
+    	catch(Exception e){
+    		LOG.error(e.getMessage(), e);
+    		LoopStatusDTO loopStatusDTO = new LoopStatusDTO();
+ 	        loopStatusDTO.setGateId(gateId);
+ 	        loopStatusDTO.setStatus("OFF");
+        	loopStatusDTO.setErrorMessage(e.getMessage());
+        	return new ResponseEntity<>(loopStatusDTO, org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+    	}
+    }
+    
+    
 
 }
