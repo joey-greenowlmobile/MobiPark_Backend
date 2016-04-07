@@ -76,7 +76,7 @@ public class GateResource {
         Optional<ParkingActivity> optional = parkingActivityService.getLatestActivityForUser(user);
         if (optional.isPresent() && Constants.PARKING_STATUS_IN_FLIGHT.equals(optional.get().getParkingStatus())) {
             return new ResponseEntity<>(
-                    genericBadReq("User already inside parking lot, can't open gate.", "/gate",
+                    genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_ALREADY_INSIDE, String.class), "/enter",
                             ErrorCodeConstants.GATE_USER_INSIDE_PARKING_LOT),
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
@@ -84,44 +84,26 @@ public class GateResource {
         // User not associated with a plan subscription.
         if (user.getPlanSubscriptions() == null || user.getPlanSubscriptions().isEmpty()) {
             return new ResponseEntity<>(
-                    genericBadReq("User is not associated with a subscription plan.", "/gate", ErrorCodeConstants.GATE_USER_UNSUBSCRIBED),
+                    genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_UNSUBSCRIBED, String.class), "/enter", ErrorCodeConstants.GATE_USER_UNSUBSCRIBED),
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
 
         ParkingPlan subscribedPlan = user.getPlanSubscriptions().iterator().next().getPlanGroup();
-
-        //
+        
         if (subscribedPlan == null) {
             return new ResponseEntity<>(
-                    genericBadReq("Unable to fetch subscription plan.", "/gate", ErrorCodeConstants.GATE_DATABASE_ERROR),
+                    genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_INTERNAL_ERROR, String.class), "/enter", ErrorCodeConstants.GATE_DATABASE_ERROR),
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
 
 
         if (subscribedPlan.getLotId() != req.getLotId()) {
             return new ResponseEntity<>(
-                    genericBadReq("ERROR-Incorrect parking lot.", "/gate",
+                    genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_INCORRECT_LOT, String.class), "/enter",
                             ErrorCodeConstants.GATE_INCORRECT_PARKING_LOT),
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
-
-        /**  logic to handle duplicate request
-        ParkingActivityDTO parkingActivityDTO;
-        Optional<ParkingActivity> opt = parkingActivityService.getLatestActivityForUser(user);
-        if (opt.isPresent()) {
-            ParkingActivity parkingActivity = opt.get();
-            String parkingStatus = parkingActivity.getParkingStatus();
-            if (Constants.PARKING_STATUS_PARKING_START.equals(parkingStatus) ||
-                    Constants.PARKING_STATUS_PENDING_ENTER.equals(parkingStatus) ||
-                    Constants.PARKING_STATUS_IN_FLIGHT.equals(parkingStatus)) {
-                parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
-            } else {
-                parkingActivityDTO = parkingActivityService.createParkingActivityForPlanUser(user, subscribedPlan, req.getDeviceInfo());
-            }
-        } else {
-            parkingActivityDTO = parkingActivityService.createParkingActivityForPlanUser(user, subscribedPlan, req.getDeviceInfo());
-        }
-        */
+       
         ParkingActivityDTO parkingActivityDTO=parkingActivityService.createParkingActivityForPlanUser(user, subscribedPlan, req.getDeviceInfo());
 
                 
@@ -139,13 +121,13 @@ public class GateResource {
                         parkingActivityDTO.getId());
                 parkingActivityService.updateGateResponse(result, parkingActivityDTO.getId());
                 return new ResponseEntity<>(
-                        genericBadReq("ERROR-Failed to open parking gate" + result, "/gate",
+                        genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_GATE_OPEN_FAILED, String.class), "/enter",
                                 ErrorCodeConstants.GATE_OPEN_FAILED),
                         org.springframework.http.HttpStatus.BAD_REQUEST);
             }
         } else {
             return new ResponseEntity<>(
-                    genericBadReq("ERROR-Failed to create parking record.", "/gate",
+                    genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_INTERNAL_ERROR, String.class), "/enter",
                             ErrorCodeConstants.GATE_DATABASE_ERROR),
                     org.springframework.http.HttpStatus.BAD_REQUEST);
         }
@@ -201,31 +183,37 @@ public class GateResource {
         User user = userService.getCurrentUser();
         Optional<ParkingActivity> opt = parkingActivityService.getLatestActivityForUser(user);
         ParkingActivity parkingActivity = null;
-        if(opt.isPresent() && opt.get().getExitDatetime()==null){
-        	parkingActivity = opt.get();
+        if(opt.isPresent()){        
+	        if(opt.get().getExitDatetime()!=null || (Constants.PARKING_STATUS_COMPLETED.equals(opt.get().getParkingStatus()))){
+	        	return new ResponseEntity<>(genericBadReq(configService.get(Constants.PARKING_EXIT_EXCEPTION_NOT_INSIDE,String.class), "/exit",
+	                    ErrorCodeConstants.GATE_USER_NOT_INSIDE_PARKING_LOT), org.springframework.http.HttpStatus.BAD_REQUEST);
+	        }
+	        else{
+	        	parkingActivity = opt.get();	       
+		        final String result = openGate(2, Long.toString(parkingActivity.getId()));
+		        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		        parkingActivity.setExceptionFlag((parkingActivity.getExceptionFlag()==null?"":parkingActivity.getExceptionFlag())+" "+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
+		        parkingActivity.setDeviceInfo(req.getDeviceInfo());
+		        parkingActivity.setGateResponse((parkingActivity.getGateResponse()==null?"":parkingActivity.getGateResponse())+" "+sdf.format(Calendar.getInstance().getTime())+" "+result);  
+		        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
+		                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {            
+		            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);            
+		            parkingActivityService.save(parkingActivity);            
+		            ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
+		            return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
+		        } else {        	
+		            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);                     
+		            parkingActivityService.save(parkingActivity);
+		            return new ResponseEntity<>(genericBadReq(configService.get(Constants.PARKING_EXIT_EXCEPTION_GATE_OPEN_FAILLED, String.class), "/exit",
+		                    ErrorCodeConstants.GATE_OPEN_FAILED), org.springframework.http.HttpStatus.BAD_REQUEST);
+		        }
+	        }
         }
         else{
-        	ParkingPlan subscribedPlan = user.getPlanSubscriptions().iterator().next().getPlanGroup();
-        	parkingActivity = ParkingActivityFactory.create(user, subscribedPlan, Constants.PARKING_STATUS_PARKING_START, req.getDeviceInfo());        	
-        }        
-       
-        final String result = openGate(2, Long.toString(parkingActivity.getId()));
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        parkingActivity.setExceptionFlag((parkingActivity.getExceptionFlag()==null?"":parkingActivity.getExceptionFlag())+" "+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
-        parkingActivity.setDeviceInfo(req.getDeviceInfo());
-        parkingActivity.setGateResponse((parkingActivity.getGateResponse()==null?"":parkingActivity.getGateResponse())+" "+sdf.format(Calendar.getInstance().getTime())+" "+result);  
-        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
-                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {            
-            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);            
-            parkingActivityService.save(parkingActivity);            
-            ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
-            return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
-        } else {        	
-            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);                     
-            parkingActivityService.save(parkingActivity);
-            return new ResponseEntity<>(genericBadReq("ERROR-Failed to open parking gate:" + result, "/gate",
-                    ErrorCodeConstants.GATE_OPEN_FAILED), org.springframework.http.HttpStatus.BAD_REQUEST);
+        	return new ResponseEntity<>(genericBadReq(configService.get(Constants.PARKING_EXIT_EXCEPTION_NOT_INSIDE,String.class), "/exit",
+                    ErrorCodeConstants.GATE_USER_NOT_INSIDE_PARKING_LOT), org.springframework.http.HttpStatus.BAD_REQUEST);
         }
+	        
     }
     
     
