@@ -8,6 +8,27 @@ angular.module('mainApp')
         $scope.daily = true;
         $scope.loading = false;
         $scope.inFlight = false;
+        $scope.dt = new Date();
+        $scope.init = function () {
+            $log.info("Initializing Scope for controller = TransactionsController");
+            $("#date").datepicker({
+                onSelect: function (dateText, inst) {
+                    $log.info("Selected.");
+                    var dateAsString = dateText; //the first parameter of this function
+                    $log.info("New Date is " + dateAsString);
+                    $scope.dt = new Date(dateAsString);
+                    var timestamp = $scope.dt.getTime();
+                    $scope.$apply();
+                }
+            });
+
+        };
+
+        $scope.updateDate = function () {
+            var newVal = angular.element(document.querySelector('#date')).val();
+            $log.info("new date is " + newVal);
+            $scope.dt = newVal;
+        };
 
         $scope.getRecords = function () {
             $log.info("Fetching records. Daily = ", $scope.daily);
@@ -30,7 +51,7 @@ angular.module('mainApp')
         $scope.getAllRecords = function () {
             $scope.loading = true;
             var type;
-            if($scope.inFlight){
+            if ($scope.inFlight) {
                 type = "IN_FLIGHT";
             }
             TransactionService.findAll(type).then(function (response) {
@@ -44,10 +65,27 @@ angular.module('mainApp')
             $scope.daily = false;
         };
 
+        $scope.getRecordsByDate = function (startTimeStamp, endTimeStamp) {
+            $scope.loading = true;
+            var type;
+            if ($scope.inFlight) {
+                type = "IN_FLIGHT";
+            }
+            TransactionService.findByDateAndType(startTimeStamp, endTimeStamp, type).then(function (response) {
+                $log.info("Found " + response.length + " records");
+                $scope.records = response;
+                for (var i = 0; i < $scope.records.length; i++) {
+                    $scope.records[i].pType = $scope.getType($scope.records[i].parkingStatus);
+                }
+                $scope.loading = false;
+            });
+            $scope.daily = false;
+        };
+
         $scope.getDailyRecords = function () {
             $scope.loading = true;
             var type;
-            if($scope.inFlight){
+            if ($scope.inFlight) {
                 type = "IN_FLIGHT";
             }
             var start = new Date();
