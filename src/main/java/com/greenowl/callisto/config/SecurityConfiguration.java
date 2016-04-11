@@ -102,6 +102,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
                 .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/swagger-ui/index.html").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/protected/**").authenticated()
+                .antMatchers("/ticket/**").hasAuthority(AuthoritiesConstants.TICKET)
                 .and()
                 .apply(securityConfigurerAdapter());
 

@@ -107,4 +107,7 @@ public class ParkingActivityService {
         parkingActivityRepository.setExceptionFlag(exceptionFlag, id);
     }
 
+    public void save(ParkingActivity parkingActivity){
+    	parkingActivityRepository.save(parkingActivity);
+    }
 }
