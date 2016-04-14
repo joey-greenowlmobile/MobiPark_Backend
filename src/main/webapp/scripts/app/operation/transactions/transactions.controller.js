@@ -2,23 +2,24 @@
 
 angular.module('mainApp')
     .controller('TransactionsController', function ($rootScope, $scope, $state, $timeout, $http, $log, $modal, TransactionService) {
-
-        $scope.records = [];
-
-        $scope.daily = true;
+        
+        $scope.records = [];        
         $scope.loading = false;
         $scope.inFlight = false;
-        $scope.dt = new Date();
+           
         $scope.init = function () {
             $log.info("Initializing Scope for controller = TransactionsController");
+            $scope.dt = new Date();
+            
             $("#date").datepicker({
-                onSelect: function (dateText, inst) {
+            	dateFormat: 'yy-mm-dd',onSelect: function (dateText) {
                     $log.info("Selected.");
-                    var dateAsString = dateText; //the first parameter of this function
-                    $log.info("New Date is " + dateAsString);
-                    $scope.dt = new Date(dateAsString);
+                    var dateAsString = dateText + "T00:00:00-04:00";                    
+                    $scope.dt = new Date(dateAsString);                     
                     var timestamp = $scope.dt.getTime();
+                    $log.info("date is "+dateAsString);
                     $scope.$apply();
+                    $scope.getRecordsByDate();
                 }
             });
 
@@ -31,22 +32,9 @@ angular.module('mainApp')
         };
 
         $scope.getRecords = function () {
-            $log.info("Fetching records. Daily = ", $scope.daily);
-            $scope.daily ? $scope.getDailyRecords() : $scope.getAllRecords();
+            $scope.getAllRecords();
         };
-
-        $scope.getTitle = function () {
-            if ($scope.daily) {
-                if ($scope.inFlight) {
-                    return "Daily In Flight Transactions";
-                }
-                return "Daily Transactions";
-            }
-            if ($scope.inFlight) {
-                return "All In Flight Transactions";
-            }
-            return "All Transactions";
-        };
+        
 
         $scope.getAllRecords = function () {
             $scope.loading = true;
@@ -62,15 +50,40 @@ angular.module('mainApp')
                 }
                 $scope.loading = false;
             });
-            $scope.daily = false;
+            
         };
 
-        $scope.getRecordsByDate = function (startTimeStamp, endTimeStamp) {
+        $scope.getRecordsByDate = function () {
+        	
+        	var dateSelected = $scope.dt;
+        	$log.info("start :"+dateSelected);
+        	dateSelected.setHours(0, 0, 0, 1);
+        	var startTimeStamp = dateSelected.getTime();
+        	$log.info("starttime:"+startTimeStamp);
+        	
+        	dateSelected.setHours(23, 59, 59, 999);
+        	var endTimeStamp = dateSelected.getTime();
             $scope.loading = true;
             var type;
-            if ($scope.inFlight) {
+            if ($scope.parking.status == "1") {
+                type = "COMPLETED";
+            }
+            else if ($scope.parking.status == "2") {
                 type = "IN_FLIGHT";
             }
+            else if($scope.parking.status == "3"){
+            	type = "PENDING_ENTER";
+            }
+            else if($scope.parking.status == "4"){
+            	type = "PENDING_EXIT";
+            }
+            else if($scope.parking.status == "5"){
+            	type = "ALARM_ENTER";
+            }
+            else if($scope.parking.status == "6"){
+            	type = "ALARM_EXIT";
+            }
+            $log.info("type:"+type);
             TransactionService.findByDateAndType(startTimeStamp, endTimeStamp, type).then(function (response) {
                 $log.info("Found " + response.length + " records");
                 $scope.records = response;
@@ -146,10 +159,13 @@ angular.module('mainApp')
                 return 0;
             }
 
-            if (status.indexOf("PENDING") > -1) {
+            if (status.indexOf("PENDING") > -1 || status.indexOf("ALARM") > -1) {
                 return 1;
             }
-            return 2;
+            if (status.indexOf("IN_FLIGHT") > -1) {
+            	return 2;
+            }
+            return 3;
 
         };
 
@@ -167,7 +183,10 @@ angular.module('mainApp')
         }
 
         $scope.today = mm + '/' + dd + '/' + yyyy;
-        $scope.getRecords();
+        $scope.dt = new Date();
+        $scope.parking={status:'0'};      
+        $log.info("parking status:"+$scope.parking.status);        
+        $scope.getRecordsByDate();
 
     });
 
@@ -178,29 +197,26 @@ angular.module('mainApp').controller('TransactionTemplateController', function (
 
     $scope.status = 0;
 
-    var getStatus = function () {
-        if ($scope.record.parkingStatus == null) {
-            return 0;
+    var getStatus = function () {        
+        if ($scope.record.parkingStatus.indexOf("IN_FLIGHT") > -1) {
+            return 2;
         }
-        if ($scope.record.parkingStatus.indexOf("Parked") > -1) {
-            return 0;
-        }
-        if ($scope.record.parkingStatus.indexOf("Finished Parking") > -1) {
+        if ($scope.record.parkingStatus.indexOf("PENDING") > -1 || $scope.record.parkingStatus.indexOf("ALARM") > -1) {
             return 1;
         }
         if ($scope.record.parkingStatus.indexOf("COMPLETED") > -1) {
-            return 2;
+            return 0;
         }
-        if ($scope.record.parkingStatus.indexOf("EXCEPTION") > -1 || $scope.record.parkingStatus.indexOf("ERROR") > -1) {
+        if ($scope.record.parkingStatus.indexOf("EXCEPTION") > -1) {
             return -1;
         }
-        return 0;
+        return 3;
     };
 
 
-    $scope.openGateModal = function (transaction) {
+    $scope.openGateModal = function (transaction,gid) {
         var modalInstance = $modal.open({
-            templateUrl: 'openGateTemplate.html',
+            templateUrl: 'openGateTemplate'+gid+'.html',
             controller: 'OpenGateController',
             resolve: {
                 transaction: function () {
@@ -222,9 +238,14 @@ angular.module('mainApp').controller('TransactionTemplateController', function (
         return t;
     };
 
-    $scope.openGate = function () {
+    $scope.openGate1 = function () {
         $scope.cancel();
-        $scope.openGateModal($scope.record);
+        $scope.openGateModal($scope.record,1);
+    };
+    
+    $scope.openGate2 = function () {
+        $scope.cancel();
+        $scope.openGateModal($scope.record,2);
     };
 
     $scope.status = getStatus();
@@ -237,18 +258,33 @@ angular.module('mainApp').controller('TransactionTemplateController', function (
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
-
+   
+    $scope.statusLogs = transaction.statusLogs;
+    $log.info("status logs:"+$scope.statusLogs);
 });
 
 
-angular.module('mainApp').controller('OpenGateController', function ($rootScope, $scope, $state, $timeout, $modal, $modalInstance, $http, $log, transaction) {
+angular.module('mainApp').controller('OpenGateController', function ($rootScope, $scope, $state, $timeout, $modal, $modalInstance, $http, $log, transaction, TransactionService) {
     $scope.record = transaction;
 
-    $scope.open = function () {
+    $scope.open1 = function () {
         if (!confirm("Are you sure you want to open the gate for transaction id = " + $scope.record.id + " ?")) {
             return;
         }
-        alert("Succesfully opened gated.");
+        TransactionService.enter(function(response){
+        	alert("The gate opened successfully");        	
+        });
+        $modalInstance.close();
+    };
+    
+    $scope.open2 = function () {
+        if (!confirm("Are you sure you want to open the gate for transaction id = " + $scope.record.id + " ?")) {
+            return;
+        }
+        TransactionService.exit(function(response){
+        	alert("The gate opened successfully");
+        });
+        $modalInstance.close();
     };
 
     $scope.getUpdatedTime = function (t) {
@@ -267,5 +303,5 @@ angular.module('mainApp').controller('OpenGateController', function ($rootScope,
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
-
+   
 });

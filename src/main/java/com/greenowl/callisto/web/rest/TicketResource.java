@@ -49,6 +49,7 @@ public class TicketResource {
             return new ResponseEntity<>(ErrorResponseFactory.genericBadReq("Unable to find ticket with id = " + ticketNo,"/api/"+apiVersion+"/ticket/status",204), org.springframework.http.HttpStatus.BAD_REQUEST);
         }
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date time = null;
         try{
         	time = sdf.parse(accessDateTime);        	
@@ -65,27 +66,52 @@ public class TicketResource {
         }
         if(Constants.PARKING_TICKET_TYPE_ENTER==gId){
         	activity.setEntryDatetime(new DateTime(time.getTime(),DateTimeZone.UTC));
-        	activity.setExceptionFlag((activity.getExceptionFlag()==null?"":activity.getExceptionFlag())+" "+sdf.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
-        	if(status!=null && status.toLowerCase().contains("pass")){        		
-        		activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT);
+        	activity.setExceptionFlag((activity.getExceptionFlag()==null?"":activity.getExceptionFlag())+","+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
+        	if(status!=null && status.toLowerCase().contains("pass")){  
+        		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
+        			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT_MANUAL);
+        		}
+        		else{
+        			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT);
+        		}
         	}
         	else{
-        		activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
+        		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
+        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);
+        		}
+        		else{
+        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
+        		}
         	}
         }
         else if(Constants.PARKING_TICKET_TYPE_EXIT==gId){
             activity.setExitDatetime(new DateTime(time.getTime(), DateTimeZone.UTC));	
-            activity.setExceptionFlag((activity.getExceptionFlag()==null?"":activity.getExceptionFlag())+" "+sdf.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
+            activity.setExceptionFlag((activity.getExceptionFlag()==null?"":activity.getExceptionFlag())+","+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
             if(status!=null && status.toLowerCase().contains("pass")){
             	if(activity.getEntryDatetime()!=null){
-            		activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED);
+            		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
+            			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED_MANUAL);
+            		}
+            		else{
+            			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED);
+            		}
             	}
             	else{
-            		activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
+            		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
+            			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);
+            		}
+            		else{
+            			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
+            		}
             	}
         	}
         	else{
-        		activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);
+        		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
+        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT_MANUAL);
+        		}
+        		else{
+        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);
+        		}
         	}
         }
         else{
@@ -93,15 +119,15 @@ public class TicketResource {
         }
         if(message!=null){
         	try{
-        		activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+" "+sdf.format(Calendar.getInstance().getTime())+" "+status+", "+URLDecoder.decode(message,"utf-8"));
+        		activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+";"+sdf2.format(Calendar.getInstance().getTime())+" "+status+", "+URLDecoder.decode(message,"utf-8"));
         	}
         	catch(Exception e){
         		LOG.error(e.getMessage(),e);
-        		activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+" "+sdf.format(Calendar.getInstance().getTime())+" "+status+", "+message);
+        		activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+";"+sdf2.format(Calendar.getInstance().getTime())+" "+status+", "+message);
         	}
         }
         else{
-        	activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+" "+sdf.format(Calendar.getInstance().getTime())+" "+status);
+        	activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+";"+sdf2.format(Calendar.getInstance().getTime())+" "+status);
         }
         try{
             parkingActivityRepository.save(activity);

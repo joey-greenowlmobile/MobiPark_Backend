@@ -1,17 +1,32 @@
 <div ng-init="init()">
 
-    <h1>{{ getTitle()}} [{{today}}]</h1>
+    <h1>Transactions</h1>
 
     <form>
         <div class="form-group">
             <div style="margin: 3%;"></div>
-            <div class="checkbox">
+            <!--  <div class="checkbox">
                 <label><input ng-model="daily" ng-change="getRecords()" type="checkbox" value="">Daily</label>
-                <label style="margin-left: 2%;"><input ng-change="getRecords()" ng-model="inFlight" type="checkbox"
-                                                       value="">In Flight</label>
-            </div>
+                
+            </div>-->
             <div style="margin: 3%;"></div>
-            <input type="date" name="date" id="date" value="" ng-model="dt"/>
+            Date:&nbsp;&nbsp;<input type="date" name="date" id="date" size="25" value="2016-04-11" ng-change="getRecordsByDate()" value="" ng-model="dt"/>
+            <!-- <label style="margin-left: 2%;"><input ng-change="getRecords()" ng-model="inFlight" type="checkbox" value="">In Flight</label>-->            
+            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="0">All</input>
+	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="1">Completed</input>
+	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="2">In Flight</input>
+	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="3">Pending Enter</input>
+	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="4">Pending Exit</input>
+	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="5">Alarm Enter</input>
+	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="6">Alarm Exit</input>
+            
+            <div style="margin: 3%;"></div>
+	        <div class="input-group">            
+	            
+	            <div class="input-group-addon"><i class="glyphicon glyphicon-search"></i></div>
+	            <input type="text" class="form-control" placeholder="Search" ng-model="searchRecord"/>
+	        </div>  
+	        <div style="margin: 3%;"></div>          
         </div>
     </form>
     <div ng-show="loading" class="loader">Loading...</div>
@@ -22,7 +37,7 @@
         <tr>
             <td>
                 <a href="#/transactions" ng-click="sortType = 'id'; sortReverse = !sortReverse">
-                    ID
+                    Ticket
                     <span ng-show="sortType == 'id' && !sortReverse" class="fa fa-caret-down"></span>
                     <span ng-show="sortType == 'id' && sortReverse" class="fa fa-caret-up"></span>
                 </a>
@@ -78,18 +93,19 @@
         <tr ng-repeat="record in records | orderBy:sortType:sortReverse | filter:searchRecord">
             <td>{{record.id}}</td>
             <td>
-                <span ng-show="record.pType == 2" class="label label-default">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 2" class="label label-info">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
                 <span ng-show="record.pType == -1" class="label label-danger">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
                 <span ng-show="record.pType == 0" class="label label-success">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
-                <span ng-show="record.pType == 1" class="label label-primary">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 1" class="label label-danger">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 3" class="label label-warning">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
             </td>
-            <td>{{record.entryDateTime | date: "h:mm a" }}</td>
-            <td>{{record.exitDateTime | date: "h:mm a" }}</td>
+            <td>{{record.entryDateTime | date: "yyyy-MM-dd HH:mm" }}</td>
+        	<td>{{record.exitDateTime | date: "yyyy-MM-dd HH:mm" }}</td>
             <td>{{record.userPlateNumber}}</td>
             <td>{{record.userEmail}}</td>
-            <td>{{record.createdDate | date: 'short'}}</td>
+            <td>{{record.createdDate | date: "yyyy-MM-dd HH:mm"}}</td>
             <td>
-                <button class="btn btn-sm btn-success" ng-click="openModal(record)">manage</button>
+                <button class="btn btn-sm btn-success" ng-click="openModal(record)">View Detail</button>
             </td>
         </tr>
         </tbody>
@@ -105,62 +121,56 @@
             <h3 class="modal-title">Transaction: </h3>
         </div>
         <div class="modal-body">
-            <b> Id: </b> {{record.id}} </br>
+            <b> Ticket: </b> {{record.id}} </br>
             <b> Status: </b>
-            <span ng-show="status == 0" class="label label-sm label-primary">Ok</span>
-            <span ng-show="status == 1" class="label label-sm label-warning">Pending</span>
-            <span ng-show="status == 2" class="label label-sm label-success">Completed</span>
-            <span ng-show="status == -1" class="label label-sm label-danger">Error</span>
-            </br>
-            </br>
-            <b> Msg: </b> {{record.parkingStatus}}  </br>
-            </br>
+            <span ng-show="record.pType == 0" class="label label-success">{{record.parkingStatus}}</span>
+            <span ng-show="record.pType == 1" class="label label-danger">{{record.parkingStatus}}</span>
+            <span ng-show="record.pType == 2" class="label label-info">{{record.parkingStatus}}</span>
+            <span ng-show="record.pType == 3" class="label label-warning">{{record.parkingStatus}}</span>
+            <span ng-show="record.pType == -1" class="label label-danger">{{record.parkingStatus}}</span>
+               
+            </br>           
             <b> Email: </b> {{record.userEmail}} </br>
             <b> Phone Number: </b> {{record.userPhoneNumber}} </br>
             <b> License Plate: </b> {{record.userPlateNumber}} </br>
-            <b> Payment Method: </b> Payroll </br>
+            <b> Payment Plan: </b> Payroll </br>
             <b> Device Info: </b> {{record.deviceInfo}} </br>
             <b> Time in: </b> {{record.entryDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
             <b> Time Out: </b> {{record.exitDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+            <b> Status Log: </b> 
+            <table>
+                <tr ng-repeat="log in statusLogs">
+                    <td>{{log}}</td>
+                </tr>
+            </table>
+            </br>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" ng-click="openGate()">Access Questions</button>
-            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+            <!--<button class="btn btn-danger" ng-click="openGate1()">Enter</button>-->
+            <button ng-show="record.parkingStatus != 'COMPLETED'" class="btn btn-danger" ng-click="openGate2()">Open Exit Gate</button>
+            <button class="btn btn-success" ng-click="cancel()">Cancel</button>
         </div>
     </script>
 
 
-    <script type="text/ng-template" id="openGateTemplate.html">
+    <script type="text/ng-template" id="openGateTemplate1.html">
         <div class="modal-header">
-            <h3 class="modal-title">Gate Operation For transaction id = {{record.id}} </h3>
+            <h4 class="modal-title">Gate Operation For Ticket {{record.id}} </h3>
         </div>
-        <div class="modal-body">
-            <div class="list-group">
-                <h3> Access Questions </h3>
-                <a href="#" class="list-group-item">
-                    <h4 class="list-group-item-heading">What is your primary mobile phone number?</h4>
-
-                    <p class="list-group-item-text">{{record.userPhoneNumber}}</p>
-                </a>
-                <a href="#" class="list-group-item">
-                    <h4 class="list-group-item-heading">What is your primary vehicle license plate number?</h4>
-
-                    <p class="list-group-item-text">{{record.userLicensePlate}}</p>
-                </a>
-                <a href="#" class="list-group-item">
-                    <h4 class="list-group-item-heading">What is your email Address?</h4>
-
-                    <p class="list-group-item-text">{{record.userEmail}}</p>
-                </a>
-                <a href="#" class="list-group-item">
-                    <h4 class="list-group-item-heading">What is Subscription plan type?</h4>
-
-                    <p class="list-group-item-text">{{record.planName}}</p>
-                </a>
-            </div>
-        </div>
+        
         <div class="modal-footer">
-            <!--<button class="btn btn-primary" ng-click="open()">Open Gate</button>-->
+            <button class="btn btn-primary" ng-click="open1()">Open Gate</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+    
+    <script type="text/ng-template" id="openGateTemplate2.html">
+        <div class="modal-header">
+            <h4 class="modal-title">Gate Operation For Ticket {{record.id}} </h3>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="open2()">Open Gate</button>
             <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
         </div>
     </script>

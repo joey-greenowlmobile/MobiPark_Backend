@@ -5,5 +5,5 @@ angular.module('mainApp')
     .constant('ENV', 'prod')
     .constant('API_VERSION', 'v1')
 
-    .constant('VERSION', '6.0.1');
+    .constant('VERSION', '1.0.0');
 

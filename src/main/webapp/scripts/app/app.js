@@ -34,7 +34,7 @@ angular.module('mainApp', ['LocalStorageModule', 'tmh.dynamicLocale',
             }
             $translate(titleKey).then(function (title) {
                 // Change window title with translated one
-                $window.document.title = title;
+            //    $window.document.title = title;
             });
         });
 

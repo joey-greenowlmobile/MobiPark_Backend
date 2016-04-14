@@ -66,11 +66,19 @@ public class GateResource {
     @Transactional(readOnly = false)
     public ResponseEntity<?> enterParkingLot(@PathVariable("apiVersion") final String apiVersion,
                                              @RequestBody GateOpenRequest req) {
-        return enterParkingLot(req);
+        return enterParkingLot(req,false);
     }
 
+    @RequestMapping(value = "/manualEnter", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional(readOnly = false)
+    public ResponseEntity<?> manualEnter(@PathVariable("apiVersion") final String apiVersion,
+                                             @RequestBody GateOpenRequest req) {
+        return enterParkingLot(req,true);
+    }
+    
+    
     @Timed
-    private ResponseEntity<?> enterParkingLot(GateOpenRequest req) {
+    private ResponseEntity<?> enterParkingLot(GateOpenRequest req, boolean manualMode) {
         User user = userService.getCurrentUser();
         // No in flight record Exists.
         Optional<ParkingActivity> optional = parkingActivityService.getLatestActivityForUser(user);
@@ -111,14 +119,27 @@ public class GateResource {
             // open gate
             final String result = openGate(1, parkingActivityDTO.getId().toString());
             if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
-                    || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {
-                parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER,
-                        parkingActivityDTO.getId());
-                parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);                
+                    || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {                
+                if(manualMode){
+                	parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);
+                	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL,
+                            parkingActivityDTO.getId());
+                }
+                else{
+                	parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);  
+                	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER,
+                            parkingActivityDTO.getId());
+                }
                 return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
             } else {
-                parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER,
+            	if(manualMode){
+            		parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL,
+                            parkingActivityDTO.getId());
+            	}
+            	else{
+            		parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER,
                         parkingActivityDTO.getId());
+            	}
                 parkingActivityService.updateGateResponse(result, parkingActivityDTO.getId());
                 return new ResponseEntity<>(
                         genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_GATE_OPEN_FAILED, String.class), "/enter",
@@ -174,12 +195,22 @@ public class GateResource {
     @Transactional(readOnly = false)
     public ResponseEntity<?> exitParkingLot(@PathVariable("apiVersion") final String apiVersion,
                                             @RequestBody GateOpenRequest req) {
-        return exitParkingLot(req);
+        return exitParkingLot(req,false);
+    }
+    
+    /**
+     * POST /exit -> manuallly open the exit gate of the parking lot.
+     */
+    @RequestMapping(value = "/manualExit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional(readOnly = false)
+    public ResponseEntity<?> manualExit(@PathVariable("apiVersion") final String apiVersion,
+                                            @RequestBody GateOpenRequest req) {
+        return exitParkingLot(req, true);
     }
 
 
     @Timed
-    private ResponseEntity<?> exitParkingLot(GateOpenRequest req) {
+    private ResponseEntity<?> exitParkingLot(GateOpenRequest req, boolean manualMode) {
         User user = userService.getCurrentUser();
         Optional<ParkingActivity> opt = parkingActivityService.getLatestActivityForUser(user);
         ParkingActivity parkingActivity = null;
@@ -192,17 +223,27 @@ public class GateResource {
 	        	parkingActivity = opt.get();	       
 		        final String result = openGate(2, Long.toString(parkingActivity.getId()));
 		        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		        parkingActivity.setExceptionFlag((parkingActivity.getExceptionFlag()==null?"":parkingActivity.getExceptionFlag())+" "+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
+		        parkingActivity.setExceptionFlag((parkingActivity.getExceptionFlag()==null?"":parkingActivity.getExceptionFlag())+","+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
 		        parkingActivity.setDeviceInfo(req.getDeviceInfo());
-		        parkingActivity.setGateResponse((parkingActivity.getGateResponse()==null?"":parkingActivity.getGateResponse())+" "+sdf.format(Calendar.getInstance().getTime())+" "+result);  
+		        parkingActivity.setGateResponse((parkingActivity.getGateResponse()==null?"":parkingActivity.getGateResponse())+";"+sdf.format(Calendar.getInstance().getTime())+" "+result);  
 		        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
-		                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {            
-		            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);            
+		                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) { 
+		        	if(manualMode){
+		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL); 
+		        	}
+		        	else{
+		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);  
+		        	}
 		            parkingActivityService.save(parkingActivity);            
 		            ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
 		            return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
-		        } else {        	
-		            parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);                     
+		        } else {      
+		        	if(manualMode){
+		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT_MANUAL);
+		        	}
+		        	else{
+		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);  
+		        	}
 		            parkingActivityService.save(parkingActivity);
 		            return new ResponseEntity<>(genericBadReq(configService.get(Constants.PARKING_EXIT_EXCEPTION_GATE_OPEN_FAILLED, String.class), "/exit",
 		                    ErrorCodeConstants.GATE_OPEN_FAILED), org.springframework.http.HttpStatus.BAD_REQUEST);

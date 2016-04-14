@@ -178,6 +178,13 @@ public class ParkingActivityDTO {
         this.deviceInfo = deviceInfo;
     }
 
+    public String[] getStatusLogs(){
+    	if(exceptionFlag!=null && exceptionFlag.indexOf(",")>-1){
+    		return exceptionFlag.split(",");
+    	}
+    	return new String[]{exceptionFlag};
+    }
+    
     @Override
     public String toString() {
         return "ParkingActivityDTO{" +
