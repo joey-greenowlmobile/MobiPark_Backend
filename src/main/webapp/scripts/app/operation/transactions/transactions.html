@@ -13,12 +13,12 @@
             Date:&nbsp;&nbsp;<input type="date" name="date" id="date" size="25" value="2016-04-11" ng-change="getRecordsByDate()" value="" ng-model="dt"/>
             <!-- <label style="margin-left: 2%;"><input ng-change="getRecords()" ng-model="inFlight" type="checkbox" value="">In Flight</label>-->            
             &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="0">All</input>
-	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="1">Completed</input>
-	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="2">In Flight</input>
-	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="3">Pending Enter</input>
-	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="4">Pending Exit</input>
-	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="5">Alarm Enter</input>
-	            &nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="6">Alarm Exit</input>
+	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="1">Completed</input>
+	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="2">In Flight</input>
+	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="3">Pending Enter</input>
+	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="4">Pending Exit</input>
+	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="5">Alarm Enter</input>
+	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="6">Alarm Exit</input>
             
             <div style="margin: 3%;"></div>
 	        <div class="input-group">            
@@ -135,12 +135,12 @@
             <b> License Plate: </b> {{record.userPlateNumber}} </br>
             <b> Payment Plan: </b> Payroll </br>
             <b> Device Info: </b> {{record.deviceInfo}} </br>
-            <b> Time in: </b> {{record.entryDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
-            <b> Time Out: </b> {{record.exitDateTime | date:"EEEE MMMM dd, yyyy 'at' h:mma" }}</br>
+            <b> Time in: </b> {{record.entryDateTime | date:"yyyy-MM-dd HH:mm" }}</br>
+            <b> Time Out: </b> {{record.exitDateTime | date:"yyyy-MM-dd HH:mm" }}</br>
             <b> Status Log: </b> 
             <table>
                 <tr ng-repeat="log in statusLogs">
-                    <td>{{log}}</td>
+                    <td>{{log.statusTime | date:"yyyy-MM-dd HH:mm:ss" }} {{log.status}}</td>
                 </tr>
             </table>
             </br>

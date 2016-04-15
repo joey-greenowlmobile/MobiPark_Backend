@@ -223,9 +223,9 @@ public class GateResource {
 	        	parkingActivity = opt.get();	       
 		        final String result = openGate(2, Long.toString(parkingActivity.getId()));
 		        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		        parkingActivity.setExceptionFlag((parkingActivity.getExceptionFlag()==null?"":parkingActivity.getExceptionFlag())+","+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
+		        parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
 		        parkingActivity.setDeviceInfo(req.getDeviceInfo());
-		        parkingActivity.setGateResponse((parkingActivity.getGateResponse()==null?"":parkingActivity.getGateResponse())+";"+sdf.format(Calendar.getInstance().getTime())+" "+result);  
+		        parkingActivity.setGateResponse(((parkingActivity.getGateResponse()==null || parkingActivity.getGateResponse().trim().length()==0)?"":(parkingActivity.getGateResponse()+";"))+sdf.format(Calendar.getInstance().getTime())+" "+result);  
 		        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
 		                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) { 
 		        	if(manualMode){

@@ -1,8 +1,14 @@
 package com.greenowl.callisto.web.rest.dto;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.joda.time.DateTimeZone;
+
 import com.greenowl.callisto.domain.ParkingActivity;
 import com.greenowl.callisto.domain.User;
-import org.joda.time.DateTimeZone;
 
 public class ParkingActivityDTO {
 
@@ -178,11 +184,35 @@ public class ParkingActivityDTO {
         this.deviceInfo = deviceInfo;
     }
 
-    public String[] getStatusLogs(){
+    public List<StatusLogDTO> getStatusLogs(){
+    	
+    	if(exceptionFlag == null){
+    		return null;
+    	}    	
+    	String[] logs = null;
     	if(exceptionFlag!=null && exceptionFlag.indexOf(",")>-1){
-    		return exceptionFlag.split(",");
+    		logs = exceptionFlag.split(",");
     	}
-    	return new String[]{exceptionFlag};
+    	else{
+    		logs = new String[]{exceptionFlag};
+    	}
+    	
+    	ArrayList<StatusLogDTO> statusLogs = new ArrayList<StatusLogDTO>();
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	for(int i=0;i<logs.length;i++){    		
+    		String[] infos = logs[i].trim().split(" ");
+    		if(infos.length==3){
+    			try{    				
+	    			StatusLogDTO statusLog = new StatusLogDTO();
+	    			statusLog.setStatusTime(sdf.parse(infos[0]+" "+infos[1]).getTime());
+	    			statusLog.setStatus(infos[2]);
+	    			statusLogs.add(statusLog);
+    			}
+    			catch(Exception e){    				
+    			}
+    		}    		
+    	}    	
+    	return statusLogs;
     }
     
     @Override

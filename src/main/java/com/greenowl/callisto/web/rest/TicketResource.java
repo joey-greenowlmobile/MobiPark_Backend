@@ -66,7 +66,7 @@ public class TicketResource {
         }
         if(Constants.PARKING_TICKET_TYPE_ENTER==gId){
         	activity.setEntryDatetime(new DateTime(time.getTime(),DateTimeZone.UTC));
-        	activity.setExceptionFlag((activity.getExceptionFlag()==null?"":activity.getExceptionFlag())+","+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
+        	activity.setExceptionFlag(((activity.getExceptionFlag()==null || activity.getExceptionFlag().trim().length()==0)?"":(activity.getExceptionFlag()+","))+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
         	if(status!=null && status.toLowerCase().contains("pass")){  
         		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
         			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT_MANUAL);
@@ -86,24 +86,14 @@ public class TicketResource {
         }
         else if(Constants.PARKING_TICKET_TYPE_EXIT==gId){
             activity.setExitDatetime(new DateTime(time.getTime(), DateTimeZone.UTC));	
-            activity.setExceptionFlag((activity.getExceptionFlag()==null?"":activity.getExceptionFlag())+","+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
-            if(status!=null && status.toLowerCase().contains("pass")){
-            	if(activity.getEntryDatetime()!=null){
-            		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
-            			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED_MANUAL);
-            		}
-            		else{
-            			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED);
-            		}
-            	}
-            	else{
-            		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
-            			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);
-            		}
-            		else{
-            			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
-            		}
-            	}
+            activity.setExceptionFlag(((activity.getExceptionFlag()==null || activity.getExceptionFlag().trim().length()==0)?"":(activity.getExceptionFlag()+","))+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
+            if(status!=null && status.toLowerCase().contains("pass")){            	
+        		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
+        			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED_MANUAL);
+        		}
+        		else{
+        			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED);
+        		}            	
         	}
         	else{
         		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
@@ -119,15 +109,15 @@ public class TicketResource {
         }
         if(message!=null){
         	try{
-        		activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+";"+sdf2.format(Calendar.getInstance().getTime())+" "+status+", "+URLDecoder.decode(message,"utf-8"));
+        		activity.setGateResponse((activity.getGateResponse()==null?"":(activity.getGateResponse()+";"))+sdf2.format(Calendar.getInstance().getTime())+" "+status+", "+URLDecoder.decode(message,"utf-8"));
         	}
         	catch(Exception e){
         		LOG.error(e.getMessage(),e);
-        		activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+";"+sdf2.format(Calendar.getInstance().getTime())+" "+status+", "+message);
+        		activity.setGateResponse((activity.getGateResponse()==null?"":(activity.getGateResponse()+";"))+sdf2.format(Calendar.getInstance().getTime())+" "+status+", "+message);
         	}
         }
         else{
-        	activity.setGateResponse((activity.getGateResponse()==null?"":activity.getGateResponse())+";"+sdf2.format(Calendar.getInstance().getTime())+" "+status);
+        	activity.setGateResponse((activity.getGateResponse()==null?"":(activity.getGateResponse()+";"))+sdf2.format(Calendar.getInstance().getTime())+" "+status);
         }
         try{
             parkingActivityRepository.save(activity);

@@ -260,7 +260,7 @@ angular.module('mainApp').controller('TransactionTemplateController', function (
     };
    
     $scope.statusLogs = transaction.statusLogs;
-    $log.info("status logs:"+$scope.statusLogs);
+    $log.info("status logs:"+$scope.statusLogs.size);
 });
 
 
