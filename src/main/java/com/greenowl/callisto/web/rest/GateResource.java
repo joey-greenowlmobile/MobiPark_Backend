@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Optional;
 import org.joda.time.DateTime;
@@ -56,6 +57,7 @@ public class GateResource {
     @Inject
     private ParkingActivityService parkingActivityService;
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
    
     private static final Logger LOG = LoggerFactory.getLogger(GateResource.class);
 
@@ -117,30 +119,34 @@ public class GateResource {
                 
         if (parkingActivityDTO != null) {        	
             // open gate
+        	ParkingActivity parkingActivity = parkingActivityService.findById(parkingActivityDTO.getId());
             final String result = openGate(1, parkingActivityDTO.getId().toString());
             if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
                     || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {                
                 if(manualMode){
                 	parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);
-                	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL,
-                            parkingActivityDTO.getId());
+                	parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);
+                	parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);                	
                 }
                 else{
-                	parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);  
-                	parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER,
-                            parkingActivityDTO.getId());
+                	parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);
+                	parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);
+                	parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER);                	
                 }
+                parkingActivity.setGateResponse(sdf.format(Calendar.getInstance().getTime())+" "+result);
+                parkingActivityService.save(parkingActivity);
                 return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
             } else {
             	if(manualMode){
-            		parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL,
-                            parkingActivityDTO.getId());
+            		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);
+            		parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);            		
             	}
             	else{
-            		parkingActivityService.updateParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER,
-                        parkingActivityDTO.getId());
+            		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
+            		parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_EXCEPTION_ENTER);            		
             	}
-                parkingActivityService.updateGateResponse(result, parkingActivityDTO.getId());
+            	parkingActivity.setGateResponse(sdf.format(Calendar.getInstance().getTime())+" "+result);
+                parkingActivityService.save(parkingActivity);
                 return new ResponseEntity<>(
                         genericBadReq(configService.get(Constants.PARKING_ENTRY_EXCEPTION_GATE_OPEN_FAILED, String.class), "/enter",
                                 ErrorCodeConstants.GATE_OPEN_FAILED),
@@ -221,9 +227,7 @@ public class GateResource {
 	        }
 	        else{
 	        	parkingActivity = opt.get();	       
-		        final String result = openGate(2, Long.toString(parkingActivity.getId()));
-		        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		        parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
+		        final String result = openGate(2, Long.toString(parkingActivity.getId()));		        
 		        parkingActivity.setDeviceInfo(req.getDeviceInfo());
 		        parkingActivity.setGateResponse(((parkingActivity.getGateResponse()==null || parkingActivity.getGateResponse().trim().length()==0)?"":(parkingActivity.getGateResponse()+";"))+sdf.format(Calendar.getInstance().getTime())+" "+result);  
 		        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
@@ -233,7 +237,8 @@ public class GateResource {
 		        	}
 		        	else{
 		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);  
-		        	}
+		        	}	
+		        	parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
 		            parkingActivityService.save(parkingActivity);            
 		            ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
 		            return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
@@ -244,6 +249,7 @@ public class GateResource {
 		        	else{
 		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);  
 		        	}
+		        	parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
 		            parkingActivityService.save(parkingActivity);
 		            return new ResponseEntity<>(genericBadReq(configService.get(Constants.PARKING_EXIT_EXCEPTION_GATE_OPEN_FAILLED, String.class), "/exit",
 		                    ErrorCodeConstants.GATE_OPEN_FAILED), org.springframework.http.HttpStatus.BAD_REQUEST);

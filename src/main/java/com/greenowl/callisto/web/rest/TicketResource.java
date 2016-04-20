@@ -65,8 +65,7 @@ public class TicketResource {
         	LOG.error("Wrong gate id:"+gateId,e);
         }
         if(Constants.PARKING_TICKET_TYPE_ENTER==gId){
-        	activity.setEntryDatetime(new DateTime(time.getTime(),DateTimeZone.UTC));
-        	activity.setExceptionFlag(((activity.getExceptionFlag()==null || activity.getExceptionFlag().trim().length()==0)?"":(activity.getExceptionFlag()+","))+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
+        	activity.setEntryDatetime(new DateTime(Calendar.getInstance().getTime(),DateTimeZone.UTC));        	
         	if(status!=null && status.toLowerCase().contains("pass")){  
         		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
         			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT_MANUAL);
@@ -85,8 +84,7 @@ public class TicketResource {
         	}
         }
         else if(Constants.PARKING_TICKET_TYPE_EXIT==gId){
-            activity.setExitDatetime(new DateTime(time.getTime(), DateTimeZone.UTC));	
-            activity.setExceptionFlag(((activity.getExceptionFlag()==null || activity.getExceptionFlag().trim().length()==0)?"":(activity.getExceptionFlag()+","))+sdf2.format(Calendar.getInstance().getTime())+" "+activity.getParkingStatus());
+            activity.setExitDatetime(new DateTime(Calendar.getInstance().getTime(), DateTimeZone.UTC));	            
             if(status!=null && status.toLowerCase().contains("pass")){            	
         		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
         			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED_MANUAL);
@@ -119,6 +117,7 @@ public class TicketResource {
         else{
         	activity.setGateResponse((activity.getGateResponse()==null?"":(activity.getGateResponse()+";"))+sdf2.format(Calendar.getInstance().getTime())+" "+status);
         }
+        activity.setExceptionFlag(((activity.getExceptionFlag()==null || activity.getExceptionFlag().trim().length()==0)?"":(activity.getExceptionFlag()+","))+sdf2.format(time)+" "+activity.getParkingStatus());
         try{
             parkingActivityRepository.save(activity);
 		    TicketStatusDTO ticketStatusDTO = new TicketStatusDTO(ticketNo, accessDateTime,status,"OK");

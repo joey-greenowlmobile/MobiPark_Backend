@@ -110,4 +110,8 @@ public class ParkingActivityService {
     public void save(ParkingActivity parkingActivity){
     	parkingActivityRepository.save(parkingActivity);
     }
+    
+    public ParkingActivity findById(Long id){
+    	return parkingActivityRepository.getParkingActivityById(id);
+    }
 }
