@@ -47,6 +47,9 @@ public class ParkingActivity extends AbstractAuditingEntity implements Serializa
 
     @Column(name = "device_info")
     private String deviceInfo;
+    
+    @Column(name = "open_log")
+    private String openLog;
 
     public ParkingActivity() {
     }
@@ -138,4 +141,14 @@ public class ParkingActivity extends AbstractAuditingEntity implements Serializa
     public void setDeviceInfo(String deviceInfo) {
         this.deviceInfo = deviceInfo;
     }
+
+	public String getOpenLog() {
+		return openLog;
+	}
+
+	public void setOpenLog(String openLog) {
+		this.openLog = openLog;
+	}
+    
+    
 }

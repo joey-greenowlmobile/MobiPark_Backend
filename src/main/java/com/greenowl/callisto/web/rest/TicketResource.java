@@ -65,41 +65,51 @@ public class TicketResource {
         	LOG.error("Wrong gate id:"+gateId,e);
         }
         if(Constants.PARKING_TICKET_TYPE_ENTER==gId){
-        	activity.setEntryDatetime(new DateTime(Calendar.getInstance().getTime(),DateTimeZone.UTC));        	
-        	if(status!=null && status.toLowerCase().contains("pass")){  
-        		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
-        			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT_MANUAL);
-        		}
-        		else{
-        			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT);
-        		}
+        	if(activity.getEntryDatetime()==null){
+	        	activity.setEntryDatetime(new DateTime(Calendar.getInstance().getTime(),DateTimeZone.UTC));        	
+	        	if(status!=null && status.toLowerCase().contains("pass")){  
+	        		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT_MANUAL);
+	        		}
+	        		else{
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_IN_FLIGHT);
+	        		}
+	        	}
+	        	else{
+	        		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);
+	        		}
+	        		else{
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
+	        		}
+	        	}
         	}
         	else{
-        		if(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL.equals(activity.getParkingStatus())){
-        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);
-        		}
-        		else{
-        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
-        		}
+        		LOG.error("EntryDateTime is not empty, ticket no:"+ticketNo);
         	}
         }
         else if(Constants.PARKING_TICKET_TYPE_EXIT==gId){
-            activity.setExitDatetime(new DateTime(Calendar.getInstance().getTime(), DateTimeZone.UTC));	            
-            if(status!=null && status.toLowerCase().contains("pass")){            	
-        		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
-        			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED_MANUAL);
-        		}
-        		else{
-        			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED);
-        		}            	
+        	if(activity.getExitDatetime()==null){
+	            activity.setExitDatetime(new DateTime(Calendar.getInstance().getTime(), DateTimeZone.UTC));	            
+	            if(status!=null && status.toLowerCase().contains("pass")){            	
+	        		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED_MANUAL);
+	        		}
+	        		else{
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_COMPLETED);
+	        		}            	
+	        	}
+	        	else{
+	        		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT_MANUAL);
+	        		}
+	        		else{
+	        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);
+	        		}
+	        	}
         	}
         	else{
-        		if(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL.equals(activity.getParkingStatus())){
-        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT_MANUAL);
-        		}
-        		else{
-        			activity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT);
-        		}
+        		LOG.error("ExitDateTime is not empty, ticket no:"+ticketNo);
         	}
         }
         else{

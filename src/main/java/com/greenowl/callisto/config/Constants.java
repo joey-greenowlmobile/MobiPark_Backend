@@ -30,12 +30,14 @@ public final class Constants {
     public static final String PARKING_STATUS_PENDING_ENTER_MANUAL = "PENDING_ENTER_MANUAL";
     public static final String PARKING_STATUS_PENDING_EXIT = "PENDING_EXIT";
     public static final String PARKING_STATUS_PENDING_EXIT_MANUAL = "PENDING_EXIT_MANUAL";
+    public static final String PARKING_STATUS_CONNECTION_TIMEOUT_ENTER = "CONNECTION_TIMEOUT_ENTER";
     public static final String PARKING_STATUS_IN_FLIGHT = "IN_FLIGHT";
     public static final String PARKING_STATUS_IN_FLIGHT_MANUAL = "IN_FLIGHT_MANUAL";
     public static final String PARKING_STATUS_EXCEPTION_ENTER = "ALARM_ENTER";
     public static final String PARKING_STATUS_EXCEPTION_ENTER_MANUAL = "ALARM_ENTER_MANUAL";
     public static final String PARKING_STATUS_EXCEPTION_EXIT = "ALARM_EXIT";
     public static final String PARKING_STATUS_EXCEPTION_EXIT_MANUAL = "ALARM_EXIT_MANUAL";
+    public static final String PARKING_STATUS_CONNECTION_TIMEOUT_EXIT = "CONNECTION_TIMEOUT_EXIT";
     public static final String PARKING_STATUS_COMPLETED = "COMPLETED";
     public static final String PARKING_STATUS_COMPLETED_MANUAL = "COMPLETED_MANUAL";
    

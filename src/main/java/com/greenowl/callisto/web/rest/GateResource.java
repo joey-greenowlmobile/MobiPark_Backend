@@ -7,16 +7,19 @@ import com.greenowl.callisto.config.ErrorCodeConstants;
 import com.greenowl.callisto.domain.ParkingActivity;
 import com.greenowl.callisto.domain.ParkingPlan;
 import com.greenowl.callisto.domain.User;
+import com.greenowl.callisto.domain.ExceptionLog;
 import com.greenowl.callisto.factory.ParkingActivityFactory;
 import com.greenowl.callisto.repository.ParkingActivityRepository;
 import com.greenowl.callisto.service.ParkingActivityService;
 import com.greenowl.callisto.service.ParkingValTicketStatusService;
 import com.greenowl.callisto.service.UserService;
 import com.greenowl.callisto.service.config.ConfigService;
+import com.greenowl.callisto.service.ExceptionLogService;
 import com.greenowl.callisto.util.ParkingActivityUtil;
 import com.greenowl.callisto.web.rest.dto.ParkingActivityDTO;
 import com.greenowl.callisto.web.rest.dto.LoopStatusDTO;
 import com.greenowl.callisto.web.rest.parking.GateOpenRequest;
+import com.greenowl.callisto.web.rest.parking.LogRequest;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -25,6 +28,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -37,7 +41,7 @@ import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Optional;
-import org.joda.time.DateTime;
+
 
 import static com.greenowl.callisto.exception.ErrorResponseFactory.genericBadReq;
 
@@ -56,6 +60,9 @@ public class GateResource {
 
     @Inject
     private ParkingActivityService parkingActivityService;
+    
+       
+    private Long sleepTime = 2000L;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
    
@@ -67,20 +74,20 @@ public class GateResource {
     @RequestMapping(value = "/enter", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
     public ResponseEntity<?> enterParkingLot(@PathVariable("apiVersion") final String apiVersion,
-                                             @RequestBody GateOpenRequest req) {
-        return enterParkingLot(req,false);
+                                             @RequestBody GateOpenRequest req, @RequestParam(required = false) final String simulationType) {
+        return enterParkingLot(req,false,simulationType);
     }
 
     @RequestMapping(value = "/manualEnter", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
     public ResponseEntity<?> manualEnter(@PathVariable("apiVersion") final String apiVersion,
                                              @RequestBody GateOpenRequest req) {
-        return enterParkingLot(req,true);
+        return enterParkingLot(req,true,null);
     }
     
     
     @Timed
-    private ResponseEntity<?> enterParkingLot(GateOpenRequest req, boolean manualMode) {
+    private ResponseEntity<?> enterParkingLot(GateOpenRequest req, boolean manualMode, String simulationType) {
         User user = userService.getCurrentUser();
         // No in flight record Exists.
         Optional<ParkingActivity> optional = parkingActivityService.getLatestActivityForUser(user);
@@ -120,30 +127,76 @@ public class GateResource {
         if (parkingActivityDTO != null) {        	
             // open gate
         	ParkingActivity parkingActivity = parkingActivityService.findById(parkingActivityDTO.getId());
-            final String result = openGate(1, parkingActivityDTO.getId().toString());
+        	if(manualMode){
+        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);
+        		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);
+        	}
+        	else{
+        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);
+        		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER);
+        	}
+        	parkingActivityService.save(parkingActivity);
+            String result = openGate(1, parkingActivityDTO.getId().toString(), simulationType);
+            if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){
+	        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":(parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" ENTER_FIRST_SUCCESSFUL");
+	        	
+	        }
+	        else{
+	        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":(parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" ENTER_FIRST_UNSUCCESSFUL");
+	        }		        
+	        
+	        if(result==null ||  !(result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){
+	        	
+        		LOG.info("Failed to open the gate, will try again after 2 seconds, ticket no:"+parkingActivity.getId());
+        		LOG.info("time1:"+sdf.format(Calendar.getInstance().getTime()));
+        		try{
+        			Thread.sleep(sleepTime);		
+        		}
+        		catch(Exception e){
+        			LOG.error(e.getMessage(), e);
+        		}        		
+	        	LOG.info("time2:"+sdf.format(Calendar.getInstance().getTime()));
+	        	parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_CONNECTION_TIMEOUT_ENTER);
+	        	
+	        	result = openGate(1, Long.toString(parkingActivity.getId()),simulationType);
+	        	if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){
+		        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":(parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" ENTER_SECOND_SUCCESSFUL");
+		        }
+		        else{
+		        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":(parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" ENTER_SECOND_UNSUCCESSFUL");
+		        }	
+	        }
+	        
+	        parkingActivity.setDeviceInfo(req.getDeviceInfo());
             if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
-                    || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {                
+                    || result.contains(Constants.GATE_OPEN_RESPONSE_2))) {  
+            	/**
                 if(manualMode){
                 	parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);
                 	parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);
-                	parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);                	
+                	parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER_MANUAL);                	
                 }
                 else{
                 	parkingActivityDTO.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);
                 	parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_ENTER);
-                	parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER);                	
+                	parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_ENTER);                	
                 }
+                */
                 parkingActivity.setGateResponse(sdf.format(Calendar.getInstance().getTime())+" "+result);
                 parkingActivityService.save(parkingActivity);
+               
                 return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
             } else {
+            	if(result!=null && result.toUpperCase().contains("TIMEOUT")){
+            		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_CONNECTION_TIMEOUT_ENTER);
+            	}
             	if(manualMode){
             		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);
-            		parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);            		
+            		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_EXCEPTION_ENTER_MANUAL);            		
             	}
             	else{
             		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_ENTER);
-            		parkingActivity.setExceptionFlag(sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_EXCEPTION_ENTER);            		
+            		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_EXCEPTION_ENTER);            		
             	}
             	parkingActivity.setGateResponse(sdf.format(Calendar.getInstance().getTime())+" "+result);
                 parkingActivityService.save(parkingActivity);
@@ -161,7 +214,7 @@ public class GateResource {
     }
 
     @Timed
-    private String openGate(int gateId, String ticketNo) {
+    private String openGate(int gateId, String ticketNo, String simulateType) {
         String ip = configService.get(Constants.GATE_API_IP, String.class, "localhost");
         Integer port = Integer.parseInt(configService.get(Constants.GATE_API_PORT, String.class, "2222"));
         String response = null;
@@ -175,7 +228,10 @@ public class GateResource {
 	        url.append("gatecmd/gate_open_cmd?gate_id=");
 	        url.append(gateId);
 	        url.append("&ticket=");
-	        url.append(ticketNo);			
+	        url.append(ticketNo);	       
+	        if(simulateType!=null){
+	        	url.append("&set_sim_mode=").append(simulateType);
+	        }
 			HttpGet httpGet = new HttpGet(url.toString());							
 	        HttpResponse httpResponse = closeableHttpClient.execute(httpGet); 
 	        HttpEntity entity = httpResponse.getEntity();  
@@ -200,8 +256,8 @@ public class GateResource {
     @RequestMapping(value = "/exit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Transactional(readOnly = false)
     public ResponseEntity<?> exitParkingLot(@PathVariable("apiVersion") final String apiVersion,
-                                            @RequestBody GateOpenRequest req) {
-        return exitParkingLot(req,false);
+                                            @RequestBody GateOpenRequest req, @RequestParam(required = false) final String simulationType) {
+        return exitParkingLot(req,false,simulationType);
     }
     
     /**
@@ -211,12 +267,12 @@ public class GateResource {
     @Transactional(readOnly = false)
     public ResponseEntity<?> manualExit(@PathVariable("apiVersion") final String apiVersion,
                                             @RequestBody GateOpenRequest req) {
-        return exitParkingLot(req, true);
+        return exitParkingLot(req, true,null);
     }
 
 
     @Timed
-    private ResponseEntity<?> exitParkingLot(GateOpenRequest req, boolean manualMode) {
+    private ResponseEntity<?> exitParkingLot(GateOpenRequest req, boolean manualMode, String simulationType) {
         User user = userService.getCurrentUser();
         Optional<ParkingActivity> opt = parkingActivityService.getLatestActivityForUser(user);
         ParkingActivity parkingActivity = null;
@@ -226,12 +282,48 @@ public class GateResource {
 	                    ErrorCodeConstants.GATE_USER_NOT_INSIDE_PARKING_LOT), org.springframework.http.HttpStatus.BAD_REQUEST);
 	        }
 	        else{
-	        	parkingActivity = opt.get();	       
-		        final String result = openGate(2, Long.toString(parkingActivity.getId()));		        
+	        	parkingActivity = opt.get();	
+	        	if(manualMode){
+	        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL);
+	        		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_EXIT_MANUAL);
+	        	}
+	        	else{
+	        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);
+	        		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_PENDING_EXIT);
+	        	}
+	        	parkingActivityService.save(parkingActivity);
+		        String result = openGate(2, Long.toString(parkingActivity.getId()),simulationType);	
+		        
+		        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){
+		        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":((parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" EXIT_FIRST_SUCCESSFUL"));
+		        }
+		        else{
+		        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":((parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" EXIT_FIRST_UNSUCCESSFUL"));
+		        }		        
+		        
+		        if(result==null ||  !(result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){		        	
+	        		LOG.info("Failed to open the gate, will try again after 2 seconds, ticket no:"+parkingActivity.getId());
+	        		try{
+	        			Thread.sleep(sleepTime);	
+	        		}
+	        		catch(Exception e){
+	        			LOG.error(e.getMessage(), e);
+	        		}
+	        		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_CONNECTION_TIMEOUT_EXIT);
+	        		
+		        	result = openGate(2, Long.toString(parkingActivity.getId()),simulationType);
+		        	if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1) || result.contains(Constants.GATE_OPEN_RESPONSE_2))){
+			        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":((parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" EXIT_SECOND_SUCCESSFUL"));
+			        }
+			        else{
+			        	parkingActivity.setOpenLog(((parkingActivity.getOpenLog()==null || parkingActivity.getOpenLog().trim().length()==0)?"":((parkingActivity.getOpenLog()+";"))+sdf.format(Calendar.getInstance().getTime())+" EXIT_SECOND_UNSUCCESSFUL"));
+			        }	
+		        }	        
 		        parkingActivity.setDeviceInfo(req.getDeviceInfo());
 		        parkingActivity.setGateResponse(((parkingActivity.getGateResponse()==null || parkingActivity.getGateResponse().trim().length()==0)?"":(parkingActivity.getGateResponse()+";"))+sdf.format(Calendar.getInstance().getTime())+" "+result);  
 		        if (result != null && (result.contains(Constants.GATE_OPEN_RESPONSE_1)
 		                || result.contains(Constants.GATE_OPEN_RESPONSE_2))) { 
+		        	/**
 		        	if(manualMode){
 		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT_MANUAL); 
 		        	}
@@ -239,10 +331,14 @@ public class GateResource {
 		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_PENDING_EXIT);  
 		        	}	
 		        	parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null || parkingActivity.getExceptionFlag().trim().length()==0)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+parkingActivity.getParkingStatus());
-		            parkingActivityService.save(parkingActivity);            
+		        	*/
+		            parkingActivityService.save(parkingActivity); 		                      
 		            ParkingActivityDTO parkingActivityDTO = ParkingActivityUtil.constructDTO(parkingActivity, user);
 		            return new ResponseEntity<>(parkingActivityDTO, org.springframework.http.HttpStatus.OK);
-		        } else {      
+		        } else {   
+		        	if(result!=null && result.toUpperCase().contains("TIMEOUT")){
+	            		parkingActivity.setExceptionFlag(((parkingActivity.getExceptionFlag()==null)?"":(parkingActivity.getExceptionFlag()+","))+sdf.format(Calendar.getInstance().getTime())+" "+Constants.PARKING_STATUS_CONNECTION_TIMEOUT_EXIT);
+	            	}		        	
 		        	if(manualMode){
 		        		parkingActivity.setParkingStatus(Constants.PARKING_STATUS_EXCEPTION_EXIT_MANUAL);
 		        	}
@@ -318,6 +414,7 @@ public class GateResource {
     	}
     }
     
+     
     
 
 }

@@ -18,6 +18,8 @@ import com.greenowl.callisto.web.rest.dto.PasswordUpdateDTO;
 import com.greenowl.callisto.web.rest.dto.UserDTO;
 import com.greenowl.callisto.web.rest.dto.user.CreateUserRequest;
 import com.greenowl.callisto.web.rest.dto.user.UpdateAccountRequest;
+import com.greenowl.callisto.web.rest.parking.LogRequest;
+
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -80,6 +82,9 @@ public class AccountResource {
 
     @Inject
     private ConfigService configService;
+    
+    @Inject
+    private ExceptionLogService exceptionLogService;
 
     /**
      * POST /register -> register the user while adding a stripe token and
@@ -204,4 +209,34 @@ public class AccountResource {
         return new ResponseEntity<>(OK);
     }
 
+    
+    /**
+     *  /logMessage -> record client exception message 
+     */
+    @RequestMapping(value = "/logMessage", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)    
+    @Transactional(readOnly = false)
+    public ResponseEntity<?> saveClientExcetionLog(@PathVariable("apiVersion") final String apiVersion,
+    		@RequestBody LogRequest req) {
+    	LOG.info("begin to save log message:"+req.getLogEvent());
+    	User user = userService.getCurrentUser();
+    	try{
+    	    ExceptionLog exceptionLog = new ExceptionLog();
+    	    exceptionLog.setActivityHolder(user);
+    	    if(req.getLogEvent()!=null){
+    	    	StringBuilder events = new StringBuilder();
+    	    	for(int i=Math.max(0,req.getLogEvent().size()-40);i<req.getLogEvent().size();i++){
+    	    	   events.append(req.getLogEvent().get(i));
+    	    	   events.append("\n");
+    	    	}
+    	    	exceptionLog.setLogMessage(events.toString());
+    	    }    	    
+    	    exceptionLogService.saveExceptionLog(exceptionLog);  
+    	    return new ResponseEntity<>(org.springframework.http.HttpStatus.OK);
+    	}
+    	catch(Exception e){
+    		LOG.error(e.getMessage(),e);
+    	}
+    	return new ResponseEntity<>(genericBadReq("Failed to save log message","/logMessage", -1), org.springframework.http.HttpStatus.BAD_REQUEST);
+    }
+    
 }
