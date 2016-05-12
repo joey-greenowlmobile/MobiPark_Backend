@@ -14,7 +14,7 @@
             <!-- <label style="margin-left: 2%;"><input ng-change="getRecords()" ng-model="inFlight" type="checkbox" value="">In Flight</label>-->            
             &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="0">All</input>
 	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="1">Completed</input>
-	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="2">In Flight</input>
+	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="2">Parked</input>
 	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="3">Pending Enter</input>
 	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="4">Pending Exit</input>
 	            &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="parking-status" ng-model="parking.status" ng-change="getRecordsByDate()" value="5">Alarm Enter</input>
@@ -93,11 +93,11 @@
         <tr ng-repeat="record in records | orderBy:sortType:sortReverse | filter:searchRecord">
             <td>{{record.id}}</td>
             <td>
-                <span ng-show="record.pType == 2" class="label label-info">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
-                <span ng-show="record.pType == -1" class="label label-danger">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
-                <span ng-show="record.pType == 0" class="label label-success">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
-                <span ng-show="record.pType == 1" class="label label-danger">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
-                <span ng-show="record.pType == 3" class="label label-warning">{{record.parkingStatus| limitTo: 20 }}{{record.parkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 2" class="label label-info">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == -1" class="label label-danger">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 0" class="label label-success">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 1" class="label label-danger">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 3" class="label label-warning">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
             </td>
             <td>{{record.entryDateTime | date: "yyyy-MM-dd HH:mm" }}</td>
         	<td>{{record.exitDateTime | date: "yyyy-MM-dd HH:mm" }}</td>
@@ -123,11 +123,11 @@
         <div class="modal-body">
             <b> Ticket: </b> {{record.id}} </br>
             <b> Status: </b>
-            <span ng-show="record.pType == 0" class="label label-success">{{record.parkingStatus}}</span>
-            <span ng-show="record.pType == 1" class="label label-danger">{{record.parkingStatus}}</span>
-            <span ng-show="record.pType == 2" class="label label-info">{{record.parkingStatus}}</span>
-            <span ng-show="record.pType == 3" class="label label-warning">{{record.parkingStatus}}</span>
-            <span ng-show="record.pType == -1" class="label label-danger">{{record.parkingStatus}}</span>
+            <span ng-show="record.pType == 0" class="label label-success">{{record.portalParkingStatus}}</span>
+            <span ng-show="record.pType == 1" class="label label-danger">{{record.portalParkingStatus}}</span>
+            <span ng-show="record.pType == 2" class="label label-info">{{record.portalParkingStatus}}</span>
+            <span ng-show="record.pType == 3" class="label label-warning">{{record.portalParkingStatus}}</span>
+            <span ng-show="record.pType == -1" class="label label-danger">{{record.portalParkingStatus}}</span>
                
             </br>           
             <b> Email: </b> {{record.userEmail}} </br>

@@ -152,6 +152,13 @@ public class ParkingActivityDTO {
         this.exitDateTime = exitDateTime;
     }
 
+    public String getPortalParkingStatus(){
+		if("IN_FLIGHT".equals(parkingStatus)){
+		    return "PARKED";
+		}
+		return parkingStatus;
+    }
+    
     public String getParkingStatus() {
         return parkingStatus;
     }
@@ -205,7 +212,12 @@ public class ParkingActivityDTO {
     			try{    				
 	    			StatusLogDTO statusLog = new StatusLogDTO();
 	    			statusLog.setStatusTime(sdf.parse(infos[0]+" "+infos[1]).getTime());
-	    			statusLog.setStatus(infos[2]);
+	    			if("IN_FLIGHT".equals(infos[2])){
+	    				statusLog.setStatus("PARKED");
+	    			}
+	    			else{
+	    				statusLog.setStatus(infos[2]);
+	    			}
 	    			statusLogs.add(statusLog);
     			}
     			catch(Exception e){    				
