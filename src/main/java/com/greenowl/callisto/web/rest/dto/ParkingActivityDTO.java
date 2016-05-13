@@ -227,6 +227,16 @@ public class ParkingActivityDTO {
     	return statusLogs;
     }
     
+    public boolean getErrorStatusFlag(){
+    	if(exceptionFlag==null){
+    		return false;
+    	}
+    	if(exceptionFlag.contains("TIMEOUT") || exceptionFlag.contains("ALARM")){
+    		return true;
+    	}
+    	return false;
+    }
+    
     @Override
     public String toString() {
         return "ParkingActivityDTO{" +

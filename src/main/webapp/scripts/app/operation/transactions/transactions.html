@@ -92,11 +92,12 @@
         <tbody>
         <tr ng-repeat="record in records | orderBy:sortType:sortReverse | filter:searchRecord">
             <td>{{record.id}}</td>
-            <td>
+            <td>                
                 <span ng-show="record.pType == 2" class="label label-info">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
                 <span ng-show="record.pType == -1" class="label label-danger">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
                 <span ng-show="record.pType == 0" class="label label-success">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
                 <span ng-show="record.pType == 1" class="label label-danger">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
+                <span ng-show="record.pType == 0 && record.errorStatusFlag" class="label label-warning">!</span>
                 <span ng-show="record.pType == 3" class="label label-warning">{{record.portalParkingStatus| limitTo: 20 }}{{record.portalParkingStatus.length > 20 ? '...' : ''}}</span>
             </td>
             <td>{{record.entryDateTime | date: "yyyy-MM-dd HH:mm" }}</td>
